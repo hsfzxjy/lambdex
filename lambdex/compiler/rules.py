@@ -52,3 +52,30 @@ def r_return(node: ast.Subscript, ctx: Context, clauses: list):
 
     return ast.Return(value=ctx.compile(clause.unwrap_body()))
 
+
+@Rules.register(ast.If)
+def r_if(node: ast, ctx: Context, clauses: list):
+    assert clauses[0].name == 'if_' and clauses[0].single_body()
+    for clause in clauses[1:-1]:
+        assert clause.name == 'elif_'
+        assert clause.single_head()
+    if not clauses.single():
+        assert clauses[-1].name in ('else_', 'elif_')
+        if clauses[-1].name == 'else_':
+            assert clauses[-1].no_head()
+
+    prev_orelse = curr_node = None
+    for clause in clauses[::-1]:
+        if clause.name == 'else_':
+            prev_orelse = _compile_stmts(ctx, clause.body)
+            continue
+
+        # if_ or elif_
+        curr_node = ast.If(
+            test=clause.unwrap_head(),
+            body=_compile_stmts(ctx, clause.body),
+            orelse=prev_orelse,
+        )
+        prev_orelse = [curr_node]
+
+    return curr_node
