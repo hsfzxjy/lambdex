@@ -45,6 +45,10 @@ def r_def(node: ast.Call, ctx: Context):
 
 
 @Rules.register(ast.Return)
-def r_return(node: ast.Subscript, ctx):
-    value = value_from_subscript(node)
-    return ast.Return(value=ctx.compile(value))
+def r_return(node: ast.Subscript, ctx: Context, clauses: list):
+    assert clauses.single()
+    clause = clauses[0]
+    assert clause.no_head() and clause.single_body()
+
+    return ast.Return(value=ctx.compile(clause.unwrap_body()))
+
