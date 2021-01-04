@@ -13,10 +13,16 @@ __all__ = ['compile_lambdex']
 def compile_node(node, ctx):
 
     dispatcher = Dispatcher.get(node.__class__)
-    rule = Rules.get(dispatcher(node), None)
+    rule_meta = dispatcher(node)
+    if isinstance(rule_meta, tuple):
+        rule_id, *extra_args = rule_meta
+    else:
+        rule_id = rule_meta
+        extra_args = ()
+    rule = Rules.get(rule_id, None)
 
     if rule is not None:
-        return rule(node, ctx)
+        return rule(node, ctx, *extra_args)
 
     for field, old_value in ast.iter_fields(node):
         if isinstance(old_value, list):
