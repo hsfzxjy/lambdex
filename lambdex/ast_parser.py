@@ -4,6 +4,8 @@ import inspect
 import astcheck
 import astsearch
 
+from lambdex.utils.ast import ast_from_source
+
 __all__ = ['lambda_to_ast']
 
 
@@ -21,8 +23,7 @@ def _shallow_match_ast(node, pattern):
 
 
 def lambda_to_ast(lambda_object: typing.Callable, *, keyword: str, identifier: str = ''):
-    source_str = inspect.getsource(lambda_object.__code__)
-    tree = ast.parse(source_str).body[0]
+    tree = ast_from_source(lambda_object)
     pattern = astsearch.prepare_pattern('{}{}(?)'.format(keyword, '.' + identifier if identifier else ''))
     matched = list(_shallow_match_ast(tree, pattern))
 
