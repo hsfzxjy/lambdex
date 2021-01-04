@@ -28,6 +28,9 @@ def value_from_subscript(node: ast.Subscript, *, force_list=False):
         raise SyntaxError('Slice not allowed here.')
 
     if force_list:
+        if isinstance(ret, ast.Tuple):
+            ret = ret.elts
+
         if not isinstance(ret, (tuple, list)):
             ret = [ret]
 
