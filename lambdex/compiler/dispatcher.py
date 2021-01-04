@@ -1,6 +1,7 @@
 import ast
 
 from lambdex.utils.registry import FunctionRegistry
+from .clauses import match_clauses
 
 __all__ = ['Dispatcher']
 
@@ -25,11 +26,11 @@ def disp_Call(node: ast.Call):
 
 @Dispatcher.register(ast.Subscript)
 def disp_Subscript(node: ast.Subscript):
-    value = node.value
-
-    if not isinstance(value, ast.Name):
-        return None
+    clauses = match_clauses(node)
+    if clauses is None:
+        return
 
     return {
         'return_': ast.Return,
-    }.get(value.id)
+        'if_': ast.If,
+    }.get(clauses[0].name), clauses
