@@ -79,3 +79,53 @@ def r_if(node: ast, ctx: Context, clauses: list):
         prev_orelse = [curr_node]
 
     return curr_node
+
+
+@Rules.register(ast.For)
+def r_for(node: ast, ctx: Context, clauses: list):
+    assert len(clauses) <= 2
+
+    assert clauses[0].name == 'for_' and clauses[0].single_head()
+    if len(clauses) == 2:
+        assert clauses[1].name == 'else_' and clauses[1].no_head()
+
+    for_clause = clauses[0]
+    for_clause_head = for_clause.unwrap_head()
+    assert isinstance(for_clause_head, ast.Compare) \
+        and len(for_clause_head.ops) == 1 \
+        and isinstance(for_clause_head.ops[0], ast.In)
+
+    target = for_clause_head.left
+    target.ctx = ast.Store()
+
+    if len(clauses) == 2:
+        else_stmts = _compile_stmts(ctx, clauses[1].body)
+    else:
+        else_stmts = []
+
+    return ast.For(
+        target=target,
+        iter=for_clause_head.comparators[0],
+        body=_compile_stmts(ctx, for_clause.body),
+        orelse=else_stmts,
+    )
+
+
+@Rules.register(ast.While)
+def r_while(node: ast, ctx: Context, clauses: list):
+    assert len(clauses) <= 2
+
+    assert clauses[0].name == 'while_' and clauses[0].single_head()
+    if len(clauses) == 2:
+        assert clauses[1].name == 'else_' and clauses[1].no_head()
+
+    if len(clauses) == 2:
+        else_stmts = _compile_stmts(ctx, clauses[1].body)
+    else:
+        else_stmts = []
+
+    return ast.While(
+        test=clauses[0].unwrap_head(),
+        body=_compile_stmts(ctx, clauses[0].body),
+        orelse=else_stmts,
+    )

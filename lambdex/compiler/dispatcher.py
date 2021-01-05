@@ -33,4 +33,6 @@ def disp_Subscript(node: ast.Subscript):
     return {
         'return_': ast.Return,
         'if_': ast.If,
+        'for_': ast.For,
+        'while_': ast.While,
     }.get(clauses[0].name), clauses
