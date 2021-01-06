@@ -130,3 +130,20 @@ def r_while(node: ast.Subscript, ctx: Context, clauses: list):
         body=_compile_stmts(ctx, clauses[0].body),
         orelse=else_stmts,
     )
+
+
+@Rules.register(ast.Assign)
+def r_assign(node: ast.Compare, ctx: Context):
+    assert all(isinstance(n, ast.LtE) for n in node.ops)
+
+    targets = [node.left] + node.comparators[:-1]
+    value = node.comparators[-1]
+
+    for target in targets:
+        assert hasattr(target, 'ctx')
+        recursively_set_attr(target, 'ctx', ast.Store())
+
+    return ast.Assign(
+        targets=targets,
+        value=value,
+    )

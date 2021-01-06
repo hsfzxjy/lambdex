@@ -37,3 +37,11 @@ def disp_Subscript(node: ast.Subscript, flag: ContextFlag):
         'for_': ast.For,
         'while_': ast.While,
     }.get(clauses[0].name), clauses
+
+
+@Dispatcher.register(ast.Compare)
+def disp_Compare(node: ast.Compare, flag: ContextFlag):
+    if flag != ContextFlag.should_be_stmt:
+        return
+
+    return ast.Assign
