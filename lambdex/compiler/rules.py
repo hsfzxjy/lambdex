@@ -171,16 +171,11 @@ def r_with(node: ast.Subscript, ctx: Context, clauses: list):
 
     items = []
     for arg in with_clause.head:
-        if not isinstance(arg, ast.Compare):
-            item = ast.withitem(context_expr=arg)
-        else:
-            context_expr, var = check_compare(arg, ast.GtE, 2)
-            assert is_lvalue(var)
-            item = ast.withitem(
-                context_expr=context_expr,
-                optional_vars=recursively_set_attr(var, 'ctx', ast.Store()),
-            )
-        items.append(item)
+        context_expr, var = check_as(node, ast.GtE)
+        items.append(ast.withitem(
+            context_expr=context_expr,
+            optional_vars=var,
+        ))
 
     return ast.With(
         items=items,

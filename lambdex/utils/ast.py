@@ -11,6 +11,7 @@ __all__ = [
     'is_lvalue',
     'cast_to_lvalue',
     'check_compare',
+    'check_as',
 ]
 
 
@@ -70,3 +71,17 @@ def check_compare(node: ast.Compare, expected_type, expected_num=None):
         assert expected_num == len(node.ops) + 1
 
     return (node.left, *node.comparators)
+
+
+def check_as(node: ast.expr, as_op, *, rhs_is_identifier=False):
+    if not isinstance(node, ast.Compare):
+        return node, None
+
+    lhs, rhs = check_compare(node, as_op, 2)
+
+    if rhs_is_identifier:
+        assert is_lvalue(rhs)
+        return lhs, cast_to_lvalue(rhs)
+    else:
+        assert isinstance(rhs, ast.Name)
+        return lhs, rhs.id
