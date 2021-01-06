@@ -166,6 +166,9 @@ def r_empty_head_stmt(node: ast.Subscript, ctx: Context, clauses: list, rule_id)
 
 @Rules.register('single_keyword_stmt')
 def r_single_keyword_stmt(node: ast.Name, ctx: Context, rule_type):
+    if rule_type == ast.Yield:
+        return ast.Yield(value=None)
+
     return rule_type()
 
 
@@ -243,3 +246,13 @@ def r_try(node: ast.Subscript, ctx: Context, clauses: list):
         orelse=orelse_body,
         finalbody=final_body,
     )
+
+
+@Rules.register(ast.Yield)
+@Rules.register(ast.YieldFrom)
+def r_yield(node: ast.Subscript, ctx: Context, clauses: list, rule_id):
+    assert clauses.single()
+    clause = clauses[0]
+    assert clause.no_head()
+
+    return rule_id(value=clause.try_tuple_body())
