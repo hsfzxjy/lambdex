@@ -14,6 +14,12 @@ class Clause(namedtuple('_Clause', 'name head body')):
     def single_body(self):
         return len(self.body) == 1
 
+    def try_tuple_body(self, ctx=ast.Load()):
+        if self.single_body():
+            return self.body[0]
+
+        return ast.Tuple(elts=self.body, ctx=ctx)
+
     def unwrap_body(self):
         assert self.single_body()
         return self.body[0]
