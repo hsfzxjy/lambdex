@@ -54,7 +54,7 @@ def r_return(node: ast.Subscript, ctx: Context, clauses: list):
 
 
 @Rules.register(ast.If)
-def r_if(node: ast, ctx: Context, clauses: list):
+def r_if(node: ast.Subscript, ctx: Context, clauses: list):
     assert clauses[0].name == 'if_' and clauses[0].single_head()
     for clause in clauses[1:-1]:
         assert clause.name == 'elif_'
@@ -83,7 +83,7 @@ def r_if(node: ast, ctx: Context, clauses: list):
 
 
 @Rules.register(ast.For)
-def r_for(node: ast, ctx: Context, clauses: list):
+def r_for(node: ast.Subscript, ctx: Context, clauses: list):
     assert len(clauses) <= 2
 
     assert clauses[0].name == 'for_' and clauses[0].single_head()
@@ -113,7 +113,7 @@ def r_for(node: ast, ctx: Context, clauses: list):
 
 
 @Rules.register(ast.While)
-def r_while(node: ast, ctx: Context, clauses: list):
+def r_while(node: ast.Subscript, ctx: Context, clauses: list):
     assert len(clauses) <= 2
 
     assert clauses[0].name == 'while_' and clauses[0].single_head()
