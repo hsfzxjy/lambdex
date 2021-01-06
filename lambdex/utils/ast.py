@@ -12,6 +12,7 @@ __all__ = [
 
 
 def pprint(ast_node):
+    recursively_set_attr(ast_node, 'type_comment', '')
     astpretty.pprint(ast_node, show_offsets=False)
 
 
