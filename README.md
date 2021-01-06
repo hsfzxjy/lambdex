@@ -15,3 +15,4 @@ Write multi-line Python lambdas in an idiomatic way.
  - [x] `with...as`
  - [x] `raise...from`
  - [x] `try...except...else...finally`
+ - [x] `yield` and `yield_from`
