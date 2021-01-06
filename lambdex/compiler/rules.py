@@ -64,7 +64,8 @@ def r_if(node: ast, ctx: Context, clauses: list):
         if clauses[-1].name == 'else_':
             assert clauses[-1].no_head()
 
-    prev_orelse = curr_node = None
+    curr_node = None
+    prev_orelse = []
     for clause in clauses[::-1]:
         if clause.name == 'else_':
             prev_orelse = _compile_stmts(ctx, clause.body)
