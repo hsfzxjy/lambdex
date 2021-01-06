@@ -1,11 +1,17 @@
+import enum
 import random
 from functools import partial
 
-__all__ = ['Context']
+__all__ = ['Context', 'ContextFlag']
 
 
 def random_hex(nbits=32):
     return hex(random.randint(0, 1 << nbits))[2:].zfill(nbits // 4)
+
+
+class ContextFlag(enum.Enum):
+    should_be_stmt = enum.auto()
+    unset = enum.auto()
 
 
 class Context:

@@ -3,7 +3,7 @@ import ast
 from lambdex.utils.ast import *
 from lambdex.utils.registry import FunctionRegistry
 
-from .context import Context
+from .context import Context, ContextFlag
 
 __all__ = ['Rules']
 
@@ -13,7 +13,7 @@ Rules = FunctionRegistry('Rules')
 def _compile_stmts(ctx: Context, stmts):
     compiled_statements = []
     for statement in stmts:
-        compiled_statement = ctx.compile(statement)
+        compiled_statement = ctx.compile(statement, flag=ContextFlag.should_be_stmt)
         if isinstance(compiled_statement, ast.expr):
             compiled_statement = ast.Expr(compiled_statement)
 

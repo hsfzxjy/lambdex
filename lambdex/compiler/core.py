@@ -2,7 +2,7 @@ import ast
 import functools
 
 from .rules import Rules
-from .context import Context
+from .context import Context, ContextFlag
 from .dispatcher import Dispatcher
 
 from lambdex.utils.ast import pprint
@@ -10,10 +10,10 @@ from lambdex.utils.ast import pprint
 __all__ = ['compile_lambdex']
 
 
-def compile_node(node, ctx):
+def compile_node(node, ctx, *, flag=ContextFlag.unset):
 
     dispatcher = Dispatcher.get(node.__class__)
-    rule_meta = dispatcher(node)
+    rule_meta = dispatcher(node, flag)
     if isinstance(rule_meta, tuple):
         rule_id, *extra_args = rule_meta
     else:
