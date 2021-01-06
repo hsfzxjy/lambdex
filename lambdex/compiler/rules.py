@@ -155,19 +155,12 @@ def r_assign(node: ast.Compare, ctx: Context):
 
 
 @Rules.register(ast.Continue)
-def r_continue(node: ast.Subscript, ctx: Context, clauses: list):
-    assert clauses.signle()
-    assert clauses[0].no_head() and clauses[0].no_body()
-
-    return ast.Continue()
-
-
 @Rules.register(ast.Break)
-def r_break(node: ast.Subscript, ctx: Context, clauses: list):
+def r_empty_head_stmt(node: ast.Subscript, ctx: Context, clauses: list, rule_id):
     assert clauses.signle()
     assert clauses[0].no_head() and clauses[0].no_body()
 
-    return ast.Break()
+    return rule_id()
 
 
 @Rules.register('single_keyword_stmt')
