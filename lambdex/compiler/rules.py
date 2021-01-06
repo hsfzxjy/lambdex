@@ -201,3 +201,38 @@ def r_raise(node: ast.Subscript, ctx: Context, clauses: list):
         exc=exc,
         cause=cause,
     )
+
+
+@Rules.register(ast.Try)
+def r_try(node: ast.Subscript, ctx: Context, clauses: list):
+    try_clause = clauses[0]
+    assert try_clause.no_head()
+    try_body = _compile_stmts(ctx, try_clause.body)
+
+    handlers = []
+    orelse_body = []
+    final_body = []
+    for clause in clauses[1:]:
+        if clause.name == 'except_':
+            assert not orelse_body and not final_body
+            assert clause.single_head()
+            type_, name = check_as(clause.unwrap_head(), ast.GtE)
+            handlers.append(ast.ExceptHandler(
+                type=type_,
+                name=name,
+                body=_compile_stmts(ctx, clause.body),
+            ))
+        elif clause.name == 'else_':
+            assert not orelse_body and not final_body
+            assert clause.no_head()
+            orelse_body.extend(_compile_stmts(ctx, clause.body))
+        elif clause.name == 'finally_':
+            assert not final_body
+            final_body.extend(_compile_stmts(ctx, clause.body))
+
+    return ast.Try(
+        body=try_body,
+        handlers=handlers,
+        orelse=orelse_body,
+        finalbody=final_body,
+    )
