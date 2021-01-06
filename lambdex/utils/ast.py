@@ -9,6 +9,7 @@ __all__ = [
     'ast_from_source',
     'recursively_set_attr',
     'is_lvalue',
+    'check_compare',
 ]
 
 
@@ -56,3 +57,11 @@ def recursively_set_attr(node: ast.AST, attrname: str, value):
 
 def is_lvalue(node: ast.AST):
     return hasattr(node, 'ctx')
+
+
+def check_compare(node: ast.Compare, expected_type, expected_num=None):
+    assert all(isinstance(n, expected_type) for n in node.ops)
+    if expected_num is not None:
+        assert expected_num == len(node.ops) + 1
+
+    return (node.left, *node.comparators)

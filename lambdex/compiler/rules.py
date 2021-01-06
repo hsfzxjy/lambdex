@@ -90,13 +90,7 @@ def r_for(node: ast.Subscript, ctx: Context, clauses: list):
     if len(clauses) == 2:
         assert clauses[1].name == 'else_' and clauses[1].no_head()
 
-    for_clause = clauses[0]
-    for_clause_head = for_clause.unwrap_head()
-    assert isinstance(for_clause_head, ast.Compare) \
-        and len(for_clause_head.ops) == 1 \
-        and isinstance(for_clause_head.ops[0], ast.In)
-
-    target = for_clause_head.left
+    target, iter_item = check_compare(clauses[0].unwrap_head(), ast.In, 2)
     assert is_lvalue(target)
     target.ctx = ast.Store()
 
@@ -107,7 +101,7 @@ def r_for(node: ast.Subscript, ctx: Context, clauses: list):
 
     return ast.For(
         target=target,
-        iter=for_clause_head.comparators[0],
+        iter=iter_item,
         body=_compile_stmts(ctx, for_clause.body),
         orelse=else_stmts,
     )
@@ -135,10 +129,7 @@ def r_while(node: ast.Subscript, ctx: Context, clauses: list):
 
 @Rules.register(ast.Assign)
 def r_assign(node: ast.Compare, ctx: Context):
-    assert all(isinstance(n, ast.LtE) for n in node.ops)
-
-    targets = [node.left] + node.comparators[:-1]
-    value = node.comparators[-1]
+    *targets, value = check_compare(node, ast.LtE)
 
     for target in targets:
         assert is_lvalue(target)
