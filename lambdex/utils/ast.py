@@ -49,3 +49,5 @@ def recursively_set_attr(node: ast.AST, attrname: str, value):
     for n in ast.walk(node):
         if attrname in n._fields:
             setattr(n, attrname, value)
+
+    return node
