@@ -160,3 +160,29 @@ def r_break(node: ast.Subscript, ctx: Context, clauses: list):
 @Rules.register('single_keyword_stmt')
 def r_single_keyword_stmt(node: ast.Name, ctx: Context, rule_type):
     return rule_type()
+
+
+@Rules.register(ast.With)
+def r_with(node: ast.Subscript, ctx: Context, clauses: list):
+    assert clauses.single()
+    with_clause = clauses[0]
+
+    assert not with_clause.no_head()
+
+    items = []
+    for arg in with_clause.head:
+        if not isinstance(arg, ast.Compare):
+            item = ast.withitem(context_expr=arg)
+        else:
+            context_expr, var = check_compare(arg, ast.GtE, 2)
+            assert is_lvalue(var)
+            item = ast.withitem(
+                context_expr=context_expr,
+                optional_vars=recursively_set_attr(var, 'ctx', ast.Store()),
+            )
+        items.append(item)
+
+    return ast.With(
+        items=items,
+        body=_compile_stmts(ctx, with_clause.body),
+    )
