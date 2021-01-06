@@ -55,6 +55,7 @@ def disp_Subscript(node: ast.Subscript, flag: ContextFlag):
         'continue_': ast.Continue,
         'break_': ast.Break,
         'with_': ast.With,
+        'raise_': ast.Raise,
     }.get(clauses[0].name), clauses
 
 

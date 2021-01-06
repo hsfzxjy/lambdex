@@ -186,3 +186,23 @@ def r_with(node: ast.Subscript, ctx: Context, clauses: list):
         items=items,
         body=_compile_stmts(ctx, with_clause.body),
     )
+
+
+@Rules.register(ast.Raise)
+def r_raise(node: ast.Subscript, ctx: Context, clauses: list):
+    assert len(clauses) <= 2
+
+    raise_clause = clauses[0]
+    assert raise_clause.no_head() and raise_clause.single_body()
+    exc = raise_clause.unwrap_body()
+
+    cause = None
+    if len(clauses) == 2:
+        from_clause = clauses[1]
+        assert from_clause.name == 'from_' and from_clause.no_head() and from_clause.single_body()
+        cause = from_clause.unwrap_body()
+
+    return ast.Raise(
+        exc=exc,
+        cause=cause,
+    )
