@@ -1,4 +1,6 @@
 import ast
+import inspect
+from functools import partial
 
 from lambdex.utils.ast import *
 from lambdex.utils.registry import FunctionRegistry
@@ -7,7 +9,18 @@ from .context import Context, ContextFlag
 
 __all__ = ['Rules']
 
-Rules = FunctionRegistry('Rules')
+
+class RulesRegistry(FunctionRegistry):
+    def get(self, key, default=FunctionRegistry._empty):
+        f = super().get(key, default)
+
+        if f is not None and 'rule_id' in inspect.signature(f).parameters:
+            return partial(f, rule_id=key)
+
+        return f
+
+
+Rules = RulesRegistry('Rules')
 
 
 def _compile_stmts(ctx: Context, stmts):
