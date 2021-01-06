@@ -8,6 +8,9 @@ class Clause(namedtuple('_Clause', 'name head body')):
     def no_head(self):
         return self.head is None
 
+    def no_body(self):
+        return len(self.body) == 0
+
     def single_body(self):
         return len(self.body) == 1
 
