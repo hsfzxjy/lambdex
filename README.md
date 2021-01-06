@@ -12,3 +12,5 @@ Write multi-line Python lambdas in an idiomatic way.
  - [x] chained assignments like `a <= b <= 1`
  - [x] `break`, `continue`
  - [x] `with...as`
+ - [x] `raise...from`
+ - [x] `try...except...else...finally`
