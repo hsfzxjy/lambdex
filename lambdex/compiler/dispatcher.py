@@ -33,6 +33,7 @@ def disp_Name(node: ast.Name, flag: ContextFlag):
     rule_type = {
         'continue_': ast.Continue,
         'break_': ast.Break,
+        'pass_': ast.Pass,
     }.get(node.id)
 
     if rule_type is not None:
@@ -57,6 +58,7 @@ def disp_Subscript(node: ast.Subscript, flag: ContextFlag):
         'with_': ast.With,
         'raise_': ast.Raise,
         'try_': ast.Try,
+        'pass_': ast.Pass,
     }.get(clauses[0].name), clauses
 
 
