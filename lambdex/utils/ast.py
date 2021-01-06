@@ -7,6 +7,7 @@ __all__ = [
     'check',
     'value_from_subscript',
     'ast_from_source',
+    'recursively_set_attr',
 ]
 
 
@@ -41,3 +42,9 @@ def ast_from_source(source):
     if inspect.isfunction(source):
         source = inspect.getsource(source.__code__)
     return ast.parse(source).body[0]
+
+
+def recursively_set_attr(node: ast.AST, attrname: str, value):
+    for n in ast.walk(node):
+        if attrname in n._fields:
+            setattr(n, attrname, value)
