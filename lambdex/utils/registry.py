@@ -20,6 +20,7 @@ class FunctionRegistry:
 
         def _decorator(f):
             self.mapping[key] = f
+            return f
 
         return _decorator
 
