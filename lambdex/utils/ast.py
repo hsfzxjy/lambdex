@@ -8,6 +8,7 @@ __all__ = [
     'value_from_subscript',
     'ast_from_source',
     'recursively_set_attr',
+    'is_lvalue',
 ]
 
 
@@ -51,3 +52,7 @@ def recursively_set_attr(node: ast.AST, attrname: str, value):
             setattr(n, attrname, value)
 
     return node
+
+
+def is_lvalue(node: ast.AST):
+    return hasattr(node, 'ctx')

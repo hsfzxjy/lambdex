@@ -97,6 +97,7 @@ def r_for(node: ast.Subscript, ctx: Context, clauses: list):
         and isinstance(for_clause_head.ops[0], ast.In)
 
     target = for_clause_head.left
+    assert is_lvalue(target)
     target.ctx = ast.Store()
 
     if len(clauses) == 2:
@@ -140,7 +141,7 @@ def r_assign(node: ast.Compare, ctx: Context):
     value = node.comparators[-1]
 
     for target in targets:
-        assert hasattr(target, 'ctx')
+        assert is_lvalue(target)
         recursively_set_attr(target, 'ctx', ast.Store())
 
     return ast.Assign(
