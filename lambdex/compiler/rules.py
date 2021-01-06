@@ -133,7 +133,7 @@ def r_assign(node: ast.Compare, ctx: Context):
 
     for target in targets:
         assert is_lvalue(target)
-        recursively_set_attr(target, 'ctx', ast.Store())
+        cast_to_lvalue(target)
 
     return ast.Assign(
         targets=targets,

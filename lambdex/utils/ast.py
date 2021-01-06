@@ -9,6 +9,7 @@ __all__ = [
     'ast_from_source',
     'recursively_set_attr',
     'is_lvalue',
+    'cast_to_lvalue',
     'check_compare',
 ]
 
@@ -57,6 +58,10 @@ def recursively_set_attr(node: ast.AST, attrname: str, value):
 
 def is_lvalue(node: ast.AST):
     return hasattr(node, 'ctx')
+
+
+def cast_to_lvalue(node: ast.AST):
+    return recursively_set_attr(node, 'ctx', ast.Store())
 
 
 def check_compare(node: ast.Compare, expected_type, expected_num=None):
