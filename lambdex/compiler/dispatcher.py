@@ -25,6 +25,22 @@ def disp_Call(node: ast.Call, flag: ContextFlag):
     }.get(name)
 
 
+@Dispatcher.register(ast.Name)
+def disp_Name(node: ast.Name, flag: ContextFlag):
+    if flag != ContextFlag.should_be_stmt:
+        return
+
+    rule_type = {
+        'continue_': ast.Continue,
+        'break_': ast.Break,
+    }.get(node.id)
+
+    if rule_type is not None:
+        return 'single_keyword_stmt', rule_type
+
+    return None
+
+
 @Dispatcher.register(ast.Subscript)
 def disp_Subscript(node: ast.Subscript, flag: ContextFlag):
     clauses = match_clauses(node)
@@ -36,6 +52,8 @@ def disp_Subscript(node: ast.Subscript, flag: ContextFlag):
         'if_': ast.If,
         'for_': ast.For,
         'while_': ast.While,
+        'continue_': ast.Continue,
+        'break_': ast.Break,
     }.get(clauses[0].name), clauses
 
 

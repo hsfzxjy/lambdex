@@ -147,3 +147,24 @@ def r_assign(node: ast.Compare, ctx: Context):
         targets=targets,
         value=value,
     )
+
+
+@Rules.register(ast.Continue)
+def r_continue(node: ast.Subscript, ctx: Context, clauses: list):
+    assert clauses.signle()
+    assert clauses[0].no_head() and clauses[0].no_body()
+
+    return ast.Continue()
+
+
+@Rules.register(ast.Break)
+def r_break(node: ast.Subscript, ctx: Context, clauses: list):
+    assert clauses.signle()
+    assert clauses[0].no_head() and clauses[0].no_body()
+
+    return ast.Break()
+
+
+@Rules.register('single_keyword_stmt')
+def r_single_keyword_stmt(node: ast.Name, ctx: Context, rule_type):
+    return rule_type()
