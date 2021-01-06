@@ -102,7 +102,7 @@ def r_for(node: ast.Subscript, ctx: Context, clauses: list):
     return ast.For(
         target=target,
         iter=iter_item,
-        body=_compile_stmts(ctx, for_clause.body),
+        body=_compile_stmts(ctx, clauses[0].body),
         orelse=else_stmts,
     )
 
