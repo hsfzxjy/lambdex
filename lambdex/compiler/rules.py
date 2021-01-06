@@ -61,9 +61,9 @@ def r_def(node: ast.Call, ctx: Context):
 def r_return(node: ast.Subscript, ctx: Context, clauses: list):
     assert clauses.single()
     clause = clauses[0]
-    assert clause.no_head() and clause.single_body()
+    assert clause.no_head()
 
-    return ast.Return(value=ctx.compile(clause.unwrap_body()))
+    return ast.Return(value=ctx.compile(clause.try_tuple_body()))
 
 
 @Rules.register(ast.If)
