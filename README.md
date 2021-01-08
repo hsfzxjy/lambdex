@@ -16,3 +16,4 @@ Write multi-line Python lambdas in an idiomatic way.
  - [x] `raise...from`
  - [x] `try...except...else...finally`
  - [x] `yield` and `yield_from`
+ - [x] `global` and `nonlocal`
