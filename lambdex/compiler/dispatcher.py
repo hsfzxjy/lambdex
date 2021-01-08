@@ -62,6 +62,8 @@ def disp_Subscript(node: ast.Subscript, flag: ContextFlag):
         'pass_': ast.Pass,
         'yield_': ast.Yield,
         'yield_from_': ast.YieldFrom,
+        'global_': ast.Global,
+        'nonlocal_': ast.Nonlocal,
     }.get(clauses[0].name), clauses
 
 

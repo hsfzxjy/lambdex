@@ -256,3 +256,17 @@ def r_yield(node: ast.Subscript, ctx: Context, clauses: list, rule_id):
     assert clause.no_head()
 
     return rule_id(value=clause.try_tuple_body())
+
+
+@Rules.register(ast.Global)
+@Rules.register(ast.Nonlocal)
+def r_scoping(node: ast.Subscript, ctx: Context, clauses: list, rule_id):
+    assert clauses.single()
+    clause = clauses[0]
+    assert clause.no_head()
+
+    names = clause.body
+    assert all(isinstance(name, ast.Name) for name in names)
+    names = [name.id for name in names]
+
+    return rule_id(names=names)
