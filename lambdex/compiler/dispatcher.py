@@ -27,11 +27,11 @@ def disp_Call(node: ast.Call, flag: ContextFlag):
 
 @Dispatcher.register(ast.Name)
 def disp_Name(node: ast.Name, flag: ContextFlag):
-    if flag != ContextFlag.should_be_stmt:
+    if flag == ContextFlag.should_be_expr:
         mapping = {
             'yield_': ast.Yield,
         }
-    else:
+    elif flag == ContextFlag.should_be_stmt:
         mapping = {
             'continue_': ast.Continue,
             'break_': ast.Break,
