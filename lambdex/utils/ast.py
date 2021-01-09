@@ -5,6 +5,7 @@ import astpretty
 
 __all__ = [
     'pprint',
+    'pformat',
     'check',
     'value_from_subscript',
     'ast_from_source',
@@ -19,6 +20,11 @@ __all__ = [
 def pprint(ast_node):
     recursively_set_attr(ast_node, 'type_comment', '')
     astpretty.pprint(ast_node, show_offsets=False)
+
+
+def pformat(ast_node):
+    recursively_set_attr(ast_node, 'type_comment', '')
+    return astpretty.pformat(ast_node, show_offsets=False)
 
 
 def check(node, ast_type):
