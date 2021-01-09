@@ -1,4 +1,5 @@
 import ast
+from collections import namedtuple
 
 from lambdex.utils.registry import FunctionRegistry
 from .clauses import match_clauses
@@ -6,7 +7,9 @@ from .context import ContextFlag
 
 __all__ = ['Dispatcher']
 
-Dispatcher = FunctionRegistry('Dispatcher').set_default(lambda *_: None)
+RuleMeta = namedtuple('RuleMeta', ['id', 'args'])
+EMPTY_RULE = RuleMeta(None, ())
+Dispatcher = FunctionRegistry('Dispatcher').set_default(lambda *_: EMPTY_RULE)
 
 
 @Dispatcher.register(ast.Call)
@@ -20,9 +23,10 @@ def disp_Call(node: ast.Call, flag: ContextFlag):
     else:
         name = None
 
-    return {
+    ast_type = {
         'def_': ast.FunctionDef,
     }.get(name)
+    return RuleMeta((ast_type, flag), ())
 
 
 @Dispatcher.register(ast.Name)
@@ -42,18 +46,18 @@ def disp_Name(node: ast.Name, flag: ContextFlag):
     rule_type = mapping.get(node.id)
 
     if rule_type is not None:
-        return 'single_keyword_stmt', rule_type
+        return RuleMeta('single_keyword_stmt', (rule_type, ))
 
-    return None
+    return RuleMeta(None, ())
 
 
 @Dispatcher.register(ast.Subscript)
 def disp_Subscript(node: ast.Subscript, flag: ContextFlag):
     clauses = match_clauses(node)
     if clauses is None:
-        return
+        return RuleMeta(None, ())
 
-    return {
+    ast_type = {
         'return_': ast.Return,
         'if_': ast.If,
         'for_': ast.For,
@@ -65,12 +69,14 @@ def disp_Subscript(node: ast.Subscript, flag: ContextFlag):
         'yield_from_': ast.YieldFrom,
         'global_': ast.Global,
         'nonlocal_': ast.Nonlocal,
-    }.get(clauses[0].name), clauses
+    }.get(clauses[0].name)
+
+    return RuleMeta(ast_type, (clauses, ))
 
 
 @Dispatcher.register(ast.Compare)
 def disp_Compare(node: ast.Compare, flag: ContextFlag):
     if flag != ContextFlag.should_be_stmt:
-        return
+        return RuleMeta(None, ())
 
-    return ast.Assign
+    return RuleMeta(ast.Assign, ())
