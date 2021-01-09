@@ -14,7 +14,7 @@ __all__ = ['compile_lambdex']
 __DEBUG__ = False
 
 
-def compile_node(node, ctx, *, flag=ContextFlag.unset):
+def compile_node(node, ctx, *, flag=ContextFlag.should_be_expr):
 
     if node is None:
         return None
@@ -59,7 +59,11 @@ def compile_lambdex(lambda_ast, lambda_func):
         compile_node,
         lambda_func.__globals__,
     )
-    lambda_node = compile_node(lambda_ast, ctx=context)
+    lambda_node = compile_node(
+        lambda_ast,
+        ctx=context,
+        flag=ContextFlag.outermost_lambdex,
+    )
 
     freevars = lambda_func.__code__.co_freevars
     if freevars:
