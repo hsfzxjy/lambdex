@@ -154,16 +154,6 @@ def r_assign(node: ast.Compare, ctx: Context):
     )
 
 
-@Rules.register(ast.Continue)
-@Rules.register(ast.Break)
-@Rules.register(ast.Pass)
-def r_empty_head_stmt(node: ast.Subscript, ctx: Context, clauses: list, rule_id):
-    assert clauses.signle()
-    assert clauses[0].no_head() and clauses[0].no_body()
-
-    return rule_id()
-
-
 @Rules.register('single_keyword_stmt')
 def r_single_keyword_stmt(node: ast.Name, ctx: Context, rule_type):
     if rule_type == ast.Yield:
