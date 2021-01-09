@@ -86,7 +86,7 @@ def r_if(node: ast.Subscript, ctx: Context, clauses: list):
 
         # if_ or elif_
         curr_node = ast.If(
-            test=clause.unwrap_head(),
+            test=ctx.compile(clause.unwrap_head()),
             body=_compile_stmts(ctx, clause.body),
             orelse=prev_orelse,
         )
@@ -114,7 +114,7 @@ def r_for(node: ast.Subscript, ctx: Context, clauses: list):
 
     return ast.For(
         target=target,
-        iter=iter_item,
+        iter=ctx.compile(iter_item),
         body=_compile_stmts(ctx, clauses[0].body),
         orelse=else_stmts,
     )
@@ -134,7 +134,7 @@ def r_while(node: ast.Subscript, ctx: Context, clauses: list):
         else_stmts = []
 
     return ast.While(
-        test=clauses[0].unwrap_head(),
+        test=ctx.compile(clauses[0].unwrap_head()),
         body=_compile_stmts(ctx, clauses[0].body),
         orelse=else_stmts,
     )
@@ -150,7 +150,7 @@ def r_assign(node: ast.Compare, ctx: Context):
 
     return ast.Assign(
         targets=targets,
-        value=value,
+        value=ctx.compile(value),
     )
 
 
@@ -173,7 +173,7 @@ def r_with(node: ast.Subscript, ctx: Context, clauses: list):
     for arg in with_clause.head:
         context_expr, var = check_as(arg, ast.GtE)
         items.append(ast.withitem(
-            context_expr=context_expr,
+            context_expr=ctx.compile(context_expr),
             optional_vars=var,
         ))
 
@@ -189,13 +189,13 @@ def r_raise(node: ast.Subscript, ctx: Context, clauses: list):
 
     raise_clause = clauses[0]
     assert raise_clause.no_head() and raise_clause.single_body()
-    exc = raise_clause.unwrap_body()
+    exc = ctx.compile(raise_clause.unwrap_body())
 
     cause = None
     if len(clauses) == 2:
         from_clause = clauses[1]
         assert from_clause.name == 'from_' and from_clause.no_head() and from_clause.single_body()
-        cause = from_clause.unwrap_body()
+        cause = ctx.compile(from_clause.unwrap_body())
 
     return ast.Raise(
         exc=exc,
@@ -223,7 +223,7 @@ def r_try(node: ast.Subscript, ctx: Context, clauses: list):
                 type_, name = check_as(clause.unwrap_head(), ast.GtE, rhs_is_identifier=True)
 
             handlers.append(ast.ExceptHandler(
-                type=type_,
+                type=ctx.compile(type_),
                 name=name,
                 body=_compile_stmts(ctx, clause.body),
             ))
@@ -250,7 +250,7 @@ def r_yield(node: ast.Subscript, ctx: Context, clauses: list, rule_id):
     clause = clauses[0]
     assert clause.no_head()
 
-    return rule_id(value=clause.try_tuple_body())
+    return rule_id(value=ctx.compile(clause.try_tuple_body()))
 
 
 @Rules.register(ast.Global)
