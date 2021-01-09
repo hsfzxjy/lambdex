@@ -12,6 +12,9 @@ __all__ = ['compile_lambdex']
 
 def compile_node(node, ctx, *, flag=ContextFlag.unset):
 
+    if node is None:
+        return None
+
     dispatcher = Dispatcher.get(node.__class__)
     rule_meta = dispatcher(node, flag)
     if isinstance(rule_meta, tuple):
