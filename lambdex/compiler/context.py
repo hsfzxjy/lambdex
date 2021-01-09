@@ -15,13 +15,21 @@ class ContextFlag(enum.Enum):
     outermost_lambdex = enum.auto()
 
 
+class Frame:
+    __slots__ = ['detached_functions']
+
+    def __init__(self):
+        self.detached_functions = []
+
+
 class Context:
-    __slots__ = ['compile', 'globals', 'used_names']
+    __slots__ = ['compile', 'globals', 'used_names', 'frames']
 
     def __init__(self, compile_fn, globals_dict):
         self.compile = partial(compile_fn, ctx=self)
         self.globals = globals_dict
         self.used_names = set(globals_dict)
+        self.frames = []
 
     def select_name(self, prefix):
         while True:
@@ -33,3 +41,14 @@ class Context:
         name = self.select_name(prefix)
         self.used_names.add(name)
         return name
+
+    def push_frame(self):
+        self.frames.append(Frame())
+        return self.frames[-1]
+
+    def pop_frame(self):
+        self.frames.pop()
+
+    @property
+    def frame(self):
+        return self.frames[-1]
