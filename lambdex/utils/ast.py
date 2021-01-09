@@ -1,5 +1,6 @@
 import ast
 import inspect
+import textwrap
 import astpretty
 
 __all__ = [
@@ -46,6 +47,7 @@ def value_from_subscript(node: ast.Subscript, *, force_list=False):
 def ast_from_source(source):
     if inspect.isfunction(source):
         source = inspect.getsource(source.__code__)
+    source = textwrap.dedent(source).strip()
     return ast.parse(source).body[0]
 
 
