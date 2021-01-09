@@ -14,6 +14,7 @@ __all__ = [
     'cast_to_lvalue',
     'check_compare',
     'check_as',
+    'empty_arguments',
 ]
 
 
@@ -102,3 +103,14 @@ def check_as(node: ast.expr, as_op, *, rhs_is_identifier=False):
     else:
         assert is_lvalue(rhs)
         return lhs, cast_to_lvalue(rhs)
+
+
+empty_arguments = ast.arguments(
+    posonlyargs=[],
+    args=[],
+    vararg=None,
+    kwonlyargs=[],
+    kw_defaults=[],
+    kwarg=None,
+    defaults=[],
+)
