@@ -28,14 +28,18 @@ def disp_Call(node: ast.Call, flag: ContextFlag):
 @Dispatcher.register(ast.Name)
 def disp_Name(node: ast.Name, flag: ContextFlag):
     if flag != ContextFlag.should_be_stmt:
-        return
+        mapping = {
+            'yield_': ast.Yield,
+        }
+    else:
+        mapping = {
+            'continue_': ast.Continue,
+            'break_': ast.Break,
+            'pass_': ast.Pass,
+            'yield_': ast.Yield,
+        }
 
-    rule_type = {
-        'continue_': ast.Continue,
-        'break_': ast.Break,
-        'pass_': ast.Pass,
-        'yield_': ast.Yield,
-    }.get(node.id)
+    rule_type = mapping.get(node.id)
 
     if rule_type is not None:
         return 'single_keyword_stmt', rule_type
