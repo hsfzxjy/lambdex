@@ -92,7 +92,6 @@ def compile_lambdex(lambda_ast, lambda_func):
         try:
             module_code = compile(module_node, '<lambdex>', 'exec')
         except Exception as e:
-            print(lambda_func.__code__.co_cellvars, lambda_func.__closure__)
             raise SyntaxError(pformat(module_node)) from e
     else:
         module_code = compile(module_node, '<lambdex>', 'exec')
