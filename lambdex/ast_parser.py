@@ -12,6 +12,7 @@ __all__ = ['lambda_to_ast']
 def _shallow_match_ast(node, pattern):
     if astcheck.is_ast_like(node, pattern):
         yield node
+        return
 
     for field, value in ast.iter_fields(node):
         if isinstance(value, list):
