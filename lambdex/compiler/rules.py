@@ -215,8 +215,13 @@ def r_try(node: ast.Subscript, ctx: Context, clauses: list):
     for clause in clauses[1:]:
         if clause.name == 'except_':
             assert not orelse_body and not final_body
-            assert clause.single_head()
-            type_, name = check_as(clause.unwrap_head(), ast.GtE)
+
+            if clause.no_head():
+                type_ = name = None
+            else:
+                assert clause.single_head()
+                type_, name = check_as(clause.unwrap_head(), ast.GtE, rhs_is_identifier=True)
+
             handlers.append(ast.ExceptHandler(
                 type=type_,
                 name=name,

@@ -80,8 +80,8 @@ def check_as(node: ast.expr, as_op, *, rhs_is_identifier=False):
     lhs, rhs = check_compare(node, as_op, 2)
 
     if rhs_is_identifier:
-        assert is_lvalue(rhs)
-        return lhs, cast_to_lvalue(rhs)
-    else:
         assert isinstance(rhs, ast.Name)
         return lhs, rhs.id
+    else:
+        assert is_lvalue(rhs)
+        return lhs, cast_to_lvalue(rhs)
