@@ -11,6 +11,8 @@ from lambdex.utils.ast import pformat, empty_arguments, None_node
 
 __all__ = ['compile_lambdex']
 
+__DEBUG__ = False
+
 
 def compile_node(node, ctx, *, flag=ContextFlag.unset):
 
@@ -86,6 +88,14 @@ def compile_lambdex(lambda_ast, lambda_func):
         )
     module_node = ast.fix_missing_locations(module_node)
 
+    if __DEBUG__:
+        try:
+            module_code = compile(module_node, '<lambdex>', 'exec')
+        except Exception as e:
+            print(lambda_func.__code__.co_cellvars, lambda_func.__closure__)
+            raise SyntaxError(pformat(module_node)) from e
+    else:
+        module_code = compile(module_node, '<lambdex>', 'exec')
 
     if freevars:
         module_code = module_code.co_consts[0]
@@ -104,5 +114,7 @@ def compile_lambdex(lambda_ast, lambda_func):
         lambda_func.__closure__,
     )
 
+    if __DEBUG__:
+        ret.__ast__ = lambda_node
 
     return ret
