@@ -47,6 +47,11 @@ def match_clauses(node):
             node = node.value
             continue
 
+        if isinstance(node, ast.Subscript) and head is None:
+            head = value_from_subscript(node, force_list=True)
+            node = node.value
+            continue
+
         if isinstance(node, ast.Call) and head is None:
             head = node.args
             node = node.func
