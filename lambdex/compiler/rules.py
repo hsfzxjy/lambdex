@@ -171,7 +171,7 @@ def r_with(node: ast.Subscript, ctx: Context, clauses: list):
 
     items = []
     for arg in with_clause.head:
-        context_expr, var = check_as(node, ast.GtE)
+        context_expr, var = check_as(arg, ast.GtE)
         items.append(ast.withitem(
             context_expr=context_expr,
             optional_vars=var,
