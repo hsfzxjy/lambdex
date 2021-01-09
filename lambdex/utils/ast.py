@@ -64,7 +64,16 @@ def is_lvalue(node: ast.AST):
 
 
 def cast_to_lvalue(node: ast.AST):
-    return recursively_set_attr(node, 'ctx', ast.Store())
+    from collections import deque
+    todo = deque([node])
+    while todo:
+        n = todo.popleft()
+        if 'ctx' in n._fields:
+            n.ctx = ast.Store()
+            if isinstance(n, (ast.List, ast.Tuple, ast.Starred)):
+                todo.extend(ast.iter_child_nodes(n))
+
+    return node
 
 
 def check_compare(node: ast.Compare, expected_type, expected_num=None):
