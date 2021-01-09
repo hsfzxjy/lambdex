@@ -15,6 +15,7 @@ __all__ = [
     'check_compare',
     'check_as',
     'empty_arguments',
+    'None_node',
 ]
 
 
@@ -114,3 +115,5 @@ empty_arguments = ast.arguments(
     kwarg=None,
     defaults=[],
 )
+
+None_node = ast.parse('None', '<consts>', mode='eval').body
