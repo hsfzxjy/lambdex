@@ -12,6 +12,14 @@ EMPTY_RULE = RuleMeta(None, ())
 Dispatcher = FunctionRegistry('Dispatcher').set_default(lambda *_: EMPTY_RULE)
 
 
+@Dispatcher.register(ast.Lambda)
+def disp_Lambda(node: ast.Lambda, flag: ContextFlag):
+    if flag != ContextFlag.outermost_lambdex:
+        return EMPTY_RULE
+
+    return RuleMeta((ast.Lambda, flag), ())
+
+
 @Dispatcher.register(ast.Call)
 def disp_Call(node: ast.Call, flag: ContextFlag):
     func = node.func
