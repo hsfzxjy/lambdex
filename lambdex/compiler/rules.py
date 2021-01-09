@@ -35,26 +35,43 @@ def _compile_stmts(ctx: Context, stmts):
     return compiled_statements
 
 
-@Rules.register(ast.FunctionDef)
-def r_def(node: ast.Call, ctx: Context):
-    check(node.args[0], ast.Lambda)
-    lambda_: ast.Lambda = node.args[0]
+@Rules.register((ast.Lambda, ContextFlag.outermost_lambdex))
+def r_lambda(node: ast.Lambda, ctx: Context):
+    check(node.body, ast.List)
+    statements: ast.List = node.body
 
-    check(lambda_.body, ast.List)
-    statements: ast.List = lambda_.body
+    ctx.push_frame()
 
     compiled_statements = _compile_stmts(ctx, statements.elts)
+    detached_functions = ctx.frame.detached_functions
 
     new_function = ast.FunctionDef(
         name=ctx.select_name_and_use('anonymous'),
-        args=lambda_.args,
-        body=compiled_statements,
+        args=node.args,
+        body=detached_functions + compiled_statements,
         decorator_list=[],
         returns=None,
         type_comment=None,
     )
 
+    ctx.pop_frame()
+
     return new_function
+
+
+@Rules.register((ast.FunctionDef, ContextFlag.outermost_lambdex))
+def r_def(node: ast.Call, ctx: Context):
+    check(node.args[0], ast.Lambda)
+    return r_lambda(node.args[0], ctx)
+
+
+@Rules.register((ast.FunctionDef, ContextFlag.should_be_expr))
+@Rules.register((ast.FunctionDef, ContextFlag.should_be_stmt))
+def r_inner_def(node: ast.Call, ctx: Context):
+    FunctionDef_node = r_def(node, ctx)
+    ctx.frame.detached_functions.append(FunctionDef_node)
+
+    return ast.Name(id=FunctionDef_node.name, ctx=ast.Load())
 
 
 @Rules.register(ast.Return)
