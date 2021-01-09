@@ -11,7 +11,8 @@ def random_hex(nbits=32):
 
 class ContextFlag(enum.Enum):
     should_be_stmt = enum.auto()
-    unset = enum.auto()
+    should_be_expr = enum.auto()
+    outermost_lambdex = enum.auto()
 
 
 class Context:
