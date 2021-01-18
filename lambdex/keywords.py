@@ -3,7 +3,7 @@ from . import ast_parser, compiler
 __all__ = ['def_']
 
 
-class KeywordWithOptionalName:
+class Declarer:
 
     __slots__ = ['__keyword', '__identifier']
 
@@ -18,7 +18,7 @@ class KeywordWithOptionalName:
         if not identifier.isidentifier():
             raise SyntaxError('{!r} is not valid identifier'.format(identifier))
 
-        ret = KeywordWithOptionalName(self.__keyword)
+        ret = Declarer(self.__keyword)
         ret.__identifier = identifier
 
         return ret
@@ -28,4 +28,4 @@ class KeywordWithOptionalName:
         return compiler.compile_lambdex(lambda_ast, f)
 
 
-def_ = KeywordWithOptionalName('def_')
+def_ = Declarer('def_')
