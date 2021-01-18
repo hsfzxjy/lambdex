@@ -49,7 +49,10 @@ def compile_node(node, ctx, *, flag=ContextFlag.should_be_expr):
     return node
 
 
-def compile_lambdex(lambda_ast, lambda_func):
+def compile_lambdex(declarer):
+    lambda_ast = declarer.get_ast()
+    lambda_func = declarer.func
+
     context = Context(
         compile_node,
         lambda_func.__globals__,

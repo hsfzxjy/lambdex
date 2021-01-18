@@ -5,11 +5,12 @@ __all__ = ['def_']
 
 class Declarer:
 
-    __slots__ = ['__keyword', '__identifier']
+    __slots__ = ['__keyword', '__identifier', 'func']
 
     def __init__(self, keyword):
         self.__identifier = None
         self.__keyword = keyword
+        self.func = None
 
     def __getattr__(self, identifier: str):
         if self.__identifier is not None:
@@ -23,9 +24,12 @@ class Declarer:
 
         return ret
 
+    def get_ast(self):
+        return ast_parser.lambda_to_ast(self.func, keyword=self.__keyword, identifier=self.__identifier)
+
     def __call__(self, f):
-        lambda_ast = ast_parser.lambda_to_ast(f, keyword=self.__keyword, identifier=self.__identifier)
-        return compiler.compile_lambdex(lambda_ast, f)
+        self.func = f
+        return compiler.compile_lambdex(self)
 
 
 def_ = Declarer('def_')
