@@ -54,7 +54,7 @@ def compile_lambdex(lambda_ast, lambda_func):
         compile_node,
         lambda_func.__globals__,
     )
-    lambda_node = compile_node(
+    lambdex_node = compile_node(
         lambda_ast,
         ctx=context,
         flag=ContextFlag.outermost_lambdex,
@@ -71,7 +71,7 @@ def compile_lambdex(lambda_ast, lambda_func):
                     targets=[ast.Name(id=name, ctx=ast.Store()) for name in freevars],
                     value=None_node,
                 ),
-                lambda_node,
+                lambdex_node,
             ],
             decorator_list=[],
             returns=None,
@@ -82,7 +82,7 @@ def compile_lambdex(lambda_ast, lambda_func):
         )
     else:
         module_node = ast.Module(
-            body=[lambda_node],
+            body=[lambdex_node],
             type_ignores=[],
         )
     module_node = ast.fix_missing_locations(module_node)
@@ -99,7 +99,7 @@ def compile_lambdex(lambda_ast, lambda_func):
         module_code = module_code.co_consts[0]
 
     for obj in module_code.co_consts:
-        if inspect.iscode(obj) and obj.co_name == lambda_node.name:
+        if inspect.iscode(obj) and obj.co_name == lambdex_node.name:
             lambdex_code = obj
             break
     lambdex_code = lambdex_code.replace(co_freevars=lambda_func.__code__.co_freevars)
