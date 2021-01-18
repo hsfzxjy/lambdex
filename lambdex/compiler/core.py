@@ -6,6 +6,7 @@ import functools
 from .rules import Rules
 from .context import Context, ContextFlag
 from .dispatcher import Dispatcher
+from . import cache
 
 from lambdex.utils.ast import pformat, empty_arguments, None_node
 
@@ -67,6 +68,11 @@ def _wrap_code_object(code_obj, lambda_func, lambdex_ast_node):
 
 
 def compile_lambdex(declarer):
+    cached_value = cache.get(declarer)
+    if cached_value is not None:
+        code_obj, lambdex_ast_node = cached_value
+        return _wrap_code_object(code_obj, declarer.func, lambdex_ast_node)
+
     lambda_ast = declarer.get_ast()
     lambda_func = declarer.func
 
@@ -123,4 +129,5 @@ def compile_lambdex(declarer):
             lambdex_code = obj
             break
 
+    cache.set(declarer, (lambdex_code, lambdex_node))
     return _wrap_code_object(lambdex_code, lambda_func, lambdex_node)
