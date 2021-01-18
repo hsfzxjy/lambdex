@@ -35,7 +35,7 @@ class Declarer:
         extra = ()
         if self.func is not None:
             code_obj = self.func.__code__
-            extra = (code_obj.co_filename, code_obj.co_firstlineno, code_obj.co_consts, code_obj.co_code)
+            extra = (code_obj.co_filename, code_obj.co_firstlineno, code_obj.co_code)
 
         return (self.__keyword, self.__identifier, *extra)
 
