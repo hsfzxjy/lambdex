@@ -107,9 +107,9 @@ class TestScoping(unittest.TestCase):
 class TestNested(unittest.TestCase):
     def test_load_nonlocal(self):
         f = def_(lambda VAR: [
-            return_[def_(lambda: [  #
+            return_[def_(lambda: [
                 return_[VAR],
-            ])]
+            ])],
         ])
 
         self.assertEqual(f(4)(), 4)
