@@ -49,6 +49,23 @@ def compile_node(node, ctx, *, flag=ContextFlag.should_be_expr):
     return node
 
 
+def _wrap_code_object(code_obj, lambda_func, lambdex_ast_node):
+    code_obj = code_obj.replace(co_freevars=lambda_func.__code__.co_freevars)
+
+    ret = types.FunctionType(
+        code_obj,
+        lambda_func.__globals__,
+        code_obj.co_name,
+        lambda_func.__defaults__,
+        lambda_func.__closure__,
+    )
+
+    if __DEBUG__:
+        ret.__ast__ = lambdex_ast_node
+
+    return ret
+
+
 def compile_lambdex(declarer):
     lambda_ast = declarer.get_ast()
     lambda_func = declarer.func
@@ -105,17 +122,5 @@ def compile_lambdex(declarer):
         if inspect.iscode(obj) and obj.co_name == lambdex_node.name:
             lambdex_code = obj
             break
-    lambdex_code = lambdex_code.replace(co_freevars=lambda_func.__code__.co_freevars)
 
-    ret = types.FunctionType(
-        lambdex_code,
-        lambda_func.__globals__,
-        lambdex_code.co_name,
-        lambda_func.__defaults__,
-        lambda_func.__closure__,
-    )
-
-    if __DEBUG__:
-        ret.__ast__ = lambda_node
-
-    return ret
+    return _wrap_code_object(lambdex_code, lambda_func, lambdex_node)
