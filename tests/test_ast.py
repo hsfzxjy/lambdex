@@ -75,9 +75,9 @@ class TestAST(unittest.TestCase):
 
     def test_if(self):
         f = def_(lambda: [
-            if_[a][  #
-                b,  #
-            ]
+            if_[a][  
+                b,  
+            ],
         ])
 
         def target():
@@ -88,10 +88,10 @@ class TestAST(unittest.TestCase):
 
     def test_if_elif(self):
         f = def_(lambda: [
-            if_[a][  #
-                b,  #
-            ].elif_[c][  #
-                d,  #
+            if_[a][  
+                b,  
+            ].elif_[c][  
+                d,  
             ],
         ])
 
@@ -105,12 +105,12 @@ class TestAST(unittest.TestCase):
 
     def test_if_elif_multiple(self):
         f = def_(lambda: [
-            if_[a][  #
-                b,  #
-            ].elif_[c][  #
-                d,  #
-            ].elif_[c][  #
-                d,  #
+            if_[a][  
+                b,  
+            ].elif_[c][  
+                d,  
+            ].elif_[c][  
+                d,  
             ],
         ])
 
@@ -126,10 +126,10 @@ class TestAST(unittest.TestCase):
 
     def test_if_else(self):
         f = def_(lambda: [
-            if_[a][  #
-                b,  #
-            ].else_[  #
-                d,  #
+            if_[a][  
+                b,  
+            ].else_[  
+                d,  
             ],
         ])
 
@@ -143,12 +143,12 @@ class TestAST(unittest.TestCase):
 
     def test_if_elif_else(self):
         f = def_(lambda: [
-            if_[a][  #
-                b,  #
-            ].elif_[c][  #
-                d,  #
-            ].else_[  #
-                d,  #
+            if_[a][  
+                b,  
+            ].elif_[c][  
+                d,  
+            ].else_[  
+                d,  
             ],
         ])
 
@@ -164,10 +164,10 @@ class TestAST(unittest.TestCase):
 
     def test_if_body_compiled(self):
         f = def_(lambda: [
-            if_[a][  #
-                a <= 1,  #
-            ].else_[  #
-                d,  #
+            if_[a][  
+                a <= 1,  
+            ].else_[  
+                d,  
             ],
         ])
 
@@ -181,13 +181,15 @@ class TestAST(unittest.TestCase):
 
     def test_if_elif_body_compiled(self):
         f = def_(lambda: [
-            if_[a][  #
-                b  #
-            ].elif_[c][  #
-                a <= 1,  #
-            ].else_[  #
-                d,  #
-            ],  #
+            if_[a][  
+                b,
+                
+            ].elif_[c][  
+                a <= 1,  
+            ].else_[  
+                d,  
+            ],
+            
         ])
 
         def target():
@@ -202,9 +204,10 @@ class TestAST(unittest.TestCase):
 
     def test_if_else_body_compiled(self):
         f = def_(lambda: [
-            if_[a][  #
-                b  #
-            ].else_[  #
+            if_[a][  
+                b,
+                
+            ].else_[  
                 a <= 1,
             ],
         ])
@@ -219,9 +222,9 @@ class TestAST(unittest.TestCase):
 
     def test_if_head_compiled(self):
         f = def_(lambda: [
-            if_[yield_][  #
-                b,  #
-            ]
+            if_[yield_][  
+                b,  
+            ],
         ])
 
         def target():
@@ -232,11 +235,11 @@ class TestAST(unittest.TestCase):
 
     def test_if_elif_head_compiled(self):
         f = def_(lambda: [
-            if_[a][  #
-                b,  #
-            ].elif_[yield_][  #
-                b,  #
-            ]
+            if_[a][  
+                b,  
+            ].elif_[yield_][  
+                b,  
+            ],
         ])
 
         def target():
@@ -249,9 +252,9 @@ class TestAST(unittest.TestCase):
 
     def test_for(self):
         f = def_(lambda: [
-            for_[a in b][  #
-                c,  #
-            ]
+            for_[a in b][  
+                c,  
+            ],
         ])
 
         def target():
@@ -262,11 +265,13 @@ class TestAST(unittest.TestCase):
 
     def test_for_else(self):
         f = def_(lambda: [
-            for_[a in b][  #
-                c  #
-            ].else_[  #
-                d  #
-            ]
+            for_[a in b][  
+                c,
+                
+            ].else_[  
+                d,
+                
+            ],
         ])
 
         def target():
@@ -279,9 +284,9 @@ class TestAST(unittest.TestCase):
 
     def test_for_body_compiled(self):
         f = def_(lambda: [
-            for_[a in b][  #
-                a <= 1,  #
-            ]
+            for_[a in b][  
+                a <= 1,  
+            ],
         ])
 
         def target():
@@ -292,14 +297,16 @@ class TestAST(unittest.TestCase):
 
     def test_for_else_body_compiled(self):
         f = def_(lambda: [
-            for_[a in b][  #
-                c  #
-            ].else_[  #
-                a <= 1  #
-            ]
+            for_[a in b][  
+                c,
+                
+            ].else_[  
+                a <= 1,
+                
+            ],
         ])
 
-        # yapf: enable
+         yapf: enable
 
         def target():
             for a in b:
@@ -311,9 +318,9 @@ class TestAST(unittest.TestCase):
 
     def test_for_iter_compiled(self):
         f = def_(lambda: [
-            for_[a in (yield_)][  #
-                b,  #
-            ]
+            for_[a in (yield_)][  
+                b,  
+            ],
         ])
 
         def target():
@@ -324,9 +331,10 @@ class TestAST(unittest.TestCase):
 
     def test_while(self):
         f = def_(lambda: [
-            while_[a][  #
-                b  #
-            ]
+            while_[a][  
+                b,
+                
+            ],
         ])
 
         def target():
@@ -337,10 +345,12 @@ class TestAST(unittest.TestCase):
 
     def test_while_else(self):
         f = def_(lambda: [
-            while_[a][  #
-                b  #
-            ].else_[  #
-                c]
+            while_[a][  
+                b,
+                
+            ].else_[  
+                c,
+            ],
         ])
 
         def target():
@@ -353,9 +363,9 @@ class TestAST(unittest.TestCase):
 
     def test_while_body_compiled(self):
         f = def_(lambda: [
-            while_[a][  #
-                a <= 1,  #
-            ]
+            while_[a][  
+                a <= 1,  
+            ],
         ])
 
         def target():
@@ -366,11 +376,13 @@ class TestAST(unittest.TestCase):
 
     def test_while_else_body_compiled(self):
         f = def_(lambda: [
-            while_[a][  #
-                b  #
-            ].else_[  #
-                a <= 1  #
-            ]
+            while_[a][  
+                b,
+                
+            ].else_[  
+                a <= 1,
+                
+            ],
         ])
 
         def target():
@@ -383,8 +395,9 @@ class TestAST(unittest.TestCase):
 
     def test_while_head_compiled(self):
         f = def_(lambda: [
-            while_[yield_][  #
-                b, ]
+            while_[yield_][  
+                b,
+            ],
         ])
 
         def target():
@@ -395,9 +408,10 @@ class TestAST(unittest.TestCase):
 
     def test_break(self):
         f = def_(lambda: [
-            while_[a][  #
-                break_  #
-            ]
+            while_[a][  
+                break_,
+                
+            ],
         ])
 
         def target():
@@ -408,9 +422,10 @@ class TestAST(unittest.TestCase):
 
     def test_continue(self):
         f = def_(lambda: [
-            while_[a][  #
-                continue_  #
-            ]
+            while_[a][  
+                continue_,
+                
+            ],
         ])
 
         def target():
@@ -452,7 +467,9 @@ class TestAST(unittest.TestCase):
     def test_assignment_op_in_other_context(self):
         f = def_(lambda: [
             a <= 1,
-            while_[a <= 1][pass_],
+            while_[a <= 1][
+                pass_,
+            ],
         ])
 
         def target():
@@ -474,7 +491,9 @@ class TestAST(unittest.TestCase):
 
     def test_with(self):
         f = def_(lambda: [
-            with_[a][b],
+            with_[a][
+                b,
+            ],
         ])
 
         def target():
@@ -485,7 +504,9 @@ class TestAST(unittest.TestCase):
 
     def test_with_as(self):
         f = def_(lambda: [
-            with_[a >= b][c],
+            with_[a >= b][
+                c,
+            ],
         ])
 
         def target():
@@ -496,8 +517,8 @@ class TestAST(unittest.TestCase):
 
     def test_with_as_multiple(self):
         f = def_(lambda: [
-            with_[a >= b.c, d >= e[f]][  #
-                g,  #
+            with_[a >= b.c, d >= e[f]][  
+                g,  
             ],
         ])
 
@@ -509,8 +530,8 @@ class TestAST(unittest.TestCase):
 
     def test_with_body_compiled(self):
         f = def_(lambda: [
-            with_[a][  #
-                b <= c,  #
+            with_[a][  
+                b <= c,  
             ],
         ])
 
@@ -522,8 +543,8 @@ class TestAST(unittest.TestCase):
 
     def test_with_value_compiled(self):
         f = def_(lambda: [
-            with_[yield_][  #
-                b,  #
+            with_[yield_][  
+                b,  
             ],
         ])
 
@@ -575,11 +596,11 @@ class TestAST(unittest.TestCase):
 
     def test_try_except(self):
         f = def_(lambda: [
-            try_[  #
-                a,  #
-            ].except_[  #
+            try_[  
+                a,  
+            ].except_[  
                 b,
-            ]
+            ],
         ])
 
         def target():
@@ -592,11 +613,11 @@ class TestAST(unittest.TestCase):
 
     def test_try_except_exc(self):
         f = def_(lambda: [
-            try_[  #
-                a,  #
-            ].except_[exc][  #
-                b,  #
-            ]
+            try_[  
+                a,  
+            ].except_[exc][  
+                b,  
+            ],
         ])
 
         def target():
@@ -609,11 +630,11 @@ class TestAST(unittest.TestCase):
 
     def test_try_except_e_as(self):
         f = def_(lambda: [
-            try_[  #
-                a,  #
-            ].except_[exc >= e][  #
-                b,  #
-            ]
+            try_[  
+                a,  
+            ].except_[exc >= e][  
+                b,  
+            ],
         ])
 
         def target():
@@ -626,13 +647,13 @@ class TestAST(unittest.TestCase):
 
     def test_try_except_multiple(self):
         f = def_(lambda: [
-            try_[  #
-                a,  #
-            ].except_[exc >= e][  #
-                b,  #
-            ].except_[exc2 >= e][  #
-                b,  #
-            ]
+            try_[  
+                a,  
+            ].except_[exc >= e][  
+                b,  
+            ].except_[exc2 >= e][  
+                b,  
+            ],
         ])
 
         def target():
@@ -647,13 +668,13 @@ class TestAST(unittest.TestCase):
 
     def test_try_except_else(self):
         f = def_(lambda: [
-            try_[  #
-                a,  #
-            ].except_[exc >= e][  #
-                b,  #
-            ].else_[  #
+            try_[  
+                a,  
+            ].except_[exc >= e][  
+                b,  
+            ].else_[  
                 b,
-            ]
+            ],
         ])
 
         def target():
@@ -668,13 +689,13 @@ class TestAST(unittest.TestCase):
 
     def test_try_except_finally(self):
         f = def_(lambda: [
-            try_[  #
-                a,  #
-            ].except_[exc >= e][  #
-                b,  #
-            ].finally_[  #
+            try_[  
+                a,  
+            ].except_[exc >= e][  
+                b,  
+            ].finally_[  
                 b,
-            ]
+            ],
         ])
 
         def target():
@@ -689,15 +710,15 @@ class TestAST(unittest.TestCase):
 
     def test_try_except_else_finally(self):
         f = def_(lambda: [
-            try_[  #
+            try_[  
                 a,
-            ].except_[exc >= e][  #
-                b,  #
-            ].else_[  #
+            ].except_[exc >= e][  
+                b,  
+            ].else_[  
                 b,
-            ].finally_[  #
+            ].finally_[  
                 b,
-            ]
+            ],
         ])
 
         def target():
@@ -714,11 +735,11 @@ class TestAST(unittest.TestCase):
 
     def test_try_finally(self):
         f = def_(lambda: [
-            try_[  #
+            try_[  
                 a,
-            ].finally_[  #
+            ].finally_[  
                 b,
-            ]
+            ],
         ])
 
         def target():
@@ -731,11 +752,11 @@ class TestAST(unittest.TestCase):
 
     def test_try_body_compiled(self):
         f = def_(lambda: [
-            try_[  #
+            try_[  
                 a <= 1,
-            ].except_[  #
+            ].except_[  
                 b,
-            ]
+            ],
         ])
 
         def target():
@@ -748,11 +769,11 @@ class TestAST(unittest.TestCase):
 
     def test_try_except_body_compiled(self):
         f = def_(lambda: [
-            try_[  #
+            try_[  
                 a,
-            ].except_[  #
+            ].except_[  
                 a <= 1,
-            ]
+            ],
         ])
 
         def target():
@@ -765,13 +786,13 @@ class TestAST(unittest.TestCase):
 
     def test_try_else_body_compiled(self):
         f = def_(lambda: [
-            try_[  #
+            try_[  
                 a,
-            ].except_[  #
+            ].except_[  
                 b,
-            ].else_[  #
+            ].else_[  
                 a <= 1,
-            ]
+            ],
         ])
 
         def target():
@@ -786,11 +807,11 @@ class TestAST(unittest.TestCase):
 
     def test_try_finally_body_compiled(self):
         f = def_(lambda: [
-            try_[  #
+            try_[  
                 a,
-            ].finally_[  #
+            ].finally_[  
                 a <= 1,
-            ]
+            ],
         ])
 
         def target():
@@ -803,11 +824,11 @@ class TestAST(unittest.TestCase):
 
     def test_try_except_head_compiled(self):
         f = def_(lambda: [
-            try_[  #
+            try_[  
                 a,
-            ].except_[yield_ >= e][  #
-                a,  #
-            ]
+            ].except_[yield_ >= e][  
+                a,  
+            ],
         ])
 
         def target():

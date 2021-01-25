@@ -119,21 +119,17 @@ class TestNested(unittest.TestCase):
         import lambdex.compiler.core as core
         from lambdex.utils.ast import pprint
         core.__DEBUG__ = True
-        f = def_(
-            lambda: [
-                ret <= [],  #
-                for_[i in range(10)][  #
-                    def_(lambda i: [  #
-                        ret.append(  #
-                            def_(lambda: [  #
-                                return_[i]  #
-                            ])
-                        )  #
-                    ])(i)  #
-                ],
-                return_[ret],
-            ]
-        )
+        f = def_(lambda: [
+            ret <= [],
+            for_[i in range(10)][
+                def_(lambda i: [
+                    ret.append(def_(lambda: [
+                        return_[i],
+                    ])),
+                ])(i),
+            ],
+            return_[ret],
+        ])
 
         ret = f()
         stored_variables = [x() for x in ret]
