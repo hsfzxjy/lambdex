@@ -13,11 +13,15 @@ def format_file(config: Config, result: Result, filename: Optional[str] = None):
     file_resource = FileResource(config, result, filename)
     string = file_resource.read()
 
-    tree = libcst.parse_module(string)
-    transformer = MainTransformer()
-    tree = tree.visit(transformer)
+    if 'def_' not in string:
+        output = string
+    else:
+        tree = libcst.parse_module(string)
+        transformer = MainTransformer()
+        tree = tree.visit(transformer)
+        output  = tree.code
 
-    file_resource.write(tree.code)
+    file_resource.write(output)
 
 
 def format_files(config: Config, result: Result):
