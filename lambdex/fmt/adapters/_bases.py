@@ -30,8 +30,6 @@ class BaseAdapter(abc.ABC):
 
         if self.config.inplace:
             output = None
-        else:
-            output = output.decode()
 
         return Result(
             success=process.returncode == 0,

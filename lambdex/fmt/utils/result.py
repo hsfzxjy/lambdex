@@ -5,4 +5,4 @@ from dataclasses import dataclass
 @dataclass
 class Result:
     success: bool
-    output: Optional[str] = None
+    output: Optional[bytes] = None
