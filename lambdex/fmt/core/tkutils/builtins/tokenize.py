@@ -577,6 +577,7 @@ def _tokenize(readline, encoding):
                     yield TokenInfo(NAME, token, spos, epos, line)
                 elif initial == '\\':                      # continued stmt
                     continued = 1
+                    yield TokenInfo(WHITESPACE, token, spos, epos, line)
                 else:
                     if initial in '([{':
                         parenlev += 1
