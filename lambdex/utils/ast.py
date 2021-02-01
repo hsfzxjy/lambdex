@@ -52,10 +52,17 @@ def value_from_subscript(node: ast.Subscript, *, force_list=False):
     return ret
 
 
-def ast_from_source(source):
+def ast_from_source(source, keyword):
     if inspect.isfunction(source):
-        source = inspect.getsource(source.__code__)
-    source = textwrap.dedent(source).strip()
+        lines, lnum = inspect.findsource(source.__code__)
+
+        while True:
+            first_keyword_loc = lines[lnum].find(keyword)
+            if first_keyword_loc >= 0: break
+            lnum -= 1
+
+        lines[lnum] = lines[lnum][first_keyword_loc:]
+        source = '\n'.join(inspect.getblock(lines[lnum:]))
     return ast.parse(source).body[0]
 
 

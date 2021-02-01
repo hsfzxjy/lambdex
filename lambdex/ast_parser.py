@@ -24,7 +24,7 @@ def _shallow_match_ast(node, pattern):
 
 
 def lambda_to_ast(lambda_object: typing.Callable, *, keyword: str, identifier: str = ''):
-    tree = ast_from_source(lambda_object)
+    tree = ast_from_source(lambda_object, keyword)
     if isinstance(tree, ast.Expr) and isinstance(tree.value, ast.Lambda):
         return tree.value
     pattern = astsearch.prepare_pattern('{}{}(?)'.format(keyword, '.' + identifier if identifier else ''))
