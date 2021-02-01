@@ -1,12 +1,16 @@
 import unittest
 
 from lambdex.keywords import def_
-from lambdex.compiler import cache
+from lambdex.compiler import cache, core
 
 
 class TestCacheEnableDisable(unittest.TestCase):
+    def setUp(self):
+        core.__DEBUG__ = True
+
     def tearDown(self):
         cache.set_enabled(True)
+        core.__DEBUG__ = False
 
     def test_code_and_ast_is_same_when_cache_enabled(self):
         def f():
@@ -34,6 +38,12 @@ class TestCacheEnableDisable(unittest.TestCase):
 
 
 class TestEdgeCase(unittest.TestCase):
+    def setUp(self):
+        core.__DEBUG__ = True
+
+    def tearDown(self):
+        core.__DEBUG__ = False
+
     def test_lambdex_on_the_same_line_should_be_different(self):
         def f():
             return def_.a(lambda: [

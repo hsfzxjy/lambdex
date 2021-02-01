@@ -11,6 +11,9 @@ class TestAST(unittest.TestCase):
     def setUp(self):
         core.__DEBUG__ = True
 
+    def tearDown(self):
+        core.__DEBUG__ = False
+
     def assert_ast_like(self, f, target):
         ast_f = f.__ast__
         recursively_set_attr(ast_f, 'type_comment', None)
