@@ -51,7 +51,7 @@ class _ResourceBase(abc.ABC):
         return self._backend_output_stream
 
     def is_changed(self, formatted_code: str) -> bool:
-        return self._source.decode('utf-8') == formatted_code
+        return self._source.decode('utf-8') != formatted_code
 
     def write_formatted_code(self, formatted_code: str):
         content = formatted_code
