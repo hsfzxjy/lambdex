@@ -43,7 +43,10 @@ class Reindent(_StreamWithLog):
 
     def _process_leading_whitespace(self, token: TokenInfo):
         if not self.scopes:
-            return token, REPLACE
+            if token.is_WS_NL or token.type == tk.INDENT:
+                return token, REPLACE
+            else:
+                return TokenInfo(type=tk.WHITESPACE, string=''), INSERT
 
         if token.is_WS:
             orig_lws = token.string
