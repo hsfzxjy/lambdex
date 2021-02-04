@@ -134,3 +134,4 @@ class TestNested(unittest.TestCase):
         ret = f()
         stored_variables = [x() for x in ret]
         self.assertEqual(stored_variables, list(range(10)))
+        core.__DEBUG__ = False
