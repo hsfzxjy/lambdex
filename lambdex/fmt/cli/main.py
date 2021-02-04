@@ -1,25 +1,26 @@
 import sys
 
-from .opts import split_argv, build_meta_parser
 from .. import adapters
-
-from ..core.api import format_files
+from .opts import split_argv, build_parser
 
 
 def main() -> int:
-    adapter_argv, meta_argv = split_argv()
-    meta_opts = build_meta_parser().parse_args(meta_argv)
+    backend_argv, argv = split_argv()
+    opts = build_parser().parse_args(argv)
 
-    adapter = adapters.build(meta_opts.adapter, meta_opts, adapter_argv)
+    adapter = adapters.build(opts.adapter, opts, backend_argv)
 
-    config = adapter.config
-    config.validate()
+    changed = False
+    if adapter.config.parallel:
+        import multiprocessing
+        import concurrent.futures
 
-    result = adapter.run()
+        with concurrent.futures.ProcessPoolExecutor(multiprocessing.cpu_count()) as executor:
+            future_formats = [executor.submit(job) for job in adapter.get_jobs()]
+            for future in concurrent.futures.as_completed(future_formats):
+                changed |= future.result()
+    else:
+        for job in adapter.get_jobs():
+            changed |= job()
 
-    if not result.success:
-        return 1
-
-    format_files(config, result)
-
-    return 0
+    return 1 if changed and (adapter.config.print_diff or adapter.config.quiet) else 0

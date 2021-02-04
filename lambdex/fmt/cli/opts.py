@@ -15,7 +15,6 @@ def split_argv():
     num_delimitters = len(idx_delimitters)
     if num_delimitters > 2:
         logger.error("Too many '--' found, expected less than 3")
-        sys.exit(1)
 
     if num_delimitters == 0:
         return argv, ()
@@ -27,7 +26,7 @@ def split_argv():
         return argv[:start] + argv[end + 1:], argv[start + 1:end]
 
 
-def build_meta_parser():
+def build_parser():
     parser = argparse.ArgumentParser('Formatter for lambdex code')
     parser.add_argument('-a', '--adapter', default='yapf')
     parser.add_argument('-e', '--executable')
