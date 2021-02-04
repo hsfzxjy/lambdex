@@ -9,6 +9,7 @@ from .InsertNewline import InsertNewline
 from .CollectComments import CollectComments
 from .SuppressWhitespaces import SuppressWhitespaces
 from .AnnotateLeadingWhitespace import AnnotateLeadingWhitespace
+from .NormalizeWhitespaceBeforeComments import NormalizeWhitespaceBeforeComments
 
 
 def transform(tokenseq: Sequence[TokenInfo]) -> Sequence[TokenInfo]:
@@ -18,6 +19,7 @@ def transform(tokenseq: Sequence[TokenInfo]) -> Sequence[TokenInfo]:
     seq = SuppressWhitespaces(seq)
     seq = InsertNewline(seq)
     seq = Reindent(seq)
+    seq = NormalizeWhitespaceBeforeComments(seq)
     return seq
 
 
