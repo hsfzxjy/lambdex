@@ -131,6 +131,5 @@ dmypy.json
 # Project specific files
 /csrc
 /test.py
-/setup.py
 .clang-format
 /.vscode/
