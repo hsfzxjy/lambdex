@@ -74,6 +74,10 @@ class _Logger(logging.Logger):
     def is_debug(self):
         return IS_DEBUG
 
+    def error(self, *args, **kwargs):
+        super(_Logger, self).error(*args, **kwargs)
+        sys.exit(2)
+
 
 def getLogger(name: str) -> _Logger:
     logger = _Logger(name)
