@@ -159,7 +159,7 @@ def r_while(node: ast.Subscript, ctx: Context, clauses: list):
 
 @Rules.register(ast.Assign)
 def r_assign(node: ast.Compare, ctx: Context):
-    *targets, value = check_compare(node, ast.LtE)
+    *targets, value = check_compare(node, ast.Lt)
 
     for target in targets:
         assert is_lvalue(target)
@@ -191,7 +191,7 @@ def r_with(node: ast.Subscript, ctx: Context, clauses: list):
 
     items = []
     for arg in with_clause.head:
-        context_expr, var = check_as(arg, ast.GtE)
+        context_expr, var = check_as(arg, ast.Gt)
         items.append(ast.withitem(
             context_expr=ctx.compile(context_expr),
             optional_vars=var,
@@ -240,7 +240,7 @@ def r_try(node: ast.Subscript, ctx: Context, clauses: list):
                 type_ = name = None
             else:
                 assert clause.single_head()
-                type_, name = check_as(clause.unwrap_head(), ast.GtE, rhs_is_identifier=True)
+                type_, name = check_as(clause.unwrap_head(), ast.Gt, rhs_is_identifier=True)
 
             handlers.append(ast.ExceptHandler(
                 type=ctx.compile(type_),

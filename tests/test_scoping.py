@@ -28,7 +28,7 @@ class TestScoping(unittest.TestCase):
     def test_set_global(self):
         f = def_(lambda: [
             global_[VAR],
-            VAR <= 2,
+            VAR < 2,
             return_[VAR],
         ])
 
@@ -37,7 +37,7 @@ class TestScoping(unittest.TestCase):
 
     def test_set_global_fail_of_no_global_keyword(self):
         f = def_(lambda: [
-            VAR <= 2,
+            VAR < 2,
             return_[VAR],
         ])
 
@@ -65,7 +65,7 @@ class TestScoping(unittest.TestCase):
         VAR = 2
         f = def_(lambda: [
             nonlocal_[VAR],
-            VAR <= VAR + 2,
+            VAR < VAR + 2,
             return_[VAR],
         ])
 
@@ -80,7 +80,7 @@ class TestScoping(unittest.TestCase):
     def test_set_nonlocal_fail_of_no_nonlocal_keyword(self):
         VAR = 2
         f = def_(lambda: [
-            VAR <= 4,
+            VAR < 4,
             return_[VAR],
         ])
 
@@ -91,7 +91,7 @@ class TestScoping(unittest.TestCase):
         VAR = 2
         f = def_(lambda: [
             global_[VAR],
-            VAR <= 4,
+            VAR < 4,
             return_[VAR],
         ])
 
@@ -120,7 +120,7 @@ class TestNested(unittest.TestCase):
         from lambdex.utils.ast import pprint
         core.__DEBUG__ = True
         f = def_(lambda: [
-            ret <= [],
+            ret < [],
             for_[i in range(10)][
                 def_(lambda i: [
                     ret.append(def_(lambda: [
