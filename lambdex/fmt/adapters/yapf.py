@@ -11,12 +11,12 @@ from ._base import BaseAdapter
 
 logger = getLogger(__name__)
 
-_ParseArguments = silent_import('yapf', ['_ParseArguments', '_BuildParser'])
-file_resources = silent_import('yapf.yapflib.file_resources')
-
 
 class YapfAdapter(BaseAdapter):
     def _make_config(self) -> Config:
+        _ParseArguments = silent_import('yapf', ['_ParseArguments', '_BuildParser'])
+        file_resources = silent_import('yapf.yapflib.file_resources')
+
         bopts = self._backend_opts = _ParseArguments([' '] + self.backend_argv)
 
         if bopts.lines and len(bopts.files) > 1:
