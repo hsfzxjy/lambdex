@@ -1,7 +1,11 @@
 import ast
 import inspect
 import textwrap
-import astpretty
+
+try:
+    import astpretty
+except ModuleNotFoundError:
+    astpretty = None
 
 __all__ = [
     'pprint',
