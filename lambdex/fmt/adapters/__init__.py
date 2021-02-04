@@ -1,7 +1,7 @@
 import typing
 from typing import Mapping
 
-from ._bases import BaseAdapter
+from ._base import BaseAdapter
 from .yapf import YapfAdapter
 
 mapping: Mapping[str, BaseAdapter] = {

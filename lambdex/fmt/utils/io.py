@@ -1,56 +1,105 @@
+import abc
 import sys
-import pathlib
-from typing import Optional
-from ..config import Config
-from .result import Result
-
 import difflib
+import pathlib
 from io import BytesIO
 
+from ..config import Config
 
-class FileResource:
-    def __init__(
-        self,
-        config: Config,
-        result: Result,
-        filename: Optional[str] = None,
-    ):
-        self.config = config
-        self.result = result
-        self.filename = filename
-        self._buffer = BytesIO()
 
-    def read_text(self) -> str:
-        return self.open().read().decode()
+def get_stdin() -> bytes:
+    contents = []
+    while True:
+        if sys.stdin.closed:
+            break
+        try:
+            content = sys.stdin.buffer.read()
+            if not content: break
+            contents.append(content)
+        except EOFError:
+            break
+        except KeyboardInterrupt:
+            sys.exit(1)
 
-    def open(self):
-        if self.result.output is not None:
-            self._buffer = BytesIO(self.result.output)
-        else:
-            with pathlib.Path(self.filename).open('rb') as fd:
-                self._buffer = BytesIO(fd.read())
+    return b''.join(contents)
 
-        return self._buffer
 
-    def write(self, output: str):
-        content = output
-        if self.config.print_diff:
-            self._buffer.seek(0)
-            before = self._buffer.read().decode().splitlines()
-            after = output.splitlines()
+class _ResourceBase(abc.ABC):
+    def __init__(self, config: Config):
+        self._config = config
+        self._source = self._get_source()
+        self._backend_output_stream = None
+
+    @abc.abstractmethod
+    def _get_source(self) -> bytes:
+        ...
+
+    @abc.abstractmethod
+    def _display_filename(self) -> str:
+        ...
+
+    @property
+    def source(self):
+        return self._source
+
+    def set_backend_output(self, output: bytes):
+        self._backend_output_stream = BytesIO(output)
+
+    @property
+    def backend_output_stream(self) -> BytesIO:
+        assert self._backend_output_stream is not None
+        return self._backend_output_stream
+
+    def is_changed(self, formatted_code: str) -> bool:
+        return self._source.decode('utf-8') == formatted_code
+
+    def write_formatted_code(self, formatted_code: str):
+        content = formatted_code
+        if self._config.print_diff:
+            before = self._source.decode('utf-8').splitlines()
+            after = formatted_code.splitlines()
             content = '\n'.join(
                 difflib.unified_diff(
                     before,
                     after,
-                    'code',
-                    'code',
+                    self._display_filename(),
+                    self._display_filename(),
                     '(original)',
                     '(reformatted)',
                     lineterm='',
                 )
             ) + '\n'
 
-        if self.config.inplace:
-            pathlib.Path(self.filename).write_text(content)
+        self._write_content(content)
 
-        sys.stdout.write(content)
+
+class StdinResource(_ResourceBase):
+    def _get_source(self) -> bytes:
+        return get_stdin()
+
+    def _display_filename(self) -> str:
+        return '<stdin>'
+
+    def _write_content(self, content: str):
+        assert not self._config.in_place
+        if not self._config.quiet:
+            sys.stdout.write(content)
+
+
+class FileResource(_ResourceBase):
+    def __init__(self, config: Config, filename: str):
+        self._filename = filename
+        self._filepath = pathlib.Path(filename)
+        super(FileResource, self).__init__(config)
+
+    def _get_source(self) -> bytes:
+        return self._filepath.read_bytes()
+
+    def _display_filename(self) -> str:
+        return self._filename
+
+    def _write_content(self, content: str):
+        if self._config.in_place:
+            self._filepath.write_text(content)
+        elif not self._config.quiet:
+            sys.stdout.write(content)
