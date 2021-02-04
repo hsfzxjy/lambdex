@@ -49,6 +49,7 @@ def disp_Name(node: ast.Name, flag: ContextFlag):
             'break_': ast.Break,
             'pass_': ast.Pass,
             'yield_': ast.Yield,
+            'raise_': ast.Raise,
         }
 
     rule_type = mapping.get(node.id)

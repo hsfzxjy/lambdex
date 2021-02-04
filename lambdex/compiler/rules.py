@@ -176,6 +176,9 @@ def r_single_keyword_stmt(node: ast.Name, ctx: Context, rule_type):
     if rule_type == ast.Yield:
         return ast.Yield(value=None)
 
+    if rule_type == ast.Raise:
+        return ast.Raise(exc=None, cause=None)
+
     return rule_type()
 
 

@@ -552,6 +552,23 @@ class TestAST(unittest.TestCase):
 
         self.assert_ast_like(f, target)
 
+    def test_raise_bare(self):
+        f = def_(lambda: [
+            try_[
+                ...
+            ].except_[
+                raise_
+            ]
+        ])
+
+        def target():
+            try:
+                ...
+            except:
+                raise
+
+        self.assert_ast_like(f, target)
+
     def test_raise_from(self):
         f = def_(lambda: [
             raise_[a].from_[b],
