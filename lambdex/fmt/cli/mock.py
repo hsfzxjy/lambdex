@@ -16,7 +16,7 @@ if os.name == 'nt':
         @echo off
         REM {comment}
         setlocal
-        set PYTHONPATH={lambdex_root};%PYTHONPATH% && {py_interpreter} -m lambdex.fmt %* -- -a {formatter_type} -e {formatter_path}
+        set PYTHONPATH={lambdex_root};%PYTHONPATH% && {py_interpreter} -m lambdex.fmt %* -- -b {formatter_type} -e {formatter_path}
         endlocal
         @echo on
         '''
@@ -29,7 +29,7 @@ else:
         else
             export PYTHONPATH={lambdex_root}:$PYTHONPATH
         fi
-        {py_interpreter} -m lambdex.fmt $@ -- -a {formatter_type} -e {formatter_path}
+        {py_interpreter} -m lambdex.fmt $@ -- -b {formatter_type} -e {formatter_path}
         '''
 
 
@@ -89,12 +89,20 @@ def _whereis(command: str):
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('CMD')
-    parser.add_argument('-r', '--reset', action='store_true')
+    parser = argparse.ArgumentParser('lxfmt-mock', description='Mock or reset specified formater backend')
+    parser.add_argument(
+        'BACKEND',
+        help='The backend to be mocked/reset',
+    )
+    parser.add_argument(
+        '-r',
+        '--reset',
+        action='store_true',
+        help='If specified, the selected command will be reset',
+    )
     opts = parser.parse_args()
 
-    command = opts.CMD
+    command = opts.BACKEND
     commands = [cmd for cmd in _whereis(command) if _is_generated_script(Path(cmd)) == opts.reset]
 
     questions = [
@@ -112,7 +120,7 @@ def main():
 
     if not opts.reset:
         backup_path = _backup_executable(path)
-        _save_script(path, _script(opts.CMD, backup_path))
+        _save_script(path, _script(opts.BACKEND, backup_path))
     else:
         _restore_executable(path)
 

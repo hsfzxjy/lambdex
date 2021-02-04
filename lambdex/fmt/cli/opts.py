@@ -27,7 +27,19 @@ def split_argv():
 
 
 def build_parser():
-    parser = argparse.ArgumentParser('Formatter for lambdex code')
-    parser.add_argument('-a', '--adapter', default='yapf')
-    parser.add_argument('-e', '--executable')
+    parser = argparse.ArgumentParser('lxfmt [ARGS OF BACKEND] --', description='Lambdex formatter as a post-processor for specific backend')
+    parser.add_argument(
+        '-b',
+        '--backend',
+        metavar='BACKEND',
+        dest='adapter',
+        default='dummy',
+        choices=list(adapters.mapping),
+        help='name of formatter backend (default: dummy)',
+    )
+    parser.add_argument(
+        '-e',
+        '--executable',
+        help='executable of backend',
+    )
     return parser
