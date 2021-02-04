@@ -113,7 +113,7 @@ def main():
         ),
     ]
 
-    answers = inquirer.prompt(questions)
+    answers = inquirer.prompt(questions, theme=inquirer.themes.GreenPassion())
     if answers is None:
         return
     path = Path(answers['path'])
