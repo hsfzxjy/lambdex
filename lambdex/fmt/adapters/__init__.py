@@ -1,10 +1,10 @@
 import typing
-from typing import Dict
+from typing import Mapping
 
 from ._bases import BaseAdapter
 from .yapf import YapfAdapter
 
-mapping: Dict[str, BaseAdapter] = {
+mapping: Mapping[str, BaseAdapter] = {
     'yapf': YapfAdapter,
 }
 

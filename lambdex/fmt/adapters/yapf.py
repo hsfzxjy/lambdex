@@ -1,6 +1,4 @@
 import os
-import typing
-import importlib
 
 from ._bases import BaseAdapter
 from ..config import Config

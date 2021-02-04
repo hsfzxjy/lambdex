@@ -1,10 +1,9 @@
+from typing import Sequence, List
+
 import abc
-from typing import Sequence, Generator, List
 
 from .definitions import TokenInfo, actions
 from ..utils.logger import getLogger, IS_DEBUG
-
-TokenInfoGenerator = Generator[TokenInfo, None, None]
 
 
 class _StreamBase(abc.ABC):
@@ -40,14 +39,14 @@ class _StreamBase(abc.ABC):
             yield from self._handle_action(token, self.action)
 
     @abc.abstractmethod
-    def _handle_token(self, token: TokenInfo) -> actions.BaseAction:
+    def _handle_token(self, token: TokenInfo):
         pass
 
     def _update_last_token(self, token: TokenInfo):
         if token.annotation is not None:
             self.last_token = token
 
-    def _handle_action(self, token: TokenInfo, action: actions.BaseAction) -> TokenInfoGenerator:
+    def _handle_action(self, token: TokenInfo, action: actions.BaseAction) -> Sequence[TokenInfo]:
 
         if actions.Default.is_class_of(action):
             yield from self._handle_default(token)

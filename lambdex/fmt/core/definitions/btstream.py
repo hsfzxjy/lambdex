@@ -2,9 +2,9 @@ import dataclasses
 from collections import deque
 from typing import List, Sequence, Optional
 
-from .token_info import TokenInfo
-
 from ...utils.logger import getLogger
+
+from .token_info import TokenInfo
 
 logger = getLogger(__name__)
 
