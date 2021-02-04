@@ -70,10 +70,36 @@ START_TOKENS = frozenset(x.pattern[0] for x in COLLECT_FORWARD + COLLECT_BACKWAR
 
 class CollectComments(_StreamWithLog):
     def _split_buffer(self):
-        return (
-            (x for x in self.buffer if x.is_NL_CMT),
-            (x for x in self.buffer if not x.is_NL_CMT),
-        )
+        comments, others = [], []
+        # for idx,token in self.buffer:
+
+        iterator = iter(self.buffer)
+
+        def _next():
+            try:
+                return next(iterator)
+            except StopIteration:
+                return TokenInfo.fake
+
+        while True:
+            token = _next()
+            if token is TokenInfo.fake:
+                break
+
+            if token.is_CMT:
+                comments.append(token)
+                token = _next()
+                assert token.is_NL
+                comments.append(token)
+            else:
+                others.append(token)
+
+        return comments, others
+
+        # return (
+        #     (x for x in self.buffer if x.is_CMT),
+        #     (x for x in self.buffer if not x.is_CMT),
+        # )
 
     def _handle_token(self, token):
         if token.annotation is None: return
