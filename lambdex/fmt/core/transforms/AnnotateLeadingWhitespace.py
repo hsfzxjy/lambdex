@@ -1,8 +1,8 @@
 from ..definitions import tk, A, TokenInfo, actions
-from .._stream_base import _StreamBase
+from .._stream_base import _StreamWithLog
 
 
-class AnnotateLeadingWhitespace(_StreamBase):
+class AnnotateLeadingWhitespace(_StreamWithLog):
     def _init(self):
         self.newlined = False
         self.last_leading_whitespace = ''
