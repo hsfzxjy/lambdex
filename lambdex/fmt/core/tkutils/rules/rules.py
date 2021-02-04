@@ -92,6 +92,9 @@ def r(ctx: Context, token: TokenInfo):
 
 @m(exact_type=tk.COMMA, last_state=State.IN_LBDX_BODY_LIST)
 def r(ctx: Context, token: TokenInfo):
+    if ctx.last_op[0].annotation not in (A.BODY_LSQB, A.CLS_BODY_LSQB):
+        return
+
     sentinel = TokenInfo.new_sentinel_before(token, A.STMT_END)
     ctx.push_ret(sentinel)
 
