@@ -17,7 +17,7 @@ class TestAST(unittest.TestCase):
     def assert_ast_like(self, f, target):
         ast_f = f.__ast__
         recursively_set_attr(ast_f, 'type_comment', None)
-        ast_target = ast_from_source(target)
+        ast_target = ast_from_source(target, 'def')
         ast_target.name = ast_f.name
 
         try:
