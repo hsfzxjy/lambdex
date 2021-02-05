@@ -237,8 +237,10 @@ def r_try(node: ast.Subscript, ctx: Context, clauses: list):
             assert not orelse_body and not final_body
 
             if clause.no_head():
+                # bare except
                 type_ = name = None
             else:
+                # except with capturing
                 assert clause.single_head()
                 type_, name = check_as(clause.unwrap_head(), ast.Gt, rhs_is_identifier=True)
 

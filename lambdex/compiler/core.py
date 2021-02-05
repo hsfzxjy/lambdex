@@ -12,11 +12,16 @@ from lambdex.utils.ast import pformat, empty_arguments, None_node
 
 __all__ = ['compile_lambdex']
 
+# This flag is used internally. when turned on:
+#  - compiled lambdex will have attribute `__ast__`
+#  - verbose message are printed when error occurs during compiling
 __DEBUG__ = False
 
 
 def compile_node(node, ctx, *, flag=ContextFlag.should_be_expr):
-
+    """
+    Compile an AST node `node` to transpile lambdex syntax to Python lambdex.
+    """
     if node is None:
         return None
 
@@ -27,13 +32,16 @@ def compile_node(node, ctx, *, flag=ContextFlag.should_be_expr):
     if rule is not None:
         return rule(node, ctx, *extra_args)
 
+    # If no rule found, recursively compile children of `node`
     for field, old_value in ast.iter_fields(node):
         if isinstance(old_value, list):
             new_values = []
             for value in old_value:
                 if isinstance(value, ast.AST):
                     value = compile_node(value, ctx)
+
                     if value is None:
+                        # Discard from `new_values`
                         continue
                     elif not isinstance(value, ast.AST):
                         new_values.extend(value)
@@ -51,14 +59,22 @@ def compile_node(node, ctx, *, flag=ContextFlag.should_be_expr):
 
 
 def _wrap_code_object(code_obj, lambda_func, lambdex_ast_node):
+    """
+    Construct a function using `code_obj`.
+
+    To ensure the two functions have same context, the returned function
+    copies `__globals__`, `__defaults__`, `__closure__` from `lambda_func`,
+    with code object whose `co_freevars` copied from
+    `lambda_func.__code__.co_freevars`.
+    """
     code_obj = code_obj.replace(co_freevars=lambda_func.__code__.co_freevars)
 
     ret = types.FunctionType(
-        code_obj,
-        lambda_func.__globals__,
-        code_obj.co_name,
-        lambda_func.__defaults__,
-        lambda_func.__closure__,
+        code=code_obj,
+        globals=lambda_func.__globals__,
+        name=code_obj.co_name,
+        argdefs=lambda_func.__defaults__,
+        closure=lambda_func.__closure__,
     )
 
     if __DEBUG__:
@@ -68,10 +84,19 @@ def _wrap_code_object(code_obj, lambda_func, lambdex_ast_node):
 
 
 def compile_lambdex(declarer):
+    """
+    Compile a lambda object given by `declarer` into a function.
+
+    Multiple calls with a same declarer yield functions with same code object,
+    whilst there closure and globals may be different.
+    """
+    # If cache hit, simply update metadata and return
     cached_value = cache.get(declarer)
     if cached_value is not None:
         code_obj, lambdex_ast_node = cached_value
         return _wrap_code_object(code_obj, declarer.func, lambdex_ast_node)
+
+    # Otherwise, we have to compile from scratch
 
     lambda_ast = declarer.get_ast()
     lambda_func = declarer.func
@@ -86,8 +111,13 @@ def compile_lambdex(declarer):
         flag=ContextFlag.outermost_lambdex,
     )
 
-    freevars = lambda_func.__code__.co_freevars
+    freevars = lambda_func.__code__.co_freevars  # name of nonlocal variables
     if freevars:
+        # A name in `lambdex_node` should be compiled as nonlocal instead of
+        # global (default) if it appears in `freevars`.
+        #
+        # This is done by wrapping `lambdex_node` in another FunctionDef, and
+        # let names in `freevars` become local variables in the wrapper.
         wrapper_name = context.select_name_and_use('wrapper')
         wrapper_node = ast.FunctionDef(
             name=wrapper_name,
@@ -122,8 +152,12 @@ def compile_lambdex(declarer):
         module_code = compile(module_node, '<lambdex>', 'exec')
 
     if freevars:
+        # unwrap the outer FunctionDef.
+        # since no other definition in the module, it should be co_consts[0]
         module_code = module_code.co_consts[0]
 
+    # the desired code object should be in `module_code.co_consts`
+    # we use `.co_name` to identify
     for obj in module_code.co_consts:
         if inspect.iscode(obj) and obj.co_name == lambdex_node.name:
             lambdex_code = obj

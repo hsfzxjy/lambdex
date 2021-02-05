@@ -8,10 +8,14 @@ __all__ = ['lambda_to_ast']
 
 
 def _shallow_match_ast(node, is_matched_fn):
+    """
+    Yields all children of `node` that fulfill `is_matched_fn` in a shallow manner.
+    """
     if is_matched_fn(node):
         yield node
         return
 
+    # Adapted from `ast.walk`
     for field, value in ast.iter_fields(node):
         if isinstance(value, list):
             for item in value:
@@ -22,11 +26,17 @@ def _shallow_match_ast(node, is_matched_fn):
 
 
 def _make_pattern(keyword: str, identifier: str):
+    """
+    Returns a function that matches a node of form `<keyword>.<identifier>(...)`
+    or `<keyword>(...)` if `identifier` is empty.
+    """
     def _pattern(node: ast.AST) -> bool:
         if node.__class__ is not ast.Call:
             return False
 
-        declarer = node.func
+        declarer = node.func  # ast.Call
+
+        # Use xx.__class__ is XX to improve efficiency
         if not identifier:
             return declarer.__class__ is ast.Name and keyword == declarer.id
         else:
@@ -41,9 +51,13 @@ def _make_pattern(keyword: str, identifier: str):
 
 
 def lambda_to_ast(lambda_object: typing.Callable, *, keyword: str, identifier: str = ''):
+    """
+    Returns the AST of `lambda_object`.
+    """
     tree = ast_from_source(lambda_object, keyword)
     if isinstance(tree, ast.Expr) and isinstance(tree.value, ast.Lambda):
         return tree.value
+
     pattern = _make_pattern(keyword, identifier)
     matched = list(_shallow_match_ast(tree, pattern))
 
