@@ -15,7 +15,7 @@ Dispatcher = FunctionRegistry('Dispatcher').set_default(lambda *_: EMPTY_RULE)
 @Dispatcher.register(ast.Lambda)
 def disp_Lambda(node: ast.Lambda, flag: ContextFlag):
     if flag != ContextFlag.outermost_lambdex:
-        return EMPTY_RULE
+        return RuleMeta(ast.Lambda, ())
 
     return RuleMeta((ast.Lambda, flag), ())
 
@@ -50,6 +50,7 @@ def disp_Name(node: ast.Name, flag: ContextFlag):
             'pass_': ast.Pass,
             'yield_': ast.Yield,
             'raise_': ast.Raise,
+            'return_': ast.Return,
         }
 
     rule_type = mapping.get(node.id)

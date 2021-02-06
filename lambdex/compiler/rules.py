@@ -61,6 +61,12 @@ def r_lambda(node: ast.Lambda, ctx: Context):
     return new_function
 
 
+@Rules.register(ast.Lambda)
+def r_simple_lambda(node: ast.Call, ctx: Context):
+    # For ordinary lambda, simply return it to early stop recursion
+    return node
+
+
 @Rules.register((ast.FunctionDef, ContextFlag.outermost_lambdex))
 def r_def(node: ast.Call, ctx: Context):
     check(node.args[0], ast.Lambda)
