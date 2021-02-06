@@ -17,10 +17,11 @@ def _get_requirements():
 
 with codecs.open("README.md", "r", "utf-8") as fd:
     setup(
-        name="lambdex",
+        name="pylambdex",
         version=lambdex.__version__,
         description="A library to write multi-line anonymous functions.",
         long_description=fd.read(),
+        long_description_content_type='text/markdown',
         license="GPL-3.0 License",
         author="Jingyi Xie (hsfzxjy)",
         author_email="hsfzxjy@gmail.com",
