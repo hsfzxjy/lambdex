@@ -19,8 +19,9 @@ class Reindent(_StreamWithLog):
     SPACES_PER_TAB = 4
 
     def _init(self):
-        self.orig_indent_str = None
-        self.spaced_indent_str = None
+        self.indent_initialized = False
+        self.orig_indent_str = '    '
+        self.spaced_indent_str = '    '
 
         self.str_newline = None
 
@@ -35,7 +36,8 @@ class Reindent(_StreamWithLog):
         return string.replace(self.spaced_indent_str, self.orig_indent_str)
 
     def _store_constant(self, token: TokenInfo):
-        if token.type == tk.INDENT and self.spaced_indent_str is None:
+        if token.type == tk.INDENT and not self.indent_initialized:
+            self.indent_initialized = True
             self.orig_indent_str = token.string
             self.spaced_indent_str = self._to_spaced(token.string)
         elif token.is_NL and self.str_newline is None:
