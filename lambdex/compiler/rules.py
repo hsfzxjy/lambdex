@@ -29,6 +29,7 @@ def _compile_stmts(ctx: Context, stmts):
         compiled_statement = ctx.compile(statement, flag=ContextFlag.should_be_stmt)
         if isinstance(compiled_statement, ast.expr):
             compiled_statement = ast.Expr(compiled_statement)
+        copy_lineinfo(statement, compiled_statement)
 
         compiled_statements.append(compiled_statement)
 
@@ -53,6 +54,7 @@ def r_lambda(node: ast.Lambda, ctx: Context):
         returns=None,
         type_comment=None,
     )
+    copy_lineinfo(node, new_function)
 
     ctx.pop_frame()
 
@@ -80,7 +82,10 @@ def r_return(node: ast.Subscript, ctx: Context, clauses: list):
     clause = clauses[0]
     assert clause.no_head()
 
-    return ast.Return(value=ctx.compile(clause.try_tuple_body()))
+    return copy_lineinfo(
+        node,
+        ast.Return(value=ctx.compile(clause.try_tuple_body())),
+    )
 
 
 @Rules.register(ast.If)
@@ -107,6 +112,7 @@ def r_if(node: ast.Subscript, ctx: Context, clauses: list):
             body=_compile_stmts(ctx, clause.body),
             orelse=prev_orelse,
         )
+        copy_lineinfo(clause.node, curr_node)
         prev_orelse = [curr_node]
 
     return curr_node
@@ -129,11 +135,14 @@ def r_for(node: ast.Subscript, ctx: Context, clauses: list):
     else:
         else_stmts = []
 
-    return ast.For(
-        target=target,
-        iter=ctx.compile(iter_item),
-        body=_compile_stmts(ctx, clauses[0].body),
-        orelse=else_stmts,
+    return copy_lineinfo(
+        node,
+        ast.For(
+            target=target,
+            iter=ctx.compile(iter_item),
+            body=_compile_stmts(ctx, clauses[0].body),
+            orelse=else_stmts,
+        ),
     )
 
 
@@ -150,10 +159,13 @@ def r_while(node: ast.Subscript, ctx: Context, clauses: list):
     else:
         else_stmts = []
 
-    return ast.While(
-        test=ctx.compile(clauses[0].unwrap_head()),
-        body=_compile_stmts(ctx, clauses[0].body),
-        orelse=else_stmts,
+    return copy_lineinfo(
+        node,
+        ast.While(
+            test=ctx.compile(clauses[0].unwrap_head()),
+            body=_compile_stmts(ctx, clauses[0].body),
+            orelse=else_stmts,
+        ),
     )
 
 
@@ -165,21 +177,27 @@ def r_assign(node: ast.Compare, ctx: Context):
         assert is_lvalue(target)
         cast_to_lvalue(target)
 
-    return ast.Assign(
-        targets=targets,
-        value=ctx.compile(value),
+    return copy_lineinfo(
+        node,
+        ast.Assign(
+            targets=targets,
+            value=ctx.compile(value),
+        ),
     )
 
 
 @Rules.register('single_keyword_stmt')
 def r_single_keyword_stmt(node: ast.Name, ctx: Context, rule_type):
     if rule_type == ast.Yield:
-        return ast.Yield(value=None)
+        new_node = ast.Yield(value=None)
 
-    if rule_type == ast.Raise:
-        return ast.Raise(exc=None, cause=None)
+    elif rule_type == ast.Raise:
+        new_node = ast.Raise(exc=None, cause=None)
 
-    return rule_type()
+    else:
+        new_node = rule_type()
+
+    return copy_lineinfo(node, new_node)
 
 
 @Rules.register(ast.With)
@@ -192,14 +210,18 @@ def r_with(node: ast.Subscript, ctx: Context, clauses: list):
     items = []
     for arg in with_clause.head:
         context_expr, var = check_as(arg, ast.Gt)
-        items.append(ast.withitem(
+        item = ast.withitem(
             context_expr=ctx.compile(context_expr),
             optional_vars=var,
-        ))
+        )
+        items.append(copy_lineinfo(arg, item))
 
-    return ast.With(
-        items=items,
-        body=_compile_stmts(ctx, with_clause.body),
+    return copy_lineinfo(
+        node,
+        ast.With(
+            items=items,
+            body=_compile_stmts(ctx, with_clause.body),
+        ),
     )
 
 
@@ -217,9 +239,12 @@ def r_raise(node: ast.Subscript, ctx: Context, clauses: list):
         assert from_clause.name == 'from_' and from_clause.no_head() and from_clause.single_body()
         cause = ctx.compile(from_clause.unwrap_body())
 
-    return ast.Raise(
-        exc=exc,
-        cause=cause,
+    return copy_lineinfo(
+        node,
+        ast.Raise(
+            exc=exc,
+            cause=cause,
+        ),
     )
 
 
@@ -244,11 +269,12 @@ def r_try(node: ast.Subscript, ctx: Context, clauses: list):
                 assert clause.single_head()
                 type_, name = check_as(clause.unwrap_head(), ast.Gt, rhs_is_identifier=True)
 
-            handlers.append(ast.ExceptHandler(
+            handler = ast.ExceptHandler(
                 type=ctx.compile(type_),
                 name=name,
                 body=_compile_stmts(ctx, clause.body),
-            ))
+            )
+            handlers.append(copy_lineinfo(clause.node, handler))
         elif clause.name == 'else_':
             assert not orelse_body and not final_body
             assert clause.no_head()
@@ -257,11 +283,14 @@ def r_try(node: ast.Subscript, ctx: Context, clauses: list):
             assert not final_body
             final_body.extend(_compile_stmts(ctx, clause.body))
 
-    return ast.Try(
-        body=try_body,
-        handlers=handlers,
-        orelse=orelse_body,
-        finalbody=final_body,
+    return copy_lineinfo(
+        node,
+        ast.Try(
+            body=try_body,
+            handlers=handlers,
+            orelse=orelse_body,
+            finalbody=final_body,
+        ),
     )
 
 
@@ -272,7 +301,10 @@ def r_yield(node: ast.Subscript, ctx: Context, clauses: list, rule_id):
     clause = clauses[0]
     assert clause.no_head()
 
-    return rule_id(value=ctx.compile(clause.try_tuple_body()))
+    return copy_lineinfo(
+        node,
+        rule_id(value=ctx.compile(clause.try_tuple_body())),
+    )
 
 
 @Rules.register(ast.Global)
@@ -286,4 +318,7 @@ def r_scoping(node: ast.Subscript, ctx: Context, clauses: list, rule_id):
     assert all(isinstance(name, ast.Name) for name in names)
     names = [name.id for name in names]
 
-    return rule_id(names=names)
+    return copy_lineinfo(
+        node,
+        rule_id(names=names),
+    )

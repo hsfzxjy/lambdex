@@ -145,11 +145,11 @@ def compile_lambdex(declarer):
 
     if __DEBUG__:
         try:
-            module_code = compile(module_node, '<lambdex>', 'exec')
+            module_code = compile(module_node, lambda_func.__code__.co_filename, 'exec')
         except Exception as e:
             raise SyntaxError(pformat(module_node)) from e
     else:
-        module_code = compile(module_node, '<lambdex>', 'exec')
+        module_code = compile(module_node, lambda_func.__code__.co_filename, 'exec')
 
     if freevars:
         # unwrap the outer FunctionDef.
