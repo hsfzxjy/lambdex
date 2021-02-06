@@ -2,6 +2,9 @@ import enum
 import random
 from functools import partial
 
+from . import error
+from ..utils.ast import is_lvalue
+
 __all__ = ['Context', 'ContextFlag']
 
 
@@ -30,23 +33,31 @@ class Frame:
         self.detached_functions = []
 
 
+EM_HEAD_FOUND = 'expect only one group of []'
+EM_HEAD_MISSING = 'expect another group of []'
+EM_TOO_MANY_ITEMS = 'expect only one item inside []'
+EM_UNEXPECTED_CLAUSE = 'unexpected clause'
+EM_NOT_LVALUE = 'cannot be assigned'
+
+
 class Context:
     """
     A `Context` object is passed among rules for sharing global informations.
 
     Attributes:
-    - `compile`: a shorthand for `compile_node(..., ctx)`
+    - `compile`: a shorthand for `compile_node(..., self)`
     - `globals`: a dict containing globalvars of currently compiling lambdex
     - `used_names`: a set containing currently occupied names
     - `frames`: current `Frame` stack
     """
-    __slots__ = ['compile', 'globals', 'used_names', 'frames']
+    __slots__ = ['compile', 'globals', 'used_names', 'frames', 'filename']
 
-    def __init__(self, compile_fn, globals_dict):
+    def __init__(self, compile_fn, globals_dict, filename):
         self.compile = partial(compile_fn, ctx=self)
         self.globals = globals_dict
         self.used_names = set(globals_dict)
         self.frames = []
+        self.filename = filename
 
     def select_name(self, prefix):
         """
@@ -87,3 +98,38 @@ class Context:
         The top-most `Frame` instance on the stack.
         """
         return self.frames[-1]
+
+    # Below are helper functions for compile-time assertion
+
+    def assert_(self, cond: bool, msg: str, node):
+        error.assert_(cond, msg, node, self.filename)
+
+    def assert_is_instance(self, node, type_: type, msg=None):
+        if msg is None:
+            msg = 'expect a(n) {} here'.format(type_.__name__.lower())
+
+        self.assert_(isinstance(node, type_), msg, node)
+
+    def assert_single_head(self, clause):
+        self.assert_(clause.single_head(), EM_TOO_MANY_ITEMS, lambda: clause.head[1])
+
+    def assert_single_body(self, clause):
+        self.assert_(clause.single_body(), EM_TOO_MANY_ITEMS, lambda: clause.body[1])
+
+    def assert_clause_num_at_most(self, clauses, num: int):
+        self.assert_(len(clauses) <= num, EM_UNEXPECTED_CLAUSE, lambda: clauses[num].node)
+
+    def assert_no_head(self, clause):
+        self.assert_(clause.no_head(), EM_HEAD_FOUND, lambda: clause.node)
+
+    def assert_head(self, clause):
+        self.assert_(clause.head, EM_HEAD_MISSING, lambda: clause.node)
+
+    def assert_name_equals(self, clause, name: str):
+        self.assert_(clause.name == name, 'expect ' + name, clause.node)
+
+    def assert_name_in(self, clause, names):
+        self.assert_(clause.name in names, 'expect ' + ' or '.join(names), clause.node)
+
+    def assert_lvalue(self, node):
+        self.assert_(is_lvalue(node), EM_NOT_LVALUE, node)

@@ -146,7 +146,7 @@ def cast_to_lvalue(node: ast.AST):
     return node
 
 
-def check_compare(node: ast.Compare, expected_type, expected_num=None):
+def check_compare(ctx, node: ast.Compare, expected_type, expected_num=None):
     """
     Check that `node.ops` are all with type `expected_type`.  If
     `expected_num` given, also check that `node` has `expected_num`
@@ -154,14 +154,21 @@ def check_compare(node: ast.Compare, expected_type, expected_num=None):
 
     Return a tuple of all operands of `node`.
     """
-    assert all(isinstance(n, expected_type) for n in node.ops)
+    op_name = repr(expected_type.__name__)
+    for op in node.ops:
+        ctx.assert_(isinstance(op, expected_type), 'expect ' + op_name, op)
+
     if expected_num is not None:
-        assert expected_num == len(node.ops) + 1
+        ctx.assert_(
+            expected_num == len(node.ops) + 1,
+            'unexpected ' + op_name,
+            lambda: node.ops[expected_num],
+        )
 
     return (node.left, *node.comparators)
 
 
-def check_as(node: ast.expr, as_op, *, rhs_is_identifier=False):
+def check_as(ctx, node: ast.expr, as_op, *, rhs_is_identifier=False):
     """
     Check that `node` has pattern `lhs > rhs`.  Return `(lhs, rhs)`
     if matched, otherwise `(any, None)`.
@@ -171,13 +178,13 @@ def check_as(node: ast.expr, as_op, *, rhs_is_identifier=False):
     if not isinstance(node, ast.Compare):
         return node, None
 
-    lhs, rhs = check_compare(node, as_op, 2)
+    lhs, rhs = check_compare(ctx, node, as_op, 2)
 
     if rhs_is_identifier:
-        assert isinstance(rhs, ast.Name)
+        ctx.assert_is_instance(rhs, ast.Name, 'expect identifier')
         return lhs, rhs.id
     else:
-        assert is_lvalue(rhs)
+        ctx.assert_lvalue(rhs)
         return lhs, cast_to_lvalue(rhs)
 
 

@@ -3,6 +3,7 @@ import typing
 import inspect
 
 from lambdex.utils.ast import ast_from_source
+from lambdex.compiler import error
 
 __all__ = ['lambda_to_ast']
 
@@ -62,10 +63,16 @@ def lambda_to_ast(lambda_object: typing.Callable, *, keyword: str, identifier: s
     matched = list(_shallow_match_ast(tree, pattern))
 
     if not len(matched):
-        raise SyntaxError('Cannot parse lambda for unknown reason')
+        raise SyntaxError('cannot parse lambda for unknown reason')
 
     if len(matched) > 1:
-        raise SyntaxError('Ambiguious identifier {!r}'.format(identifier))
+        decl = keyword if not identifier else keyword + '.' + identifier
+        error.assert_(
+            len(matched) == 1,
+            'ambiguious declaration {!r}'.format(decl),
+            matched[0],
+            lambda_object.__code__.co_filename,
+        )
 
     assert isinstance(matched[0], ast.Call)
 

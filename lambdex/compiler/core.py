@@ -104,6 +104,7 @@ def compile_lambdex(declarer):
     context = Context(
         compile_node,
         lambda_func.__globals__,
+        lambda_func.__code__.co_filename,
     )
     lambdex_node = compile_node(
         lambda_ast,

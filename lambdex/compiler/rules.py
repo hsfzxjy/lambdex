@@ -38,11 +38,13 @@ def _compile_stmts(ctx: Context, stmts):
 
 @Rules.register((ast.Lambda, ContextFlag.outermost_lambdex))
 def r_lambda(node: ast.Lambda, ctx: Context):
-    check(node.body, ast.List)
+    ctx.assert_is_instance(node.body, ast.List, 'expect [')
+
     statements: ast.List = node.body
 
     ctx.push_frame()
 
+    ctx.assert_(statements.elts, 'empty body', statements)
     compiled_statements = _compile_stmts(ctx, statements.elts)
     detached_functions = ctx.frame.detached_functions
 
@@ -69,7 +71,8 @@ def r_simple_lambda(node: ast.Call, ctx: Context):
 
 @Rules.register((ast.FunctionDef, ContextFlag.outermost_lambdex))
 def r_def(node: ast.Call, ctx: Context):
-    check(node.args[0], ast.Lambda)
+    ctx.assert_(node.args, 'expect lambda in ()', node.func)
+    ctx.assert_is_instance(node.args[0], ast.Lambda, 'expect lambda')
     return r_lambda(node.args[0], ctx)
 
 
@@ -84,9 +87,9 @@ def r_inner_def(node: ast.Call, ctx: Context):
 
 @Rules.register(ast.Return)
 def r_return(node: ast.Subscript, ctx: Context, clauses: list):
-    assert clauses.single()
+    ctx.assert_clause_num_at_most(clauses, 1)
     clause = clauses[0]
-    assert clause.no_head()
+    ctx.assert_no_head(clause)
 
     return copy_lineinfo(
         node,
@@ -96,14 +99,22 @@ def r_return(node: ast.Subscript, ctx: Context, clauses: list):
 
 @Rules.register(ast.If)
 def r_if(node: ast.Subscript, ctx: Context, clauses: list):
-    assert clauses[0].name == 'if_' and clauses[0].single_head()
+    ctx.assert_head(clauses[0])
+    ctx.assert_single_head(clauses[0])
+
     for clause in clauses[1:-1]:
-        assert clause.name == 'elif_'
-        assert clause.single_head()
+        ctx.assert_name_equals(clause, 'elif_')
+        ctx.assert_head(clause)
+        ctx.assert_single_head(clause)
+
     if not clauses.single():
-        assert clauses[-1].name in ('else_', 'elif_')
-        if clauses[-1].name == 'else_':
-            assert clauses[-1].no_head()
+        clause = clauses[-1]
+        ctx.assert_name_in(clause, ('else_', 'elif_'))
+        if clause.name == 'else_':
+            ctx.assert_no_head(clause)
+        else:
+            ctx.assert_head(clause)
+            ctx.assert_single_head(clause)
 
     curr_node = None
     prev_orelse = []
@@ -126,14 +137,16 @@ def r_if(node: ast.Subscript, ctx: Context, clauses: list):
 
 @Rules.register(ast.For)
 def r_for(node: ast.Subscript, ctx: Context, clauses: list):
-    assert len(clauses) <= 2
+    ctx.assert_clause_num_at_most(clauses, 2)
 
-    assert clauses[0].name == 'for_' and clauses[0].single_head()
+    ctx.assert_head(clauses[0])
+    ctx.assert_single_head(clauses[0])
     if len(clauses) == 2:
-        assert clauses[1].name == 'else_' and clauses[1].no_head()
+        ctx.assert_name_equals(clauses[1], 'else_')
+        ctx.assert_no_head(clauses[1])
 
-    target, iter_item = check_compare(clauses[0].unwrap_head(), ast.In, 2)
-    assert is_lvalue(target)
+    target, iter_item = check_compare(ctx, clauses[0].unwrap_head(), ast.In, 2)
+    ctx.assert_lvalue(target)
     target.ctx = ast.Store()
 
     if len(clauses) == 2:
@@ -154,11 +167,13 @@ def r_for(node: ast.Subscript, ctx: Context, clauses: list):
 
 @Rules.register(ast.While)
 def r_while(node: ast.Subscript, ctx: Context, clauses: list):
-    assert len(clauses) <= 2
+    ctx.assert_clause_num_at_most(clauses, 2)
 
-    assert clauses[0].name == 'while_' and clauses[0].single_head()
+    ctx.assert_head(clauses[0])
+    ctx.assert_single_head(clauses[0])
     if len(clauses) == 2:
-        assert clauses[1].name == 'else_' and clauses[1].no_head()
+        ctx.assert_name_equals(clauses[1], 'else_')
+        ctx.assert_no_head(clauses[1])
 
     if len(clauses) == 2:
         else_stmts = _compile_stmts(ctx, clauses[1].body)
@@ -177,10 +192,10 @@ def r_while(node: ast.Subscript, ctx: Context, clauses: list):
 
 @Rules.register(ast.Assign)
 def r_assign(node: ast.Compare, ctx: Context):
-    *targets, value = check_compare(node, ast.Lt)
+    *targets, value = check_compare(ctx, node, ast.Lt)
 
     for target in targets:
-        assert is_lvalue(target)
+        ctx.assert_lvalue(target)
         cast_to_lvalue(target)
 
     return copy_lineinfo(
@@ -208,14 +223,14 @@ def r_single_keyword_stmt(node: ast.Name, ctx: Context, rule_type):
 
 @Rules.register(ast.With)
 def r_with(node: ast.Subscript, ctx: Context, clauses: list):
-    assert clauses.single()
-    with_clause = clauses[0]
+    ctx.assert_clause_num_at_most(clauses, 1)
 
-    assert not with_clause.no_head()
+    with_clause = clauses[0]
+    ctx.assert_head(with_clause)
 
     items = []
     for arg in with_clause.head:
-        context_expr, var = check_as(arg, ast.Gt)
+        context_expr, var = check_as(ctx, arg, ast.Gt)
         item = ast.withitem(
             context_expr=ctx.compile(context_expr),
             optional_vars=var,
@@ -233,16 +248,19 @@ def r_with(node: ast.Subscript, ctx: Context, clauses: list):
 
 @Rules.register(ast.Raise)
 def r_raise(node: ast.Subscript, ctx: Context, clauses: list):
-    assert len(clauses) <= 2
+    ctx.assert_clause_num_at_most(clauses, 2)
 
     raise_clause = clauses[0]
-    assert raise_clause.no_head() and raise_clause.single_body()
+    ctx.assert_no_head(raise_clause)
+    ctx.assert_single_body(raise_clause)
     exc = ctx.compile(raise_clause.unwrap_body())
 
     cause = None
     if len(clauses) == 2:
         from_clause = clauses[1]
-        assert from_clause.name == 'from_' and from_clause.no_head() and from_clause.single_body()
+        ctx.assert_name_equals(from_clause, 'from_')
+        ctx.assert_no_head(from_clause)
+        ctx.assert_single_body(from_clause)
         cause = ctx.compile(from_clause.unwrap_body())
 
     return copy_lineinfo(
@@ -257,7 +275,7 @@ def r_raise(node: ast.Subscript, ctx: Context, clauses: list):
 @Rules.register(ast.Try)
 def r_try(node: ast.Subscript, ctx: Context, clauses: list):
     try_clause = clauses[0]
-    assert try_clause.no_head()
+    ctx.assert_no_head(try_clause)
     try_body = _compile_stmts(ctx, try_clause.body)
 
     handlers = []
@@ -265,15 +283,19 @@ def r_try(node: ast.Subscript, ctx: Context, clauses: list):
     final_body = []
     for clause in clauses[1:]:
         if clause.name == 'except_':
-            assert not orelse_body and not final_body
+            ctx.assert_(
+                not orelse_body and not final_body,
+                'unexpected "expect_"',
+                node,
+            )
 
             if clause.no_head():
                 # bare except
                 type_ = name = None
             else:
                 # except with capturing
-                assert clause.single_head()
-                type_, name = check_as(clause.unwrap_head(), ast.Gt, rhs_is_identifier=True)
+                ctx.assert_single_head(clause)
+                type_, name = check_as(ctx, clause.unwrap_head(), ast.Gt, rhs_is_identifier=True)
 
             handler = ast.ExceptHandler(
                 type=ctx.compile(type_),
@@ -282,12 +304,18 @@ def r_try(node: ast.Subscript, ctx: Context, clauses: list):
             )
             handlers.append(copy_lineinfo(clause.node, handler))
         elif clause.name == 'else_':
-            assert not orelse_body and not final_body
-            assert clause.no_head()
+            ctx.assert_(not orelse_body and not final_body, 'unexpected_ "else_"', node)
+            ctx.assert_no_head(clause)
             orelse_body.extend(_compile_stmts(ctx, clause.body))
         elif clause.name == 'finally_':
-            assert not final_body
+            ctx.assert_(not final_body, 'unexpected_ "finally_"', node)
             final_body.extend(_compile_stmts(ctx, clause.body))
+
+    ctx.assert_(
+        handlers or final_body,
+        'try_ has neither expect_ clause(s) or finally_ clause',
+        node,
+    )
 
     return copy_lineinfo(
         node,
@@ -303,9 +331,9 @@ def r_try(node: ast.Subscript, ctx: Context, clauses: list):
 @Rules.register(ast.Yield)
 @Rules.register(ast.YieldFrom)
 def r_yield(node: ast.Subscript, ctx: Context, clauses: list, rule_id):
-    assert clauses.single()
+    ctx.assert_clause_num_at_most(clauses, 1)
     clause = clauses[0]
-    assert clause.no_head()
+    ctx.assert_no_head(clause)
 
     return copy_lineinfo(
         node,
@@ -316,12 +344,13 @@ def r_yield(node: ast.Subscript, ctx: Context, clauses: list, rule_id):
 @Rules.register(ast.Global)
 @Rules.register(ast.Nonlocal)
 def r_scoping(node: ast.Subscript, ctx: Context, clauses: list, rule_id):
-    assert clauses.single()
+    ctx.assert_clause_num_at_most(clauses, 1)
     clause = clauses[0]
-    assert clause.no_head()
+    ctx.assert_no_head(clause)
 
     names = clause.body
-    assert all(isinstance(name, ast.Name) for name in names)
+    for name in names:
+        ctx.assert_is_instance(name, ast.Name, "expect identifier")
     names = [name.id for name in names]
 
     return copy_lineinfo(
