@@ -14,6 +14,7 @@ __all__ = [
     'value_from_subscript',
     'ast_from_source',
     'recursively_set_attr',
+    'copy_lineinfo',
     'is_lvalue',
     'cast_to_lvalue',
     'check_compare',
@@ -90,7 +91,9 @@ def ast_from_source(source, keyword: str):
             lnum -= 1
 
         lines[lnum] = lines[lnum][first_keyword_loc:]
-        source = '\n'.join(inspect.getblock(lines[lnum:]))
+        # Prepend the lines with newlines, so that parsed AST will have correct lineno
+        source = '\n' * lnum + ''.join(inspect.getblock(lines[lnum:]))
+
     return ast.parse(source).body[0]
 
 
