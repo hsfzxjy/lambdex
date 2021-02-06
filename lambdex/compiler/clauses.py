@@ -117,7 +117,7 @@ def match_clauses(node: ast.Subscript) -> Clauses:
 
         # If everything is OK, we construct and store a clause
         if name is not None:
-            results.append(Clause(name, head, body))
+            results.append(Clause(node, name, head, body))
             body = head = name = None
             node = next_node
             continue
