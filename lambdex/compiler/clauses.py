@@ -95,10 +95,6 @@ def match_clauses(node: ast.Subscript) -> Clauses:
             node = node.value
             continue
 
-        if isinstance(node, ast.Call) and head is None:
-            head = node.args
-            node = node.func
-            continue
         # Otherwise, the body and head are matched.  We expect a keyword.
         # The keyword may appear as a `Name` (first clause) or `Attribute` (sub-clause)
 
