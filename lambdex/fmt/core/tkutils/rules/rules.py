@@ -60,7 +60,7 @@ def r(ctx: Context, token: TokenInfo):
 def r(ctx: Context, token: TokenInfo):
     ctx.pop_state()
     ctx.cache = None
-    return actions.StopBuffer()
+    return actions.StopBuffer(dont_consume=True)
 
 
 @m(exact_type=tk.NAME, string='lambda', last_state=State.IN_LBDX_CALL)
