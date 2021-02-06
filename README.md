@@ -33,6 +33,7 @@ Compared with ordinary lambda, which only allows single expression as body, lamb
   - [Miscellaneous](#miscellaneous)
   - [Nested lambdexes](#nested-lambdexes)
   - [Bytecode caching](#bytecode-caching)
+  - [Detailed compile-time and runtime error](#detailed-compile-time-and-runtime-error)
 - [Declaration Disambiguity](#declaration-disambiguity)
 - [Code Formatting](#code-formatting)
   - [Standalone lambdex formatter](#standalone-lambdex-formatter)
@@ -53,13 +54,17 @@ Python provides `lambda <arg>: <expr>` for such purpose. Lambdas are good for si
 
 ## Installation & Usage
 
-Currently you can install **lambdex** from Github by:
+You can install **lambdex** from PyPI by
+
+```bash
+pip install pylambdex
+```
+
+or from Github by
 
 ```bash
 pip install git+https://github.com/hsfzxjy/lambdex
 ```
-
-The package will be available on PyPI once it's stablized.
 
 To use lambdex, a simple import is required:
 
@@ -630,13 +635,69 @@ def foo():
     ])
 
 f1 = foo()
-f2 = foo()
+f2 = foo()  # will not re-compile
 f1()  # 2
 f2()  # 2
-f1.__code__ is f2.__code__  # True
 ```
 
 The feature ensures no redundant computation is done when compiling lambdexes sharing the same lexical context.
+
+### Detailed compile-time and runtime error
+
+**lambdex** well preserves information of source code such as line number or token offsets. The information are used to provide detailed messages when error occurs.
+
+For example, the following code mis-types else\_ as els\_:
+
+```python
+from lambdex import def_
+
+def_(lambda: [
+    if_[cond][
+        ...
+    ].els_[
+        ...
+    ]
+])
+```
+
+which will yield a SyntaxError at compile-time:
+
+```
+Traceback (most recent call last):
+  File "demo.py", line 3, in <module>
+    def_(lambda: [
+  --- Traceback omitted ---
+  File "demo.py", line 6
+    ].els_[
+         ^
+SyntaxError: expect else_ or elif_
+```
+
+Errors at runtime can also be located to corresponding lines. For example:
+
+```python
+from lambdex import def_
+
+def_(lambda: [
+    def_(lambda: [
+        a < 1 / 0,
+        return_[a]
+    ])()
+])()
+```
+
+will yield:
+
+```
+Traceback (most recent call last):
+  File "demo.py", line 3, in <module>
+    def_(lambda: [
+  File "demo.py", line 4, in anonymous_d598829c
+    def_(lambda: [
+  File "demo.py", line 5, in anonymous_dc2006c1
+    a < 1 / 0,
+ZeroDivisionError: division by zero
+```
 
 ## Declaration Disambiguity
 
@@ -648,7 +709,7 @@ Suppose you are running the following code:
 f1, f2 = def_(lambda a, b: [return_[a + b]]), def_(lambda a, b: [return_[a * b]])
 ```
 
-The code yields an exception `SyntaxError: Ambiguious identifier None`.
+The code yields an exception `SyntaxError: ambiguious declaration 'def_'`.
 
 What's going on here? The problem is that **there are more than one lambdexes defined on the same line**. Since CPython provides no effective way but a line number for locating a given lambda, the lambdex compiler fails to obtain the source code of the lambda in this case. A workaround is to prepend an identifier after `def_` of lambdex:
 
@@ -821,7 +882,6 @@ Lambdexes also violate linters, which is inevitable.
 
 Besides, the upcoming versions will:
 
-- improve the error message of compilation failures or runtime panics;
 - make keywords and operators customizable;
 - add style options for **lxfmt**
 
