@@ -41,6 +41,7 @@ Compared with ordinary lambda, which only allows single expression as body, lamb
   - [Mocking existing formatter executable](#mocking-existing-formatter-executable)
 - [Known Issues & Future](#known-issues--future)
 - [Q & A](#q--a)
+- [Change Log](./CHANGELOG.md)
 - [License](#license)
 </details>
 
