@@ -11,9 +11,6 @@ class Clause(namedtuple('_Clause', 'node name head body')):
         """
         return self.head is None
 
-    def no_body(self):
-        return len(self.body) == 0
-
     def single_body(self) -> bool:
         """
         Check that whether the body has only one item.
