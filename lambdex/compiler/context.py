@@ -113,10 +113,8 @@ class Context:
     def assert_(self, cond: bool, msg: str, node):
         error.assert_(cond, msg, node, self.filename)
 
-    def assert_is_instance(self, node, type_: type, msg=None):
-        if msg is None:
-            msg = 'expect a(n) {} here'.format(type_.__name__.lower())
 
+    def assert_is_instance(self, node, type_: type, msg):
         self.assert_(isinstance(node, type_), msg, node)
 
     def assert_single_head(self, clause):
