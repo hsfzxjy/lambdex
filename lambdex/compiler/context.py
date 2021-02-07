@@ -141,4 +141,5 @@ class Context:
         self.assert_(clause.name in names, 'expect ' + ' or '.join(names), clause.node)
 
     def assert_lvalue(self, node):
-        self.assert_(is_lvalue(node), EM_NOT_LVALUE, node)
+        check_result, failed_at = is_lvalue(node)
+        self.assert_(check_result, EM_NOT_LVALUE, failed_at)

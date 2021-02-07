@@ -123,9 +123,21 @@ def copy_lineinfo(src: ast.AST, dst: ast.AST):
 
 def is_lvalue(node: ast.AST) -> bool:
     """
-    Check whether `node` has field `ctx` (so that it can be used as L-value).
+    Check whether `node` can be L-value.
     """
-    return hasattr(node, 'ctx')
+    from collections import deque
+    todo = deque([node])
+    while todo:
+        n = todo.popleft()
+        if 'ctx' not in n._fields:
+            return False, n
+        if isinstance(n, (ast.List, ast.Tuple, ast.Starred)):
+            todo.extend(
+                cn for cn in ast.iter_child_nodes(n) \
+                if not isinstance(cn, ast.expr_context)
+            )
+
+    return True, None
 
 
 def cast_to_lvalue(node: ast.AST):
