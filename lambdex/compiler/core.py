@@ -9,6 +9,7 @@ from .dispatcher import Dispatcher
 from . import cache
 
 from lambdex.utils.ast import pformat, empty_arguments, None_node
+from lambdex.utils import compat
 
 __all__ = ['compile_lambdex']
 
@@ -67,7 +68,7 @@ def _wrap_code_object(code_obj, lambda_func, lambdex_ast_node):
     with code object whose `co_freevars` copied from
     `lambda_func.__code__.co_freevars`.
     """
-    code_obj = code_obj.replace(co_freevars=lambda_func.__code__.co_freevars)
+    code_obj = compat.code_replace(code_obj, co_freevars=lambda_func.__code__.co_freevars)
 
     ret = types.FunctionType(
         code=code_obj,
