@@ -192,7 +192,13 @@ def r_while(node: ast.Subscript, ctx: Context, clauses: list):
 
 @Rules.register(ast.Assign)
 def r_assign(node: ast.Compare, ctx: Context):
-    *targets, value = check_compare(ctx, node, ast.Lt)
+    try:
+        *targets, value = check_compare(ctx, node, ast.Lt)
+    except SyntaxError:
+        return copy_lineinfo(
+            node,
+            ast.Expr(ctx.compile(node, flag=ContextFlag.should_be_expr)),
+        )
 
     for target in targets:
         ctx.assert_lvalue(target)
