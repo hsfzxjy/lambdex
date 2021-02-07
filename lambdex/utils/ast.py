@@ -65,6 +65,9 @@ def value_from_subscript(node: ast.Subscript, *, force_list=False, raise_=None):
     if isinstance(slice_, ast.Index):
         ret = slice_.value
     elif isinstance(slice_, ast.ExtSlice):
+        for dim in slice_.dims:
+            if isinstance(dim, ast.Slice):
+                _raise_slice_error()
         ret = slice_.dims
     elif not isinstance(slice_, ast.Slice):
         ret = slice_
