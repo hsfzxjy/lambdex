@@ -113,6 +113,8 @@ class Context:
     def assert_(self, cond: bool, msg: str, node):
         error.assert_(cond, msg, node, self.filename)
 
+    def raise_(self, msg: str, node):
+        error.assert_(False, msg, node, self.filename)
 
     def assert_is_instance(self, node, type_: type, msg):
         self.assert_(isinstance(node, type_), msg, node)
