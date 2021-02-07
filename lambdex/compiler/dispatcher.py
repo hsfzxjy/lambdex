@@ -3,7 +3,7 @@ from collections import namedtuple
 
 from lambdex.utils.registry import FunctionRegistry
 from .clauses import match_clauses
-from .context import ContextFlag
+from .context import ContextFlag, Context
 
 __all__ = ['Dispatcher']
 
@@ -13,7 +13,7 @@ Dispatcher = FunctionRegistry('Dispatcher').set_default(lambda *_: EMPTY_RULE)
 
 
 @Dispatcher.register(ast.Lambda)
-def disp_Lambda(node: ast.Lambda, flag: ContextFlag):
+def disp_Lambda(node: ast.Lambda, ctx: Context, flag: ContextFlag):
     if flag != ContextFlag.outermost_lambdex:
         return RuleMeta(ast.Lambda, ())
 
@@ -21,7 +21,7 @@ def disp_Lambda(node: ast.Lambda, flag: ContextFlag):
 
 
 @Dispatcher.register(ast.Call)
-def disp_Call(node: ast.Call, flag: ContextFlag):
+def disp_Call(node: ast.Call, ctx: Context, flag: ContextFlag):
     func = node.func
 
     if isinstance(func, ast.Name):
@@ -38,7 +38,7 @@ def disp_Call(node: ast.Call, flag: ContextFlag):
 
 
 @Dispatcher.register(ast.Name)
-def disp_Name(node: ast.Name, flag: ContextFlag):
+def disp_Name(node: ast.Name, ctx: Context, flag: ContextFlag):
     if flag == ContextFlag.should_be_expr:
         mapping = {
             'yield_': ast.Yield,
@@ -62,7 +62,7 @@ def disp_Name(node: ast.Name, flag: ContextFlag):
 
 
 @Dispatcher.register(ast.Subscript)
-def disp_Subscript(node: ast.Subscript, flag: ContextFlag):
+def disp_Subscript(node: ast.Subscript, ctx: Context, flag: ContextFlag):
     clauses = match_clauses(node, ctx.raise_)
     if clauses is None:
         return RuleMeta(None, ())
@@ -85,7 +85,7 @@ def disp_Subscript(node: ast.Subscript, flag: ContextFlag):
 
 
 @Dispatcher.register(ast.Compare)
-def disp_Compare(node: ast.Compare, flag: ContextFlag):
+def disp_Compare(node: ast.Compare, ctx: Context, flag: ContextFlag):
     if flag != ContextFlag.should_be_stmt:
         return RuleMeta(None, ())
 

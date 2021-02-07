@@ -27,7 +27,7 @@ def compile_node(node, ctx, *, flag=ContextFlag.should_be_expr):
         return None
 
     dispatcher = Dispatcher.get(node.__class__)
-    rule_id, extra_args = dispatcher(node, flag)
+    rule_id, extra_args = dispatcher(node, ctx, flag)
     rule = Rules.get(rule_id, None)
 
     if rule is not None:
