@@ -1,8 +1,30 @@
+## v0.2.0
+
+### Compiler
+
+- Support and tested on Python 3.5, 3.6, 3.7, 3.8, 3.9, 3.10-dev.
+- Improve the compile-time error messages
+
+#### BugFix
+
+- Use `sys` instead of `inspect` to check current running environment (as executable or module) in `lambdex/__init__.py`. `inspect` has far more dependencies than `sys`, which may cause module name conflicts in **lxfmt**. ([8a43346](../../../commit/8a43346c087db4f6eb1bc158e6a5554dfce640a1))
+- `lambdex.utils.ast::is_lvalue` should check recursively. L-value checking is also removed in `lambdex.utils.ast::cast_to_lvalue`. ([55fbfb6](../../../commit/55fbfb6351778db9f41ea04cec9e7b6be3ec115c), [8c801bd](../../../commit/8c801bd1bb65b1611c3847e101088c88288bf6cd))
+- `lambdex.utils.ast::check_compare` should ensure that argument `node` is of type `ast.Compare`. ([5fbe3d5](../../../commit/5fbe3d52b3dd93dc4e5e6754ebcb365b8015eda7))
+- Comparisons other than assignments should not raise a `SyntaxError` in body. This allows expressions like `a > b` to exist in body. ([73c228d](../../../commit/73c228d7e252a11562684032a31bf1326452eb34))
+- Default `except_` should be the last exception handler. Otherwise a `SyntaxError` raised. ([9091565](../../../commit/9091565b688cd9af550db83cee45f82c1c965ee1))
+- Should raise a `SyntaxError` when `finally_` has a clause head. ([ee70df0](../../../commit/ee70df030e9a07304821b31b0fcb9fa0ddb681be))
+- Should raise a `SyntaxError` when unknown clause encountered in a `try_` block. ([16edff4](../../../commit/16edff4b2b70b47452e369e31cf5f0127d7b9009))
+- Should raise a `SyntaxError` when `Slice` node found in `ExtSlice` node. This disallows code like `if_[a:b][...]`. ([77d796f](../../../commit/77d796fb1e2a952deba18532fd760f36704e4d49))
+
+### Formatter
+
+- Support and tested on Python 3.5, 3.6, 3.7, 3.8, 3.9, 3.10-dev.
+
 ## v0.1.0
 
 ### Compiler
 
-- detailed compile-time / runtime error messages
+- Add Detailed compile-time and runtime error messages.
 
 ## v0.0.1
 
@@ -19,11 +41,11 @@
 - `return_`
 - `raise_`, `from_`
 - `yield_`, `yield_from_`
-- nested lambdex
+- Nested lambdex
 
 ### Compiler
 
-- bytecode caching
+- Bytecode caching
 
 ### Formatter
 
