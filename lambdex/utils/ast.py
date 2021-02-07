@@ -4,7 +4,7 @@ import textwrap
 
 try:
     import astpretty
-except ModuleNotFoundError:
+except ImportError:
     astpretty = None
 
 __all__ = [
