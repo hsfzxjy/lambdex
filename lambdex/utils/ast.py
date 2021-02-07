@@ -59,6 +59,8 @@ def value_from_subscript(node: ast.Subscript, *, force_list=False):
         ret = slice_.value
     elif isinstance(slice_, ast.ExtSlice):
         ret = slice_.dims
+    elif not isinstance(slice_, ast.Slice):
+        ret = slice_
     else:
         raise SyntaxError('Slice not allowed here.')
 
