@@ -47,13 +47,20 @@ def check(node, ast_type):
     assert isinstance(node, ast_type)
 
 
-def value_from_subscript(node: ast.Subscript, *, force_list=False):
+def value_from_subscript(node: ast.Subscript, *, force_list=False, raise_=None):
     """
     Extract value(s) from the brackets of `node`.
 
     If `force_list` is `True`, result will be guaranteed as a list.
     Otherwise the original value will be returned.
     """
+    def _raise_slice_error():
+        message = "':' is not allowed in '[]'"
+        if callable(raise_):
+            raise_(message, node.value)
+        else:
+            raise SyntaxError(message)
+
     slice_ = node.slice
     if isinstance(slice_, ast.Index):
         ret = slice_.value
@@ -62,7 +69,7 @@ def value_from_subscript(node: ast.Subscript, *, force_list=False):
     elif not isinstance(slice_, ast.Slice):
         ret = slice_
     else:
-        raise SyntaxError('Slice not allowed here.')
+        _raise_slice_error()
 
     if force_list:
         if isinstance(ret, ast.Tuple):

@@ -63,7 +63,7 @@ def disp_Name(node: ast.Name, flag: ContextFlag):
 
 @Dispatcher.register(ast.Subscript)
 def disp_Subscript(node: ast.Subscript, flag: ContextFlag):
-    clauses = match_clauses(node)
+    clauses = match_clauses(node, ctx.raise_)
     if clauses is None:
         return RuleMeta(None, ())
 

@@ -56,7 +56,7 @@ class Clauses(list):
         return len(self) == 1
 
 
-def match_clauses(node: ast.Subscript) -> Clauses:
+def match_clauses(node: ast.Subscript, raise_) -> Clauses:
     """
     Extract info from a `node` with lambdex compound statement syntax pattern.
     """
@@ -83,7 +83,7 @@ def match_clauses(node: ast.Subscript) -> Clauses:
     while node is not None:
         # If body is None, we are matching a new clause
         if isinstance(node, ast.Subscript) and body is None:
-            body = value_from_subscript(node, force_list=True)
+            body = value_from_subscript(node, force_list=True, raise_=raise_)
             node = node.value
             continue
 
@@ -91,7 +91,7 @@ def match_clauses(node: ast.Subscript) -> Clauses:
 
         # Match a head
         if isinstance(node, ast.Subscript) and head is None:
-            head = value_from_subscript(node, force_list=True)
+            head = value_from_subscript(node, force_list=True, raise_=raise_)
             node = node.value
             continue
 
