@@ -160,6 +160,23 @@ def cast_to_lvalue(node: ast.AST):
     return node
 
 
+_AST_op_to_str = {
+    ast.In: 'in',
+    ast.Lt: '<',
+    ast.Gt: '>',
+}
+
+
+def _expected_syntax_repr(type_, num):
+    assert type_ in _AST_op_to_str
+    op = _AST_op_to_str[type_]
+
+    if num is None:
+        return '... {op} ... [{op} ...]'.format(op=op)
+    else:
+        return ' {op} '.format(op=op).join(['...'] * num)
+
+
 def check_compare(ctx, node: ast.Compare, expected_type, expected_num=None):
     """
     Check that `node.ops` are all with type `expected_type`.  If
@@ -168,15 +185,23 @@ def check_compare(ctx, node: ast.Compare, expected_type, expected_num=None):
 
     Return a tuple of all operands of `node`.
     """
-    op_name = repr(expected_type.__name__)
-    for op in node.ops:
-        ctx.assert_(isinstance(op, expected_type), 'expect ' + op_name, op)
+    syntax_repr = _expected_syntax_repr(expected_type, expected_num)
+    op_repr = _AST_op_to_str[expected_type]
+    ctx.assert_is_instance(node, ast.Compare, 'expect {!r}'.format(syntax_repr))
+
+    for idx, op in enumerate(node.ops):
+        ctx.assert_(
+            isinstance(op, expected_type),
+            'expect {!r} before'.format(op_repr),
+            node.comparators[idx],
+        )
 
     if expected_num is not None:
+        assert expected_num == 2
         ctx.assert_(
             expected_num == len(node.ops) + 1,
-            'unexpected ' + op_name,
-            lambda: node.ops[expected_num],
+            'too many operands',
+            lambda: node.comparators[expected_num - 1],
         )
 
     return (node.left, *node.comparators)
