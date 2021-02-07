@@ -1,4 +1,5 @@
 import sys
+import enum
 import types
 
 if sys.version_info < (3, 8):
@@ -25,3 +26,20 @@ if sys.version_info < (3, 8):
 
 else:
     code_replace = types.CodeType.replace
+
+if sys.version_info < (3, 6):
+
+    def enum_auto():
+        _counter = 0
+
+        def _auto():
+            nonlocal _counter
+            _counter += 1
+            return _counter
+
+        return _auto
+
+else:
+
+    def enum_auto():
+        return enum.auto

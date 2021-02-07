@@ -2,8 +2,10 @@ import enum
 import random
 from functools import partial
 
+from lambdex.utils import compat
+from lambdex.utils.ast import is_lvalue
+
 from . import error
-from ..utils.ast import is_lvalue
 
 __all__ = ['Context', 'ContextFlag']
 
@@ -15,15 +17,22 @@ def random_hex(nbits=32) -> str:
     return hex(random.randint(0, 1 << nbits))[2:].zfill(nbits // 4)
 
 
+auto = compat.enum_auto()
+
+
 class ContextFlag(enum.Enum):
+
     # Expect an `ast.stmt`
-    should_be_stmt = enum.auto()
+    should_be_stmt = auto()
 
     # Expect an `ast.expr`
-    should_be_expr = enum.auto()
+    should_be_expr = auto()
 
     # Indicate that this should be the outermost lambdex
-    outermost_lambdex = enum.auto()
+    outermost_lambdex = auto()
+
+
+del auto
 
 
 class Frame:
