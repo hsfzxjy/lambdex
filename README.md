@@ -1,5 +1,7 @@
 <h1 style="text-align: center">lambdex</h1>
 
+[![PyPI version fury.io](https://badge.fury.io/py/pylambdex.svg)](https://pypi.python.org/pypi/pylambdex/) [![PyPI pyversions](https://img.shields.io/pypi/pyversions/pylambdex.svg)](https://pypi.python.org/pypi/pylambdex/) [![PyPI status](https://img.shields.io/pypi/status/pylambdex.svg)](https://pypi.python.org/pypi/pylambdex/) [![Build Status](https://travis-ci.com/hsfzxjy/lambdex.svg?branch=master)](https://travis-ci.com/hsfzxjy/lambdex) [![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](http://perso.crans.org/besson/LICENSE.html)
+
 **lambdex** allows you to write multi-line anonymous function expression (called a _lambdex_) in an idiomatic manner. Below is a quick example of a recursive Fibonacci function:
 
 ```python
