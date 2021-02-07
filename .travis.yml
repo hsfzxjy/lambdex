@@ -1,0 +1,18 @@
+language: python
+python:
+  - "3.5"
+  - "3.6"
+  - "3.7"
+  - "3.8"
+  - "3.9"
+  - "3.10-dev"
+env:
+  - "TARGET=test"
+  - "TARGET=test_fmt"
+install:
+  - bash .travis.install
+script:
+  - make ${TARGET}
+cache:
+  directories:
+    - /home/travis/.cache/

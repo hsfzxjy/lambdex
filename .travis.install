@@ -1,0 +1,7 @@
+set -euvx
+
+if [[ `python3 --version` =~ Python\ 3\.[56].*$ ]]; then 
+    python3 -m pip install dataclasses
+fi
+
+python3 -m pip install astcheck
