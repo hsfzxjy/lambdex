@@ -1,5 +1,3 @@
-import enum
-
 from ...utils.logger import getLogger
 
 from .._stream_base import _StreamWithLog

@@ -1,5 +1,3 @@
-import enum
-
 from ...utils.logger import getLogger
 
 from .._stream_base import _StreamWithLog
@@ -92,11 +90,6 @@ class CollectComments(_StreamWithLog):
                 others.append(token)
 
         return comments, others
-
-        # return (
-        #     (x for x in self.buffer if x.is_CMT),
-        #     (x for x in self.buffer if not x.is_CMT),
-        # )
 
     def _handle_token(self, token):
         if token.annotation is None: return
