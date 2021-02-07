@@ -38,7 +38,7 @@ def _compile_stmts(ctx: Context, stmts):
 
 @Rules.register((ast.Lambda, ContextFlag.outermost_lambdex))
 def r_lambda(node: ast.Lambda, ctx: Context):
-    ctx.assert_is_instance(node.body, ast.List, 'expect [')
+    ctx.assert_is_instance(node.body, ast.List, "expect '['")
 
     statements = node.body  # type: ast.List
 
@@ -71,8 +71,8 @@ def r_simple_lambda(node: ast.Call, ctx: Context):
 
 @Rules.register((ast.FunctionDef, ContextFlag.outermost_lambdex))
 def r_def(node: ast.Call, ctx: Context):
-    ctx.assert_(node.args, 'expect lambda in ()', node.func)
-    ctx.assert_is_instance(node.args[0], ast.Lambda, 'expect lambda')
+    ctx.assert_(node.args, "expect 'lambda' in '()'", node.func)
+    ctx.assert_is_instance(node.args[0], ast.Lambda, "expect 'lambda'")
     return r_lambda(node.args[0], ctx)
 
 
@@ -292,8 +292,8 @@ def r_try(node: ast.Subscript, ctx: Context, clauses: list):
         if clause.name == 'except_':
             ctx.assert_(
                 not orelse_body and not final_body,
-                'unexpected "expect_"',
-                node,
+                "unexpected 'except_'",
+                clause.node,
             )
 
             if clause.no_head():
@@ -317,11 +317,19 @@ def r_try(node: ast.Subscript, ctx: Context, clauses: list):
             )
             handlers.append(copy_lineinfo(clause.node, handler))
         elif clause.name == 'else_':
-            ctx.assert_(not orelse_body and not final_body, 'unexpected_ "else_"', node)
+            ctx.assert_(
+                handlers and not orelse_body and not final_body,
+                "unexpected 'else_'",
+                clause.node,
+            )
             ctx.assert_no_head(clause)
             orelse_body.extend(_compile_stmts(ctx, clause.body))
         elif clause.name == 'finally_':
-            ctx.assert_(not final_body, 'unexpected_ "finally_"', node)
+            ctx.assert_(
+                not final_body,
+                "unexpected 'finally_'",
+                clause.node,
+            )
             ctx.assert_no_head(clause)
             final_body.extend(_compile_stmts(ctx, clause.body))
         else:
@@ -329,8 +337,8 @@ def r_try(node: ast.Subscript, ctx: Context, clauses: list):
 
     ctx.assert_(
         handlers or final_body,
-        'try_ has neither expect_ clause(s) or finally_ clause',
-        node,
+        "'try_' has neither 'except_' clause(s) nor 'finally_' clause",
+        try_clause.node,
     )
 
     return copy_lineinfo(

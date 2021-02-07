@@ -42,9 +42,9 @@ class Frame:
         self.detached_functions = []
 
 
-EM_HEAD_FOUND = 'expect only one group of []'
-EM_HEAD_MISSING = 'expect another group of []'
-EM_TOO_MANY_ITEMS = 'expect only one item inside []'
+EM_HEAD_FOUND = "expect only one group of '[]'"
+EM_HEAD_MISSING = "expect another group of '[]'"
+EM_TOO_MANY_ITEMS = "expect only one item inside '[]'"
 EM_UNEXPECTED_CLAUSE = 'unexpected clause'
 EM_NOT_LVALUE = 'cannot be assigned'
 
@@ -135,10 +135,10 @@ class Context:
         self.assert_(clause.head, EM_HEAD_MISSING, lambda: clause.node)
 
     def assert_name_equals(self, clause, name: str):
-        self.assert_(clause.name == name, 'expect ' + name, clause.node)
+        self.assert_(clause.name == name, 'expect {!r}'.format(name), clause.node)
 
     def assert_name_in(self, clause, names):
-        self.assert_(clause.name in names, 'expect ' + ' or '.join(names), clause.node)
+        self.assert_(clause.name in names, 'expect ' + ' or '.join(map(repr, names)), clause.node)
 
     def assert_lvalue(self, node):
         check_result, failed_at = is_lvalue(node)
