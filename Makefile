@@ -1,2 +1,8 @@
+# PY=${py}
+ifeq (${PY}, )
+	PY=python3
+endif
 test:
-	python3 -m unittest discover tests
+	${PY} -m unittest discover tests
+test_fmt:
+	${PY} -m unittest discover fmt_tests
