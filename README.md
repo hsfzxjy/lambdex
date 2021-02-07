@@ -171,6 +171,20 @@ def_(lambda: [
 
 </details>
 
+Tuple destruction is also supported:
+
+<details open>
+    <summary><em>show code</em></summary>
+
+```python
+def_(lambda: [
+    (a, b) < (b, a),
+    (a, *rest, c) < [1, 2, 3],
+])
+```
+
+</details>
+
 In Python 3.8 or above, the walrus operator `:=` might also be used. But be careful that Python enforces parentheses around `:=` in many cases.
 
 <details open>
@@ -180,7 +194,7 @@ In Python 3.8 or above, the walrus operator `:=` might also be used. But be care
 def_(lambda: [
     foo := "bar",           # OK
     foo := baz := "bar",    # syntax error
-    foo := (baz := "bar"),  # syntax error
+    foo := (baz := "bar"),  # OK
     if_[condition] [
         foo := "bar",       # syntax error
         (foo := "bar"),     # OK
@@ -673,7 +687,7 @@ Traceback (most recent call last):
   File "demo.py", line 6
     ].els_[
          ^
-SyntaxError: expect else_ or elif_
+SyntaxError: expect 'else_' or 'elif_'
 ```
 
 Errors at runtime can also be located to corresponding lines. For example:
