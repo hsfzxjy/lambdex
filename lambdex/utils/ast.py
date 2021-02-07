@@ -69,6 +69,11 @@ def value_from_subscript(node: ast.Subscript, *, force_list=False, raise_=None):
             if isinstance(dim, ast.Slice):
                 _raise_slice_error()
         ret = slice_.dims
+    elif isinstance(slice_, ast.Tuple):
+        for elt in slice_.elts:
+            if isinstance(elt, ast.Slice):
+                _raise_slice_error()
+        ret = slice_
     elif not isinstance(slice_, ast.Slice):
         ret = slice_
     else:
