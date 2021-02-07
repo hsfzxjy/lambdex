@@ -142,7 +142,8 @@ def is_lvalue(node: ast.AST) -> bool:
 
 def cast_to_lvalue(node: ast.AST):
     """
-    Recursively set `ctx` to `Store()` on `node` and its children.
+    Recursively set `ctx` to `Store()` on `node` and its children.  This
+    function assumes that `is_lvalue()` check has passed.
 
     The behavior ony propagates down to children with type `ast.List`,
     `ast.Tuple` and `ast.Starred`. e.g. name `attr` in `a[attr]` will
@@ -152,10 +153,9 @@ def cast_to_lvalue(node: ast.AST):
     todo = deque([node])
     while todo:
         n = todo.popleft()
-        if 'ctx' in n._fields:
-            n.ctx = ast.Store()
-            if isinstance(n, (ast.List, ast.Tuple, ast.Starred)):
-                todo.extend(ast.iter_child_nodes(n))
+        n.ctx = ast.Store()
+        if isinstance(n, (ast.List, ast.Tuple, ast.Starred)):
+            todo.extend(ast.iter_child_nodes(n))
 
     return node
 
