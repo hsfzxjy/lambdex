@@ -116,7 +116,7 @@ def copy_lineinfo(src: ast.AST, dst: ast.AST):
     Copy metadata of lineno and column offset from `src` to `dst`.
     """
     for field in ('lineno', 'col_offset', 'end_lineno', 'end_col_offset'):
-        setattr(dst, field, getattr(src, field))
+        setattr(dst, field, getattr(src, field, None))
 
     return dst
 
