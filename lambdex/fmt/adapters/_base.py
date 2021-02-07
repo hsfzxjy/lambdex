@@ -13,8 +13,6 @@ logger = getLogger(__name__)
 
 
 class Result:
-    success: bool
-    output: bytes
 
     __slots__ = ['success', 'output']
 

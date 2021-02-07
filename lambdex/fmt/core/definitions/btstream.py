@@ -16,9 +16,8 @@ class BufferFrame:
         self.is_backtracing = False
         self.buffer = deque()
 
-class BTStream:
-    stack: List[BufferFrame]
 
+class BTStream:
     def __init__(self, tokenseq: Sequence[TokenInfo]):
         self.stack = []
         self._backtrace_invoked = False

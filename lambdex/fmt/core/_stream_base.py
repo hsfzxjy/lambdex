@@ -1,4 +1,4 @@
-from typing import Sequence, List
+from typing import Sequence
 
 import abc
 
@@ -8,12 +8,12 @@ from ..utils.logger import getLogger, IS_DEBUG
 
 class _StreamBase(abc.ABC):
     def __init__(self, tokenseq: Sequence[TokenInfo]):
-        self.buffering: bool = False
-        self.last_token: TokenInfo = TokenInfo.fake
-        self.buffer: List[TokenInfo] = []
-        self.action: actions.BaseAction = actions.Default()
+        self.buffering = False
+        self.last_token = TokenInfo.fake
+        self.buffer = []
+        self.action = actions.Default()
 
-        self.tokenseq: Sequence[TokenInfo] = tokenseq
+        self.tokenseq = tokenseq
 
         self._init()
 

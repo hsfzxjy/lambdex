@@ -21,12 +21,9 @@ def _match_rule(pattern, rules):
 
 
 class _CollectRule:
-    pattern: tuple
-    insert_at: int
-
     __slots__ = ['pattern', 'insert_at']
 
-    def __init__(self, *, insert_at, pattern):
+    def __init__(self, *, insert_at: int, pattern: tuple):
         self.pattern = pattern
         self.insert_at = insert_at
 

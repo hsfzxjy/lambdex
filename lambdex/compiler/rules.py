@@ -40,7 +40,7 @@ def _compile_stmts(ctx: Context, stmts):
 def r_lambda(node: ast.Lambda, ctx: Context):
     ctx.assert_is_instance(node.body, ast.List, 'expect [')
 
-    statements: ast.List = node.body
+    statements = node.body  # type: ast.List
 
     ctx.push_frame()
 

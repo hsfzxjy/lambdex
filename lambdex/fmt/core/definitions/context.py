@@ -1,11 +1,4 @@
-from typing import (
-    List,
-    Any,
-    Optional,
-    Tuple,
-    Union,
-    TYPE_CHECKING,
-)
+from typing import Tuple
 
 from ...utils.logger import getLogger
 
@@ -16,13 +9,6 @@ logger = getLogger(__name__)
 
 
 class Context:
-
-    ret: List[TokenInfo]
-    state_stack: List[State]
-    op_stack: List[Tuple[TokenInfo, State]]
-    cache: Union[None, TokenInfo, List[TokenInfo]]
-    tokenseq: None
-
     def __init__(self):
         self.ret = []
         self.op_stack = []
