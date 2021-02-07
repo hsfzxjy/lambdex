@@ -322,6 +322,7 @@ def r_try(node: ast.Subscript, ctx: Context, clauses: list):
             orelse_body.extend(_compile_stmts(ctx, clause.body))
         elif clause.name == 'finally_':
             ctx.assert_(not final_body, 'unexpected_ "finally_"', node)
+            ctx.assert_no_head(clause)
             final_body.extend(_compile_stmts(ctx, clause.body))
 
     ctx.assert_(
