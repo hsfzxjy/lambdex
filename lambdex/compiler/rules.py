@@ -287,6 +287,7 @@ def r_try(node: ast.Subscript, ctx: Context, clauses: list):
     handlers = []
     orelse_body = []
     final_body = []
+    default_except_clause = None
     for clause in clauses[1:]:
         if clause.name == 'except_':
             ctx.assert_(
@@ -298,8 +299,14 @@ def r_try(node: ast.Subscript, ctx: Context, clauses: list):
             if clause.no_head():
                 # bare except
                 type_ = name = None
+                default_except_clause = clause
             else:
                 # except with capturing
+                ctx.assert_(
+                    default_except_clause is None,
+                    "default 'except_' must be last",
+                    lambda: default_except_clause.node,
+                )
                 ctx.assert_single_head(clause)
                 type_, name = check_as(ctx, clause.unwrap_head(), ast.Gt, rhs_is_identifier=True)
 
