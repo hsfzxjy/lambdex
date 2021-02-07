@@ -432,6 +432,16 @@ class TestAST(unittest.TestCase):
 
         self.assert_ast_like(f, target)
 
+    def test_assignment_other_compare(self):
+        f = def_(lambda: [
+            a <= b <= c
+        ])
+
+        def target():
+            a <= b <= c
+
+        self.assert_ast_like(f, target)
+
     def test_assignment_chained(self):
         f = def_(lambda: [
             a < b[c] < d < 1,
