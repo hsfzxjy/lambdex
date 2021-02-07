@@ -8,9 +8,6 @@ import lambdex
 def _get_requirements():
     reqs = []
 
-    if sys.version_info < (3, 7):
-        reqs.append("dataclasses")
-
     reqs.append("inquirer==2.7.0")
     return reqs
 
