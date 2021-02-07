@@ -1,6 +1,6 @@
-import dataclasses
-from collections import deque
 from typing import List, Sequence, Optional
+
+from collections import deque
 
 from ...utils.logger import getLogger
 
@@ -9,11 +9,12 @@ from .token_info import TokenInfo
 logger = getLogger(__name__)
 
 
-@dataclasses.dataclass
 class BufferFrame:
-    is_backtracing: bool = False
-    buffer: deque = dataclasses.field(default_factory=deque)
+    __slots__ = ['is_backtracing', 'buffer']
 
+    def __init__(self):
+        self.is_backtracing = False
+        self.buffer = deque()
 
 class BTStream:
     stack: List[BufferFrame]

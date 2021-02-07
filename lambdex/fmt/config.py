@@ -1,22 +1,21 @@
 import typing
-from dataclasses import dataclass, field
 
 from .utils.logger import getLogger
 
 logger = getLogger(__name__)
 
 
-@dataclass
 class Config:
-    adapter: str
 
-    quiet: bool = False
-    in_place: bool = False
-    print_diff: bool = False
+    __slots__ = ['adapter', 'quiet', 'in_place', 'print_diff', 'parallel', 'files']
 
-    parallel: bool = False
-
-    files: typing.List[str] = field(default_factory=list)
+    def __init__(self, adapter: str):
+        self.adapter = adapter
+        self.quiet = False
+        self.in_place = False
+        self.print_diff = False
+        self.parallel = False
+        self.files = []
 
     @property
     def from_stdin(self):

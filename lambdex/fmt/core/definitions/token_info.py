@@ -1,29 +1,32 @@
 from typing import Optional, Tuple, FrozenSet
 
-import dataclasses
-
 from ...utils.colored import colored, colorful
 
 from . import token as tk
 from .annotation import Annotation as A
 
 
-@dataclasses.dataclass
 class TokenInfo:
 
-    type: int
+    __slots__ = ['type', 'string', 'start', 'end', 'line', 'annotation', 'leading_whitespace']
 
-    string: str
-
-    start: Optional[Tuple[int, int]] = None
-
-    end: Optional[Tuple[int, int]] = None
-
-    line: Optional[str] = None
-
-    annotation: Optional[A] = None
-
-    leading_whitespace: Optional[str] = None
+    def __init__(
+        self,
+        type: int,
+        string: str,
+        start: Optional[Tuple[int, int]] = None,
+        end: Optional[Tuple[int, int]] = None,
+        line: Optional[str] = None,
+        annotation: Optional[A] = None,
+        leading_whitespace: Optional[str] = None,
+    ):
+        self.type = type
+        self.string = string
+        self.start = start
+        self.end = end
+        self.line = line
+        self.annotation = annotation
+        self.leading_whitespace = leading_whitespace
 
     def visualize(self, *, repr=False) -> Optional[str]:
         def _(string):
@@ -121,7 +124,7 @@ class TokenInfo:
     for name, value in list(locals().items()):
         if not isinstance(value, frozenset):
             continue
-        locals()[f'is_{name}'] = _build_property(value)
+        locals()['is_{}'.format(name)] = _build_property(value)
         del locals()[name]
 
     del name, value
