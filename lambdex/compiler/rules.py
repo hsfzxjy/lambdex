@@ -324,6 +324,8 @@ def r_try(node: ast.Subscript, ctx: Context, clauses: list):
             ctx.assert_(not final_body, 'unexpected_ "finally_"', node)
             ctx.assert_no_head(clause)
             final_body.extend(_compile_stmts(ctx, clause.body))
+        else:
+            ctx.raise_('unexpected {!r}'.format(clause.name), clause.node)
 
     ctx.assert_(
         handlers or final_body,
