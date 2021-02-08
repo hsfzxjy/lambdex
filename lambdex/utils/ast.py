@@ -100,6 +100,11 @@ def ast_from_source(source, keyword: str):
     if inspect.isfunction(source):
         lines, lnum = inspect.findsource(source.__code__)
 
+        # Append line-ending if necessary
+        for idx in range(len(lines)):
+            if not lines[idx].endswith('\n'):
+                lines[idx] += '\n'
+
         # Lines starting from `lnum` may contain enclosing tokens of previous expression
         # We use `keyword` to locate the true start point of source
         while True:
@@ -109,7 +114,8 @@ def ast_from_source(source, keyword: str):
 
         lines[lnum] = lines[lnum][first_keyword_loc:]
         # Prepend the lines with newlines, so that parsed AST will have correct lineno
-        source = '\n' * lnum + ''.join(inspect.getblock(lines[lnum:]))
+        source_lines = ['\n'] * lnum + inspect.getblock(lines[lnum:])
+        source = ''.join(source_lines)
 
     return ast.parse(source).body[0]
 
