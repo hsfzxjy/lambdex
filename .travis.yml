@@ -6,7 +6,12 @@ python:
   - "3.8"
   - "3.9"
   - "3.10-dev"
+services:
+  - xvfb
 env:
+  - "TARGET=test_repl_builtin"
+  - "TARGET=test_repl_ipython"
+  - "TARGET=test_repl_idle"
   - "TARGET=test"
   - "TARGET=test_fmt"
 install:

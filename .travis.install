@@ -1,7 +1,9 @@
 set -euvx
 
-if [[ `python3 --version` =~ Python\ 3\.[56].*$ ]]; then 
-    python3 -m pip install dataclasses
+DEPS=("astcheck" "pexpect")
+
+if [ "${TARGET}"x == "test_repl_ipython"x ]; then
+    DEPS+=("ipython")
 fi
 
-python3 -m pip install astcheck
+python3 -m pip install ${DEPS[@]}
