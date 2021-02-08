@@ -20,7 +20,7 @@ def _build_test_func(src, dst):
             [sys.executable, '-m', 'lambdex.fmt', str(src.absolute())],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            cwd=str(TEST_DIR.parent),
+            cwd=str(TEST_DIR.parent.parent),
         )
         stdout, stderr = p.communicate()
         output = stdout.decode()
