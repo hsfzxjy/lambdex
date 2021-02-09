@@ -4,7 +4,7 @@ import subprocess
 from functools import partial
 from typing import Sequence
 
-from ..config import Config
+from ..jobs_meta import JobsMeta
 from ..core.api import FormatCode
 from ..utils.logger import getLogger
 from ..utils.io import StdinResource, FileResource, _ResourceBase
@@ -26,10 +26,10 @@ class BaseAdapter(abc.ABC):
         self.opts = opts
         self.backend_argv = backend_argv
 
-        self.config = self._make_config()
+        self.jobs_meta = self._make_jobs_meta()
 
     @abc.abstractmethod
-    def _make_config(self) -> Config:
+    def _make_jobs_meta(self) -> JobsMeta:
         pass
 
     @abc.abstractmethod
@@ -38,9 +38,9 @@ class BaseAdapter(abc.ABC):
 
     def _job(self, filename=None) -> bool:
         if filename is None:
-            resource = StdinResource(self.config)
+            resource = StdinResource(self.jobs_meta)
         else:
-            resource = FileResource(self.config, filename)
+            resource = FileResource(self.jobs_meta, filename)
 
         cmd = self._get_backend_cmd_for_resource(resource)
         backend_result = self.call_backend(cmd, resource.source)
@@ -54,10 +54,10 @@ class BaseAdapter(abc.ABC):
         return resource.is_changed(formatted_code)
 
     def get_jobs(self):
-        if not self.config.files:
+        if not self.jobs_meta.files:
             yield self._job
         else:
-            yield from (partial(self._job, filename) for filename in self.config.files)
+            yield from (partial(self._job, filename) for filename in self.jobs_meta.files)
 
     def call_backend(self, cmd: Sequence[str], stdin: bytes) -> Result:
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.PIPE)

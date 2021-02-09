@@ -5,7 +5,7 @@ from .utils.logger import getLogger
 logger = getLogger(__name__)
 
 
-class Config:
+class JobsMeta:
 
     __slots__ = ['adapter', 'quiet', 'in_place', 'print_diff', 'parallel', 'files']
 

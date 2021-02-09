@@ -11,7 +11,7 @@ def main() -> int:
     adapter = adapters.build(opts.adapter, opts, backend_argv)
 
     changed = False
-    if adapter.config.parallel:
+    if adapter.jobs_meta.parallel:
         import multiprocessing
         import concurrent.futures
 
@@ -23,4 +23,4 @@ def main() -> int:
         for job in adapter.get_jobs():
             changed |= job()
 
-    return 1 if changed and (adapter.config.print_diff or adapter.config.quiet) else 0
+    return 1 if changed and (adapter.jobs_meta.print_diff or adapter.jobs_meta.quiet) else 0

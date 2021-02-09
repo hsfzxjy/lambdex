@@ -3,7 +3,7 @@ from typing import Sequence
 import os
 import argparse
 
-from ..config import Config
+from ..jobs_meta import JobsMeta
 from ..utils.io import FileResource, StdinResource
 from ..utils.logger import getLogger
 from ..utils.importlib import silent_import
@@ -48,7 +48,7 @@ def _build_argument_parser():
 
 
 class DummyAdapter(BaseAdapter):
-    def _make_config(self) -> Config:
+    def _make_jobs_meta(self) -> JobsMeta:
         parser = _build_argument_parser()
 
         bopts = parser.parse_args(self.backend_argv)
@@ -56,20 +56,20 @@ class DummyAdapter(BaseAdapter):
         if (bopts.in_place or bopts.diff) and not bopts.files:
             logger.error('cannot use --in-place or --diff flags when reading from stdin')
 
-        cfg = Config(adapter='yapf')
-        cfg.in_place = bopts.in_place
-        cfg.parallel = bopts.parallel
-        cfg.print_diff = bopts.diff
-        cfg.quiet = bopts.quiet
-        cfg.files = bopts.files
+        meta = JobsMeta(adapter='yapf')
+        meta.in_place = bopts.in_place
+        meta.parallel = bopts.parallel
+        meta.print_diff = bopts.diff
+        meta.quiet = bopts.quiet
+        meta.files = bopts.files
 
-        return cfg
+        return meta
 
     def _job(self, filename=None) -> bool:
         if filename is None:
-            resource = StdinResource(self.config)
+            resource = StdinResource(self.jobs_meta)
         else:
-            resource = FileResource(self.config, filename)
+            resource = FileResource(self.jobs_meta, filename)
 
         resource.set_backend_output(resource.source)
 

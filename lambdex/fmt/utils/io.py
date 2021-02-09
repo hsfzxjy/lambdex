@@ -4,7 +4,7 @@ import difflib
 import pathlib
 from io import BytesIO
 
-from ..config import Config
+from ..jobs_meta import JobsMeta
 
 
 def get_stdin() -> bytes:
@@ -25,8 +25,8 @@ def get_stdin() -> bytes:
 
 
 class _ResourceBase(abc.ABC):
-    def __init__(self, config: Config):
-        self._config = config
+    def __init__(self, jobs_meta: JobsMeta):
+        self._meta = jobs_meta
         self._source = self._get_source()
         self._backend_output_stream = None
 
@@ -55,7 +55,7 @@ class _ResourceBase(abc.ABC):
 
     def write_formatted_code(self, formatted_code: str):
         content = formatted_code
-        if self._config.print_diff:
+        if self._meta.print_diff:
             before = self._source.decode('utf-8').splitlines()
             after = formatted_code.splitlines()
             content = '\n'.join(
@@ -81,16 +81,16 @@ class StdinResource(_ResourceBase):
         return '<stdin>'
 
     def _write_content(self, content: str):
-        assert not self._config.in_place
-        if not self._config.quiet:
+        assert not self._meta.in_place
+        if not self._meta.quiet:
             sys.stdout.write(content)
 
 
 class FileResource(_ResourceBase):
-    def __init__(self, config: Config, filename: str):
+    def __init__(self, jobs_meta: JobsMeta, filename: str):
         self._filename = filename
         self._filepath = pathlib.Path(filename)
-        super(FileResource, self).__init__(config)
+        super(FileResource, self).__init__(jobs_meta)
 
     def _get_source(self) -> bytes:
         return self._filepath.read_bytes()
@@ -99,7 +99,7 @@ class FileResource(_ResourceBase):
         return self._filename
 
     def _write_content(self, content: str):
-        if self._config.in_place:
+        if self._meta.in_place:
             self._filepath.write_text(content)
-        elif not self._config.quiet:
+        elif not self._meta.quiet:
             sys.stdout.write(content)
