@@ -1,6 +1,8 @@
-from . import ast_parser, compiler
+from . import ast_parser, compiler, _aliases
 
-__all__ = ['def_']
+aliases = _aliases.get_aliases()
+
+__all__ = [aliases.def_]
 
 
 class Declarer:
@@ -61,4 +63,4 @@ class Declarer:
         return (self.__keyword, self.__identifier, *extra)
 
 
-def_ = Declarer('def_')
+globals()[aliases.def_] = Declarer(aliases.def_)

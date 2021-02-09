@@ -2,6 +2,9 @@ import ast
 import inspect
 from functools import partial
 
+from lambdex._aliases import get_aliases, COMPARATORS
+aliases = get_aliases()
+
 from lambdex.utils.ast import *
 from lambdex.utils.registry import FunctionRegistry
 
@@ -103,14 +106,14 @@ def r_if(node: ast.Subscript, ctx: Context, clauses: list):
     ctx.assert_single_head(clauses[0])
 
     for clause in clauses[1:-1]:
-        ctx.assert_name_equals(clause, 'elif_')
+        ctx.assert_name_equals(clause, aliases.elif_)
         ctx.assert_head(clause)
         ctx.assert_single_head(clause)
 
     if not clauses.single():
         clause = clauses[-1]
-        ctx.assert_name_in(clause, ('else_', 'elif_'))
-        if clause.name == 'else_':
+        ctx.assert_name_in(clause, (aliases.else_, aliases.elif_))
+        if clause.name == aliases.else_:
             ctx.assert_no_head(clause)
         else:
             ctx.assert_head(clause)
@@ -119,7 +122,7 @@ def r_if(node: ast.Subscript, ctx: Context, clauses: list):
     curr_node = None
     prev_orelse = []
     for clause in clauses[::-1]:
-        if clause.name == 'else_':
+        if clause.name == aliases.else_:
             prev_orelse = _compile_stmts(ctx, clause.body)
             continue
 
@@ -142,7 +145,7 @@ def r_for(node: ast.Subscript, ctx: Context, clauses: list):
     ctx.assert_head(clauses[0])
     ctx.assert_single_head(clauses[0])
     if len(clauses) == 2:
-        ctx.assert_name_equals(clauses[1], 'else_')
+        ctx.assert_name_equals(clauses[1], aliases.else_)
         ctx.assert_no_head(clauses[1])
 
     target, iter_item = check_compare(ctx, clauses[0].unwrap_head(), ast.In, 2)
@@ -172,7 +175,7 @@ def r_while(node: ast.Subscript, ctx: Context, clauses: list):
     ctx.assert_head(clauses[0])
     ctx.assert_single_head(clauses[0])
     if len(clauses) == 2:
-        ctx.assert_name_equals(clauses[1], 'else_')
+        ctx.assert_name_equals(clauses[1], aliases.else_)
         ctx.assert_no_head(clauses[1])
 
     if len(clauses) == 2:
@@ -193,7 +196,7 @@ def r_while(node: ast.Subscript, ctx: Context, clauses: list):
 @Rules.register(ast.Assign)
 def r_assign(node: ast.Compare, ctx: Context):
     try:
-        *targets, value = check_compare(ctx, node, ast.Lt)
+        *targets, value = check_compare(ctx, node, COMPARATORS[aliases.Assignment])
     except SyntaxError:
         return copy_lineinfo(
             node,
@@ -236,7 +239,7 @@ def r_with(node: ast.Subscript, ctx: Context, clauses: list):
 
     items = []
     for arg in with_clause.head:
-        context_expr, var = check_as(ctx, arg, ast.Gt)
+        context_expr, var = check_as(ctx, arg, COMPARATORS[aliases.As])
         item = ast.withitem(
             context_expr=ctx.compile(context_expr),
             optional_vars=var,
@@ -264,7 +267,7 @@ def r_raise(node: ast.Subscript, ctx: Context, clauses: list):
     cause = None
     if len(clauses) == 2:
         from_clause = clauses[1]
-        ctx.assert_name_equals(from_clause, 'from_')
+        ctx.assert_name_equals(from_clause, aliases.from_)
         ctx.assert_no_head(from_clause)
         ctx.assert_single_body(from_clause)
         cause = ctx.compile(from_clause.unwrap_body())
@@ -289,10 +292,10 @@ def r_try(node: ast.Subscript, ctx: Context, clauses: list):
     final_body = []
     default_except_clause = None
     for clause in clauses[1:]:
-        if clause.name == 'except_':
+        if clause.name == aliases.except_:
             ctx.assert_(
                 not orelse_body and not final_body,
-                "unexpected 'except_'",
+                "unexpected {!r}".format(aliases.except_),
                 clause.node,
             )
 
@@ -304,11 +307,11 @@ def r_try(node: ast.Subscript, ctx: Context, clauses: list):
                 # except with capturing
                 ctx.assert_(
                     default_except_clause is None,
-                    "default 'except_' must be last",
+                    "default {!r} must be last".format(aliases.except_),
                     lambda: default_except_clause.node,
                 )
                 ctx.assert_single_head(clause)
-                type_, name = check_as(ctx, clause.unwrap_head(), ast.Gt, rhs_is_identifier=True)
+                type_, name = check_as(ctx, clause.unwrap_head(), COMPARATORS[aliases.As], rhs_is_identifier=True)
 
             handler = ast.ExceptHandler(
                 type=ctx.compile(type_),
@@ -316,18 +319,18 @@ def r_try(node: ast.Subscript, ctx: Context, clauses: list):
                 body=_compile_stmts(ctx, clause.body),
             )
             handlers.append(copy_lineinfo(clause.node, handler))
-        elif clause.name == 'else_':
+        elif clause.name == aliases.else_:
             ctx.assert_(
                 handlers and not orelse_body and not final_body,
-                "unexpected 'else_'",
+                "unexpected {!r}".format(aliases.else_),
                 clause.node,
             )
             ctx.assert_no_head(clause)
             orelse_body.extend(_compile_stmts(ctx, clause.body))
-        elif clause.name == 'finally_':
+        elif clause.name == aliases.finally_:
             ctx.assert_(
                 not final_body,
-                "unexpected 'finally_'",
+                "unexpected {!r}".format(aliases.finally_),
                 clause.node,
             )
             ctx.assert_no_head(clause)
@@ -337,7 +340,7 @@ def r_try(node: ast.Subscript, ctx: Context, clauses: list):
 
     ctx.assert_(
         handlers or final_body,
-        "'try_' has neither 'except_' clause(s) nor 'finally_' clause",
+        "{!r} has neither {!r} clause(s) nor {!r} clause".format(aliases.try_, aliases.except_, aliases.finally_),
         try_clause.node,
     )
 

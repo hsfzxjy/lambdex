@@ -66,6 +66,7 @@ class DummyAdapter(BaseAdapter):
         return meta
 
     def _job(self, filename=None) -> bool:
+        self._reset_aliases(filename)
         if filename is None:
             resource = StdinResource(self.jobs_meta)
         else:

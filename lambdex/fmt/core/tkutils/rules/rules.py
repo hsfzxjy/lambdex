@@ -1,3 +1,5 @@
+# In this module, we use aliases in a lazy way.
+from lambdex._aliases import _Aliases
 from ...definitions import State, Context, TokenInfo, tk, A, actions
 
 from .matcher import matcher as m
@@ -19,11 +21,11 @@ def r(ctx: Context, token: TokenInfo):
         ctx.error()
 
 
-@m(exact_type=tk.NAME, string='def_', last_state=State.UNKNOWN)
-@m(exact_type=tk.NAME, string='def_', last_state=State.IN_LBDX_LAMBDA)
-@m(exact_type=tk.NAME, string='def_', last_state=State.IN_LBDX_CLS_HEAD)
-@m(exact_type=tk.NAME, string='def_', last_state=State.IN_LBDX_CLS_BODY)
-@m(exact_type=tk.NAME, string='def_', last_state=State.IN_LBDX_BODY_LIST)
+@m(exact_type=tk.NAME, string=_Aliases.def_, last_state=State.UNKNOWN)
+@m(exact_type=tk.NAME, string=_Aliases.def_, last_state=State.IN_LBDX_LAMBDA)
+@m(exact_type=tk.NAME, string=_Aliases.def_, last_state=State.IN_LBDX_CLS_HEAD)
+@m(exact_type=tk.NAME, string=_Aliases.def_, last_state=State.IN_LBDX_CLS_BODY)
+@m(exact_type=tk.NAME, string=_Aliases.def_, last_state=State.IN_LBDX_BODY_LIST)
 def r(ctx: Context, token: TokenInfo):
     ctx.push_state(State.EXPECT_LBDX_LPAR)
 
@@ -140,14 +142,14 @@ def r(ctx: Context, token: TokenInfo):
     token.annotation = A.DECL_ARG_COMMA
 
 
-@m(exact_type=tk.NAME, string='if_', last_state=State.IN_LBDX_BODY_LIST)
-@m(exact_type=tk.NAME, string='with_', last_state=State.IN_LBDX_BODY_LIST)
-@m(exact_type=tk.NAME, string='for_', last_state=State.IN_LBDX_BODY_LIST)
-@m(exact_type=tk.NAME, string='while_', last_state=State.IN_LBDX_BODY_LIST)
-@m(exact_type=tk.NAME, string='if_', last_state=State.IN_LBDX_CLS_BODY)
-@m(exact_type=tk.NAME, string='with_', last_state=State.IN_LBDX_CLS_BODY)
-@m(exact_type=tk.NAME, string='for_', last_state=State.IN_LBDX_CLS_BODY)
-@m(exact_type=tk.NAME, string='while_', last_state=State.IN_LBDX_CLS_BODY)
+@m(exact_type=tk.NAME, string=_Aliases.if_, last_state=State.IN_LBDX_BODY_LIST)
+@m(exact_type=tk.NAME, string=_Aliases.with_, last_state=State.IN_LBDX_BODY_LIST)
+@m(exact_type=tk.NAME, string=_Aliases.for_, last_state=State.IN_LBDX_BODY_LIST)
+@m(exact_type=tk.NAME, string=_Aliases.while_, last_state=State.IN_LBDX_BODY_LIST)
+@m(exact_type=tk.NAME, string=_Aliases.if_, last_state=State.IN_LBDX_CLS_BODY)
+@m(exact_type=tk.NAME, string=_Aliases.with_, last_state=State.IN_LBDX_CLS_BODY)
+@m(exact_type=tk.NAME, string=_Aliases.for_, last_state=State.IN_LBDX_CLS_BODY)
+@m(exact_type=tk.NAME, string=_Aliases.while_, last_state=State.IN_LBDX_CLS_BODY)
 def r(ctx: Context, token: TokenInfo):
     ctx.push_state(State.EXPECT_CLS_HEAD_LSQB)
     ctx.cache = [token]
@@ -183,8 +185,8 @@ def r(ctx: Context, token: TokenInfo):
         token.annotation = A.CLS_HEAD_RSQB
 
 
-@m(exact_type=tk.NAME, string='try_', last_state=State.IN_LBDX_BODY_LIST)
-@m(exact_type=tk.NAME, string='try_', last_state=State.IN_LBDX_CLS_BODY)
+@m(exact_type=tk.NAME, string=_Aliases.try_, last_state=State.IN_LBDX_BODY_LIST)
+@m(exact_type=tk.NAME, string=_Aliases.try_, last_state=State.IN_LBDX_CLS_BODY)
 def r(ctx: Context, token: TokenInfo):
     ctx.push_state(State.EXPECT_CLS_BODY_LSQB)
     ctx.cache = [token]
@@ -297,24 +299,24 @@ def r(ctx: Context, token: TokenInfo):
     return actions.Default(dont_consume=True)
 
 
-@m(exact_type=tk.NAME, string='else_', last_state=State.EXPECT_SUBCLS_NAME)
-@m(exact_type=tk.NAME, string='finally_', last_state=State.EXPECT_SUBCLS_NAME)
+@m(exact_type=tk.NAME, string=_Aliases.else_, last_state=State.EXPECT_SUBCLS_NAME)
+@m(exact_type=tk.NAME, string=_Aliases.finally_, last_state=State.EXPECT_SUBCLS_NAME)
 def r(ctx: Context, token: TokenInfo):
     ctx.pop_state()
     ctx.cache.append(token)
     ctx.push_state(State.EXPECT_CLS_BODY_LSQB)
 
 
-@m(exact_type=tk.NAME, string='elif_', last_state=State.EXPECT_SUBCLS_NAME)
+@m(exact_type=tk.NAME, string=_Aliases.elif_, last_state=State.EXPECT_SUBCLS_NAME)
 def r(ctx: Context, token: TokenInfo):
     ctx.pop_state()
     ctx.cache.append(token)
     ctx.push_state(State.EXPECT_CLS_HEAD_LSQB)
 
 
-@m(exact_type=tk.NAME, string='except_', last_state=State.EXPECT_SUBCLS_NAME)
-@m(exact_type=tk.NAME, string='except_', last_state=State.MUST_SUBCLS_NAME_WITH_HEAD)
-@m(exact_type=tk.NAME, string='except_', last_state=State.MUST_SUBCLS_NAME_WITH_BODY)
+@m(exact_type=tk.NAME, string=_Aliases.except_, last_state=State.EXPECT_SUBCLS_NAME)
+@m(exact_type=tk.NAME, string=_Aliases.except_, last_state=State.MUST_SUBCLS_NAME_WITH_HEAD)
+@m(exact_type=tk.NAME, string=_Aliases.except_, last_state=State.MUST_SUBCLS_NAME_WITH_BODY)
 def r(ctx: Context, token: TokenInfo):
     last_state = ctx.pop_state()
     ctx.cache.append(token)

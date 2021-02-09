@@ -36,7 +36,16 @@ class BaseAdapter(abc.ABC):
     def _get_backend_cmd_for_resource(self, resource: _ResourceBase) -> Sequence[str]:
         pass
 
+    def _reset_aliases(self, filename):
+        from lambdex.fmt.core.tkutils.rules import matcher
+
+        if filename is None:
+            matcher.reset_aliases()
+        else:
+            matcher.reset_aliases(filename)
+
     def _job(self, filename=None) -> bool:
+        self._reset_aliases(filename)
         if filename is None:
             resource = StdinResource(self.jobs_meta)
         else:

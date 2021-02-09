@@ -29,6 +29,7 @@ else:
         else
             export PYTHONPATH={lambdex_root}:$PYTHONPATH
         fi
+        export LXALIAS=on
         {py_interpreter} -m lambdex.fmt $@ -- -b {formatter_type} -e {formatter_path}
         '''
 

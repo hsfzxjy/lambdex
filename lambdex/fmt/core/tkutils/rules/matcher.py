@@ -12,12 +12,14 @@ def _make_key(exact_type, string, last_state, *, strict=True):
         return (exact_type, last_state)
 
 
-def _generate_queries(token, last_state):
+def _generate_queries(token, last_state, keyword_to_symbol):
+
+    symbol = keyword_to_symbol.get(token.string, token.string)
 
     # Use both `token` and `last_state`
-    yield _make_key(token.exact_type, token.string, last_state, strict=False)
+    yield _make_key(token.exact_type, symbol, last_state, strict=False)
 
-    # Use `token` and `last_state`, but ignore `token.string`
+    # Use `token` and `last_state`, but ignore `symbol`
     # This is for the case you want to capture a `tk.NAME`, but don't care about its content
     yield _make_key(token.exact_type, _empty, last_state, strict=False)
 
@@ -25,12 +27,21 @@ def _generate_queries(token, last_state):
     yield _make_key(_empty, _empty, last_state, strict=False)
 
     # Use only `token`
-    yield _make_key(token.exact_type, token.string, _empty, strict=False)
+    yield _make_key(token.exact_type, symbol, _empty, strict=False)
 
 
 class Matcher:
     def __init__(self):
         self._mapping = {}
+        self._keyword_to_symbol = {}
+
+    def reset_aliases(self, *userpaths):
+        from lambdex._aliases import _Aliases, get_aliases
+        aliases = get_aliases(userpaths, reinit=True)
+
+        self._keyword_to_symbol = {}
+        for name, value in aliases._asdict().items():
+            self._keyword_to_symbol[value] = getattr(_Aliases, name)
 
     def __call__(self, *, exact_type=_empty, string=_empty, last_state=_empty):
         def _inner(f):
@@ -46,7 +57,7 @@ class Matcher:
             # If token is whitespace, newline or comments, pass through
             return None
 
-        for query in _generate_queries(token, ctx.last_state):
+        for query in _generate_queries(token, ctx.last_state, self._keyword_to_symbol):
             if query in self._mapping:
                 return self._mapping[query](ctx, token)
 

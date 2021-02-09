@@ -2,6 +2,8 @@ import ast
 import inspect
 import textwrap
 
+from .ops import COMPARATORS_S2A
+
 try:
     import astpretty
 except ImportError:
@@ -181,16 +183,9 @@ def cast_to_lvalue(node: ast.AST):
     return node
 
 
-_AST_op_to_str = {
-    ast.In: 'in',
-    ast.Lt: '<',
-    ast.Gt: '>',
-}
-
-
 def _expected_syntax_repr(type_, num):
-    assert type_ in _AST_op_to_str
-    op = _AST_op_to_str[type_]
+    assert type_ in COMPARATORS_S2A
+    op = COMPARATORS_S2A[type_]
 
     if num is None:
         return '... {op} ... [{op} ...]'.format(op=op)
@@ -207,7 +202,7 @@ def check_compare(ctx, node: ast.Compare, expected_type, expected_num=None):
     Return a tuple of all operands of `node`.
     """
     syntax_repr = _expected_syntax_repr(expected_type, expected_num)
-    op_repr = _AST_op_to_str[expected_type]
+    op_repr = COMPARATORS_S2A[expected_type]
     ctx.assert_is_instance(node, ast.Compare, 'expect {!r}'.format(syntax_repr))
 
     for idx, op in enumerate(node.ops):

@@ -1,6 +1,9 @@
 import ast
 from collections import namedtuple
 
+from lambdex._aliases import get_aliases
+aliases = get_aliases()
+
 from lambdex.utils.registry import FunctionRegistry
 from .clauses import match_clauses
 from .context import ContextFlag, Context
@@ -32,7 +35,7 @@ def disp_Call(node: ast.Call, ctx: Context, flag: ContextFlag):
         name = None
 
     ast_type = {
-        'def_': ast.FunctionDef,
+        aliases.def_: ast.FunctionDef,
     }.get(name)
     return RuleMeta((ast_type, flag), ())
 
@@ -41,16 +44,16 @@ def disp_Call(node: ast.Call, ctx: Context, flag: ContextFlag):
 def disp_Name(node: ast.Name, ctx: Context, flag: ContextFlag):
     if flag == ContextFlag.should_be_expr:
         mapping = {
-            'yield_': ast.Yield,
+            aliases.yield_: ast.Yield,
         }
     elif flag == ContextFlag.should_be_stmt:
         mapping = {
-            'continue_': ast.Continue,
-            'break_': ast.Break,
-            'pass_': ast.Pass,
-            'yield_': ast.Yield,
-            'raise_': ast.Raise,
-            'return_': ast.Return,
+            aliases.continue_: ast.Continue,
+            aliases.break_: ast.Break,
+            aliases.pass_: ast.Pass,
+            aliases.yield_: ast.Yield,
+            aliases.raise_: ast.Raise,
+            aliases.return_: ast.Return,
         }
 
     rule_type = mapping.get(node.id)
@@ -68,17 +71,17 @@ def disp_Subscript(node: ast.Subscript, ctx: Context, flag: ContextFlag):
         return RuleMeta(None, ())
 
     ast_type = {
-        'return_': ast.Return,
-        'if_': ast.If,
-        'for_': ast.For,
-        'while_': ast.While,
-        'with_': ast.With,
-        'raise_': ast.Raise,
-        'try_': ast.Try,
-        'yield_': ast.Yield,
-        'yield_from_': ast.YieldFrom,
-        'global_': ast.Global,
-        'nonlocal_': ast.Nonlocal,
+        aliases.return_: ast.Return,
+        aliases.if_: ast.If,
+        aliases.for_: ast.For,
+        aliases.while_: ast.While,
+        aliases.with_: ast.With,
+        aliases.raise_: ast.Raise,
+        aliases.try_: ast.Try,
+        aliases.yield_: ast.Yield,
+        aliases.yield_from_: ast.YieldFrom,
+        aliases.global_: ast.Global,
+        aliases.nonlocal_: ast.Nonlocal,
     }.get(clauses[0].name)
 
     return RuleMeta(ast_type, (clauses, ))
