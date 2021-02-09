@@ -24,6 +24,7 @@ Compared with ordinary lambda, which only allows single expression as body, lamb
 
 - [More about lambdex](#more-about-lambdex)
 - [Installation & Usage](#installation--usage)
+- [Running in an REPL](#running-in-an-repl)
 - [Supported Features](#supported-features)
   - [Parameters](#parameters)
   - [Variable assignment](#variable-assignment)
@@ -80,6 +81,24 @@ my_sum = def_(lambda a, b: [
 ```
 
 That's it! You don't even need to import other keywords such as `return_`.
+
+## Running in an REPL
+
+If you are using an interactive environment (REPL), like IDLE or IPython, you should import the keywords from `lambdex.repl`:
+
+```python
+>>> from lambdex.repl import def_
+>>> my_sum = def_(lambda a, b: [
+... return_[a + b]
+... ])
+...
+>>> my_sum(1, 2)
+3
+```
+
+The statement should be executed **at the beginning** to ensure that corresponding patching stuff is enabled.
+
+Currently **lambdex** has been well tested on 3 REPL environments: the built-in Python REPL, IDLE and IPython (Jupyter). Other REPL may or may not be supported.
 
 ## Supported Features
 
@@ -887,13 +906,10 @@ Currently lambdex doesn't support:
 2. augmented assignments like `+=`, `-=`, etc.
 3. type annotation
 4. `import` statements
-5. executed in an REPL environment
 
 Coroutines [1] support is guaranteed to add in the future. Augmented assignments [2] support is planned, but no suitable solution for the operators yet.
 
 Type annotation [3] and `import` statements [4] will not be supported.
-
-REPL [5] support will be available if there's any workaround to obtain the source code, since the compiler requires the code for further parsing.
 
 Lambdexes also violate linters, which is inevitable.
 
