@@ -55,4 +55,4 @@ else:
 
 del os, sys, _sitepaths, _is_run_as_script
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
