@@ -38,6 +38,7 @@ Compared with ordinary lambda, which only allows single expression as body, lamb
   - [Bytecode caching](#bytecode-caching)
   - [Detailed compile-time and runtime error](#detailed-compile-time-and-runtime-error)
 - [Declaration Disambiguity](#declaration-disambiguity)
+- [Keyword and Operator Aliasing](./docs/Customization.md#keyword-and-operator-aliasing)
 - [Code Formatting](#code-formatting)
   - [Standalone lambdex formatter](#standalone-lambdex-formatter)
   - [Lambdex formatter as post-processor](#lambdex-formatter-as-post-processor)
@@ -336,7 +337,7 @@ def anonymous():
 
 ### With statement
 
-With statements are supported by the `with_` keyword. The optional `as` aliasing is written using `>`.
+With statements are supported by the `with_` keyword. The optional `as` is written using `>`.
 
 <details open>
     <summary><em>show code</em></summary>
@@ -348,7 +349,7 @@ def_(lambda: [
         ...
     ]
 
-    # `with` with aliasing
+    # `with` with `as`
     with_[open("foo") > fd] [
         ...
     ]
@@ -370,7 +371,7 @@ def anonymous():
     with open("foo"):
         ...
 
-    # `with` with aliasing
+    # `with` with `as`
     with open("foo") as fd:
         ...
 
@@ -915,7 +916,6 @@ Lambdexes also violate linters, which is inevitable.
 
 Besides, the upcoming versions will:
 
-- make keywords and operators customizable;
 - add style options for **lxfmt**
 
 , in order to provide a better developing experience.
@@ -928,11 +928,20 @@ Brackets are easier to type than parentheses on most of the keyboards.
 
 ---
 
-**Why using "<" and ">" for assignment and aliasing?**
+**Why using "<" and ">" for assignment and as?**
 
 The design is from three considerations. _1)_ Comparators such as "<", "<=", ">" or ">=" [have lower precedence](https://docs.python.org/3/reference/expressions.html#operator-precedence) than most of the other operators, thus allowing R-values without parentheses for most of the time; _2)_ in AST representation, chained comparators have a flat structure, which is easier to parse; _3)_ "<" and ">" visually illustrate the direction of data flows.
 
 The preference of "<" ">" over "<=" "=>" is that the previous ones consume only one character and are easier to type. Options may be included in the future to allow customized operators.
+
+---
+
+**Why use configuration file based keyword and operator aliasing instead of a programmatic approach?**
+
+The design is from two concerns.
+
+1. A programmatic approaches may cause inconsistency at runtime, which is difficult for troubleshooting. For example, if one declares the aliasing in `mod/__init__.py` and uses the new keywords in `mod/A.py`, the aliasing works fine if `mod/A.py` imported as `mod.A`, but fails if run as a standalone script.
+2. The compiler and formatter should behave consistently when processing the same file. If a programmatic approach used, the formatter must apply semantic analysis to figure out the aliasing rules, which is far more complicated.
 
 ---
 
