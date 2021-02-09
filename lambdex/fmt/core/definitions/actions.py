@@ -1,4 +1,4 @@
-from ..definitions import State
+from lambdex.fmt.core.definitions import State
 
 
 class BaseAction:

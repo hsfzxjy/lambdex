@@ -1,4 +1,4 @@
-from ...definitions import tk, TokenInfo
+from lambdex.fmt.core.definitions import tk, TokenInfo
 
 # A sentinel indicating an empty argument for `_make_key()`
 _empty = object()

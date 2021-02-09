@@ -1,7 +1,7 @@
 from typing import List
 
-from .._stream_base import _StreamWithLog
-from ..definitions import TokenInfo, tk, Context, A, actions, BTStream
+from lambdex.fmt.core._stream_base import _StreamWithLog
+from lambdex.fmt.core.definitions import TokenInfo, tk, Context, A, actions, BTStream
 
 from .rules import matcher
 from .builtins import tokenize as bltokenize

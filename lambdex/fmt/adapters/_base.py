@@ -4,10 +4,10 @@ import subprocess
 from functools import partial
 from typing import Sequence
 
-from ..jobs_meta import JobsMeta
-from ..core.api import FormatCode
-from ..utils.logger import getLogger
-from ..utils.io import StdinResource, FileResource, _ResourceBase
+from lambdex.fmt.jobs_meta import JobsMeta
+from lambdex.fmt.core.api import FormatCode
+from lambdex.fmt.utils.logger import getLogger
+from lambdex.fmt.utils.io import StdinResource, FileResource, _ResourceBase
 
 logger = getLogger(__name__)
 

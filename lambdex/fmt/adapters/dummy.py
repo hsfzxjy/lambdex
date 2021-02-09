@@ -3,11 +3,11 @@ from typing import Sequence
 import os
 import argparse
 
-from ..jobs_meta import JobsMeta
-from ..utils.io import FileResource, StdinResource
-from ..utils.logger import getLogger
-from ..utils.importlib import silent_import
-from ..core.api import FormatCode
+from lambdex.fmt.jobs_meta import JobsMeta
+from lambdex.fmt.utils.io import FileResource, StdinResource
+from lambdex.fmt.utils.logger import getLogger
+from lambdex.fmt.utils.importlib import silent_import
+from lambdex.fmt.core.api import FormatCode
 
 from ._base import BaseAdapter
 

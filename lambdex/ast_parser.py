@@ -17,7 +17,7 @@ def _shallow_match_ast(node, is_matched_fn):
         return
 
     # Adapted from `ast.walk`
-    for field, value in ast.iter_fields(node):
+    for _, value in ast.iter_fields(node):
         if isinstance(value, list):
             for item in value:
                 if isinstance(item, ast.AST):

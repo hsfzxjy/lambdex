@@ -1,6 +1,6 @@
 import sys
 
-from .. import adapters
+from lambdex.fmt import adapters
 from .opts import split_argv, build_parser
 
 

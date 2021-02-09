@@ -1,6 +1,6 @@
 from typing import Sequence, Union
 
-from ..definitions import TokenInfo, tk
+from lambdex.fmt.core.definitions import TokenInfo, tk
 
 
 def AsCode(tokenseq: Sequence[TokenInfo], *, encode=False) -> Union[str, bytes]:

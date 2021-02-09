@@ -1,7 +1,7 @@
-from ...utils.logger import getLogger
+from lambdex.fmt.utils.logger import getLogger
 
-from .._stream_base import _StreamWithLog
-from ..definitions import tk, A, TokenInfo, actions
+from lambdex.fmt.core._stream_base import _StreamWithLog
+from lambdex.fmt.core.definitions import tk, A, TokenInfo, actions
 
 logger = getLogger(__name__)
 

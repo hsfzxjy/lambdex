@@ -30,13 +30,13 @@ from io import TextIOWrapper
 import itertools as _itertools
 import re
 import sys
-from ...definitions import TokenInfo
-from ...definitions.token import *
+from lambdex.fmt.core.definitions import TokenInfo
+from lambdex.fmt.core.definitions.token import *
 
 cookie_re = re.compile(r'^[ \t\f]*#.*?coding[:=][ \t]*([-\w.]+)', re.ASCII)
 blank_re = re.compile(br'^[ \t\f]*(?:[#\r\n]|$)', re.ASCII)
 
-from ...definitions import token
+from lambdex.fmt.core.definitions import token
 __all__ = token.__all__ + ["tokenize", "generate_tokens", "detect_encoding",
                            "untokenize", "TokenInfo"]
 del token

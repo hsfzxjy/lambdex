@@ -1,6 +1,6 @@
 # In this module, we use aliases in a lazy way.
 from lambdex._aliases import _Aliases
-from ...definitions import State, Context, TokenInfo, tk, A, actions
+from lambdex.fmt.core.definitions import State, Context, TokenInfo, tk, A, actions
 
 from .matcher import matcher as m
 

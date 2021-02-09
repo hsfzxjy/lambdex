@@ -5,7 +5,7 @@ from functools import partial
 from lambdex._aliases import get_aliases, COMPARATORS
 aliases = get_aliases()
 
-from lambdex.utils.ast import *
+from lambdex.utils.ast import check_as, copy_lineinfo, check_compare, cast_to_lvalue
 from lambdex.utils.registry import FunctionRegistry
 
 from .context import Context, ContextFlag

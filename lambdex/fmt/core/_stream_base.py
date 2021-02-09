@@ -2,8 +2,8 @@ from typing import Sequence
 
 import abc
 
+from lambdex.fmt.utils.logger import getLogger, IS_DEBUG
 from .definitions import TokenInfo, actions
-from ..utils.logger import getLogger, IS_DEBUG
 
 
 class _StreamBase(abc.ABC):

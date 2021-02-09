@@ -1,8 +1,8 @@
 import sys
 import argparse
 
-from .. import adapters
-from ..utils.logger import getLogger
+from lambdex.fmt import adapters
+from lambdex.fmt.utils.logger import getLogger
 
 logger = getLogger(__name__)
 

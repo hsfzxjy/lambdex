@@ -2,7 +2,7 @@ from typing import List, Sequence, Optional
 
 from collections import deque
 
-from ...utils.logger import getLogger
+from lambdex.fmt.utils.logger import getLogger
 
 from .token_info import TokenInfo
 

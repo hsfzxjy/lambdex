@@ -4,7 +4,7 @@ import difflib
 import pathlib
 from io import BytesIO
 
-from ..jobs_meta import JobsMeta
+from lambdex.fmt.jobs_meta import JobsMeta
 
 
 def get_stdin() -> bytes:

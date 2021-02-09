@@ -2,10 +2,10 @@ from typing import Sequence
 
 import os
 
-from ..jobs_meta import JobsMeta
-from ..utils.io import _ResourceBase
-from ..utils.logger import getLogger
-from ..utils.importlib import silent_import
+from lambdex.fmt.jobs_meta import JobsMeta
+from lambdex.fmt.utils.io import _ResourceBase
+from lambdex.fmt.utils.logger import getLogger
+from lambdex.fmt.utils.importlib import silent_import
 
 from ._base import BaseAdapter
 

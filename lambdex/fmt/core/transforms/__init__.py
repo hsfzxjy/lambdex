@@ -1,6 +1,6 @@
 from typing import Sequence, Union
 
-from ..definitions import TokenInfo
+from lambdex.fmt.core.definitions import TokenInfo
 
 from .AsCode import AsCode
 from .Reindent import Reindent

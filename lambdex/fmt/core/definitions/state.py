@@ -1,6 +1,6 @@
 import enum
 
-from ....utils import compat
+from lambdex.utils import compat
 
 auto = compat.enum_auto()
 

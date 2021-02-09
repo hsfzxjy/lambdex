@@ -1,7 +1,7 @@
 import functools
 
-from ..definitions import tk, A, TokenInfo, actions
-from .._stream_base import _StreamWithLog
+from lambdex.fmt.core.definitions import tk, A, TokenInfo, actions
+from lambdex.fmt.core._stream_base import _StreamWithLog
 
 ANNOTATIONS_TO_DROP = frozenset([
     A.DECL_ARG_COMMA,

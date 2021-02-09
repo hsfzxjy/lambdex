@@ -1,4 +1,4 @@
-from ..tkutils.builtins import token as bltk
+from lambdex.fmt.core.tkutils.builtins import token as bltk
 
 __all__ = bltk.__all__ + ['ISMATCHED', 'EXACT_TOKEN_TYPES', 'WHITESPACE', 'SENTINEL']
 
@@ -28,7 +28,7 @@ bltk.tok_name.update({
     if isinstance(value, int) and not name.startswith('_')
 })
 
-from ..tkutils.builtins.token import *
-from ..tkutils.builtins.token import EXACT_TOKEN_TYPES
+from lambdex.fmt.core.tkutils.builtins.token import *
+from lambdex.fmt.core.tkutils.builtins.token import EXACT_TOKEN_TYPES
 
 del auto, bltk

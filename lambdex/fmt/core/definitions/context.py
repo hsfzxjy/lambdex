@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from ...utils.logger import getLogger
+from lambdex.fmt.utils.logger import getLogger
 
 from .state import State
 from .token_info import TokenInfo

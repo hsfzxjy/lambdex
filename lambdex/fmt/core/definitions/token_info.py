@@ -1,6 +1,6 @@
 from typing import Optional, Tuple, FrozenSet
 
-from ...utils.colored import colored, colorful
+from lambdex.fmt.utils.colored import colored, colorful
 
 from . import token as tk
 from .annotation import Annotation as A
