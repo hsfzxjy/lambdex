@@ -1,3 +1,15 @@
+## v0.3.0
+
+### Compiler
+
+**News** lambdex is now able to run in REPL! Currently three environments _built-in Python REPL_, _IDLE_ and _IPython (Jupyter)_ are supported.
+
+#### BugFix
+
+ - Top-level script checking in `lambdex/__init__.py` should check the first frame that contains no `'importlib'`. ([6e1dfb8](../../../commit/6e1dfb86ab77f5160bcc4d9fe9b5c2eeef862e8e))
+ - Top-level script checking in `lambdex/__init__.py` should not fail if `site.getusersitepackages` not available. ([f174187](../../../commit/f174187cccf4614d8a4afc4bcc328145c1bb4ded))
+ - `lambdex.utils.ast::ast_from_source` should not assume that lines are ending with line separators. ([e6aa950](../../../commit/e6aa9507abdade2479167abc1dec1c7cb5b4dbe5))
+
 ## v0.2.0
 
 ### Compiler
