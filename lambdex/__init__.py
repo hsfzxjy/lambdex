@@ -2,16 +2,6 @@ import os
 import sys
 
 
-def _sitepaths():
-    import site
-
-    if hasattr(site, 'getsitepackages'):
-        yield from site.getsitepackages()
-
-    if hasattr(site, 'getusersitepackages'):
-        yield site.getusersitepackages()
-
-
 def _is_run_as_script():
     """
     Check that whether lambdex is run as top-level script.
@@ -22,21 +12,17 @@ def _is_run_as_script():
     If the importer has any system prefixes, we assert that lambdex is run
     as top-level script.
     """
-    from os.path import dirname, abspath
+    from os.path import dirname
+    from .utils.sysinfo import get_importer_path, get_site_paths
 
-    f = sys._getframe(1)
-    while f is not None \
-        and f.f_code is not None \
-        and 'importlib' in f.f_code.co_filename:
-        f = f.f_back
+    importer_path = get_importer_path()
 
-    if not (f or f.f_code):
+    if not importer_path:
         return False
 
-    filename = abspath(f.f_code.co_filename)
-    for sitepath in _sitepaths():
+    for sitepath in get_site_paths():
         prefix = dirname(dirname(dirname(sitepath)))  # such as '/usr/local'
-        if filename.startswith(prefix):
+        if importer_path.startswith(prefix):
             return True
 
     return False
@@ -53,6 +39,6 @@ else:
     from .keywords import *
     from .keywords import __all__
 
-del os, sys, _sitepaths, _is_run_as_script
+del os, sys, _is_run_as_script
 
 __version__ = "0.3.0"
