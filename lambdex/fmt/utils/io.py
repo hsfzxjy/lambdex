@@ -69,6 +69,8 @@ class _ResourceBase(abc.ABC):
                     lineterm='',
                 )
             ) + '\n'
+        elif not self._meta.in_place and not content.endswith('\n'):
+            content += '\n'
 
         self._write_content(content)
 

@@ -7,6 +7,11 @@ import subprocess
 TEST_DIR = pathlib.Path(__file__).parent
 
 
+def _pad(string):
+    if not string.endswith('\n'): string += '\n'
+    return string
+
+
 def _test_cases():
     fmt_samples_dir = TEST_DIR / 'fmt_samples'
     for src in fmt_samples_dir.glob('*.src.py'):
@@ -24,7 +29,7 @@ def _build_test_func(src, dst):
         )
         stdout, stderr = p.communicate()
         output = stdout.decode()
-        desired_output = dst.read_text()
+        desired_output = _pad(dst.read_text())
         self.assertEqual(p.returncode, 0, msg='STDERR:\n' + stderr.decode())
         self.assertEqual(output, desired_output)
 
