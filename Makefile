@@ -8,5 +8,7 @@ test_fmt:
 	${PY} -m unittest discover tests/fmt/
 test_repl_builtin:
 	${PY} -m unittest tests/repl/*builtin*
+test_repl_ipython:
+	${PY} -m unittest tests/repl/*ipython*
 test_repl_idle:
 	${PY} -m unittest tests/repl/*idle*
