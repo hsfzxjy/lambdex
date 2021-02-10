@@ -15,9 +15,9 @@ if os.name == 'nt':
     SCRIPT_TEMPLATE = '''
         @echo off
         REM {comment}
-        setlocal
-        set PYTHONPATH={lambdex_root};%PYTHONPATH% && {py_interpreter} -m lambdex.fmt %* -- -b {formatter_type} -e {formatter_path}
-        endlocal
+        set PYTHONPATH={lambdex_root};%PYTHONPATH%
+        set LXALIAS=on
+        {py_interpreter} -m lambdex.fmt %* -- -b {formatter_type} -e {formatter_path}
         @echo on
         '''
 else:
