@@ -1,3 +1,15 @@
+# v0.5.0
+
+## What's New
+
+Now we can access to the current lambdex via the `callee_` keyword!
+
+## BugFix
+
+### Compiler
+
+- `lambdex.utils.ast::source_from_ast` should consider the probability that garbadge remains at the end of the source. ([accc5a7](../../commit/accc5a7a1cf59c7d60558ed527b226fc3814b37a))
+
 # v0.4.1
 
 ## BugFix
