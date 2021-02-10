@@ -1,3 +1,10 @@
+# v0.6.0
+
+## What's New
+
+- Finally comes the corontine syntax! **lambdex** now supports the keywords `async_def_`, `async_with_`, `async_for_` and `await_`.
+- Customized language features are now available! You can enable specific features to fit a preferrable style.
+
 # v0.5.0
 
 ## What's New
