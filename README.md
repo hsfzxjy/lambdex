@@ -24,7 +24,7 @@ Compared with ordinary lambda, which only allows single expression as body, lamb
 - [More about lambdex](#more-about-lambdex)
 - [Installation & Usage](#installation--usage)
 - [Running in an REPL](#running-in-an-repl)
-- [Supported Features](#supported-features)
+- [Language Features](#language-features)
   - [Parameters](#parameters)
   - [Variable assignment](#variable-assignment)
   - [Conditional statement](#conditional-statement)
@@ -32,14 +32,16 @@ Compared with ordinary lambda, which only allows single expression as body, lamb
   - [With statement](#with-statement)
   - [Try statement](#try-statement)
   - [Yield statement](#yield-statement)
+  - [Async and Await](#async-and-await)
   - [Miscellaneous](#miscellaneous)
   - [Nested lambdexes](#nested-lambdexes)
   - [Recursion](#recursion)
-  - [Bytecode caching](#bytecode-caching)
-  - [Detailed compile-time and runtime error](#detailed-compile-time-and-runtime-error)
-- [Declaration Disambiguity](#declaration-disambiguity)
-- [Keyword and Operator Aliasing](./docs/Customization.md#keyword-and-operator-aliasing)
-- [Code Formatting](#code-formatting)
+- [Declaration Disambiguity **[NOTE]**](#declaration-disambiguity)
+- [Bytecode Caching](#bytecode-caching)
+- [Detailed Compile-time and Runtime Error](#detailed-compile-time-and-runtime-error)
+- [Keyword and Operator Aliasing **[CUSTOM]**](#keyword-and-operator-aliasing)
+- [Language Extension **[CUSTOM]**](#language-extension)
+- [Code Formatting **[TOOL]**](#code-formatting)
   - [Standalone lambdex formatter](#standalone-lambdex-formatter)
   - [Lambdex formatter as post-processor](#lambdex-formatter-as-post-processor)
   - [Mocking existing formatter executable](#mocking-existing-formatter-executable)
@@ -101,7 +103,7 @@ The statement should be executed **at the beginning** to ensure that correspondi
 
 Currently **lambdex** has been well tested on 3 REPL environments: the built-in Python REPL, IDLE and IPython (Jupyter). Other REPL may or may not be supported.
 
-## Supported Features
+## Language Features
 
 We are going to explore a wide range of features supported by **lambdex** in the following sections.
 
@@ -511,6 +513,35 @@ def anonymous():
 
 </details>
 
+### Async and Await
+
+**lambdex** supports coroutines by keywords `async_def_`, `async_for_`, `async_with_` and `await_`.
+
+<details open>
+    <summary><em>show code</em></summary>
+
+```python
+from lambdex import async_def_
+async_def_(lambda: [
+    async_for_[a in b] [ ... ],
+    async_with_[a > b] [ ... ],
+    await_[a],
+])
+```
+
+</details>
+<details>
+    <summary><em>show equivalent function</em></summary>
+
+```python
+async def anonymous():
+    async for a in b: ...
+    async with a as b: ...
+    await a
+```
+
+</details>
+
 ### Miscellaneous
 
 Lambdexes support some other keywords in Python too.
@@ -685,7 +716,33 @@ f1 is f2  # True
 f3 is f   # True
 ```
 
-### Bytecode caching
+## Declaration Disambiguity
+
+We are going to discuss an edge case in this section.
+
+Suppose you are running the following code:
+
+```python
+f1, f2 = def_(lambda a, b: [return_[a + b]]), def_(lambda a, b: [return_[a * b]])
+```
+
+The code yields an exception `SyntaxError: ambiguious declaration 'def_'`.
+
+What's going on here? The problem is that **there are more than one lambdexes defined on the same line**. Since CPython provides no effective way but a line number for locating a given lambda, the lambdex compiler fails to obtain the source code of the lambda in this case. A workaround is to prepend an identifier after `def_` of lambdex:
+
+```python
+f1, f2 = def_.f1(lambda a, b: [return_[a + b]]), def_.f2(lambda a, b: [return_[a * b]])
+```
+
+With this, the compiler can now tell them from each other.
+
+In the example above, it's not necessary to add identifier for both lambdexes. The following is also acceptable, as long as their declarations are different:
+
+```python
+f1, f2 = def_.f1(lambda a, b: [return_[a + b]]), def_(lambda a, b: [return_[a * b]])
+```
+
+## Bytecode Caching
 
 Each lambdex will be compiled at the time `def_(...)` is executed, and only compiled once. The bytecode of lambdex will be cached and reused in the future execution.
 
@@ -707,9 +764,9 @@ f2()  # 2
 
 The feature ensures no redundant computation is done when compiling lambdexes sharing the same lexical context.
 
-### Detailed compile-time and runtime error
+## Detailed Compile-time and Runtime Error
 
-**lambdex** well preserves information of source code such as line number or token offsets. The information are used to provide detailed messages when error occurs.
+**lambdex** preserves information of source code such as line number or token offsets. The information are used to provide detailed messages when error occurs.
 
 For example, the following code mis-types else\_ as els\_:
 
@@ -764,31 +821,89 @@ Traceback (most recent call last):
 ZeroDivisionError: division by zero
 ```
 
-## Declaration Disambiguity
+## Keyword and Operator Aliasing
 
-We are going to discuss an edge case in this section.
+If you don't like the default keywords or operators, **lambdex** allows you to use alternative ones. See the [doc](./docs/Customization.md#keyword-and-operator-aliasing) for detailed configuration.
 
-Suppose you are running the following code:
+## Language Extension
 
-```python
-f1, f2 = def_(lambda a, b: [return_[a + b]]), def_(lambda a, b: [return_[a * b]])
-```
+**lambdex** allows you to customize some of the syntax. For how to enable specific extension, please forward to the [doc](./docs/Customization.md#language-extension).
 
-The code yields an exception `SyntaxError: ambiguious declaration 'def_'`.
+Currently the following ones are supported:
 
-What's going on here? The problem is that **there are more than one lambdexes defined on the same line**. Since CPython provides no effective way but a line number for locating a given lambda, the lambdex compiler fails to obtain the source code of the lambda in this case. A workaround is to prepend an identifier after `def_` of lambdex:
+---
 
-```python
-f1, f2 = def_.f1(lambda a, b: [return_[a + b]]), def_.f2(lambda a, b: [return_[a * b]])
-```
+**await_attribute**
 
-With this, the compiler can now tell them from each other.
+With this enabled, you can use Rust-style await expressions.
 
-In the example above, it's not necessary to add identifier for both lambdexes. The following is also acceptable, as long as their declarations are different:
+<details open>
+    <summary><em>show code</em></summary>
 
 ```python
-f1, f2 = def_.f1(lambda a, b: [return_[a + b]]), def_(lambda a, b: [return_[a * b]])
+async_def_(lambda: [
+    a.await_.b.await_.c,
+])
 ```
+
+</details>
+<details>
+    <summary><em>show equivalent function</em></summary>
+
+```python
+async def anonymous():
+    (await (await a).b).c
+```
+
+</details>
+
+---
+
+**implicit_return**
+
+With this enabled, the last statement of a function body will be regarded as the return value.
+
+<details open>
+    <summary><em>show code</em></summary>
+
+```python
+def_(lambda: [
+    1 + 1
+])
+```
+
+</details>
+<details>
+    <summary><em>show equivalent function</em></summary>
+
+```python
+def anonymous():
+    return 1 + 1
+```
+
+</details>
+
+But be careful that this doesn't apply to assignments at the last:
+
+<details open>
+    <summary><em>show code</em></summary>
+
+```python
+def_(lambda: [
+    a < 1
+])
+```
+
+</details>
+<details>
+    <summary><em>show equivalent function</em></summary>
+
+```python
+def anonymous():
+    a = 1
+```
+
+</details>
 
 ## Code Formatting
 
@@ -931,14 +1046,13 @@ Mocking a formatter backend could be very useful when you want to enable lambdex
 
 Currently lambdex doesn't support:
 
-1. coroutines (async functions)
-2. augmented assignments like `+=`, `-=`, etc.
-3. type annotation
-4. `import` statements
+1. augmented assignments like `+=`, `-=`, etc.
+2. type annotation
+3. `import` statements
 
-Coroutines [1] support is guaranteed to add in the future. Augmented assignments [2] support is planned, but no suitable solution for the operators yet.
+Augmented assignments [1] support is planned, but no suitable solution for the operators yet.
 
-Type annotation [3] and `import` statements [4] will not be supported.
+Type annotation [2] and `import` statements [3] will not be supported.
 
 Lambdexes also violate linters, which is inevitable.
 
@@ -960,8 +1074,7 @@ Brackets are easier to type than parentheses on most of the keyboards.
 
 The design is from three considerations. _1)_ Comparators such as "<", "<=", ">" or ">=" [have lower precedence](https://docs.python.org/3/reference/expressions.html#operator-precedence) than most of the other operators, thus allowing R-values without parentheses for most of the time; _2)_ in AST representation, chained comparators have a flat structure, which is easier to parse; _3)_ "<" and ">" visually illustrate the direction of data flows.
 
-The preference of "<" ">" over "<=" "=>" is that the previous ones consume only one character and are easier to type. Options may be included in the future to allow customized operators.
-
+The preference of "<" ">" over "<=" "=>" is that the previous ones consume only one character and are easier to type. 
 ---
 
 **Why use configuration file based keyword and operator aliasing instead of a programmatic approach?**

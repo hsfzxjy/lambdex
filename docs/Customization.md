@@ -4,6 +4,11 @@
 
 If you want to completely disable customization, simply set environment variable `LXNOCFG=1`.
 
+List of environment variables that affect the behavior of **lambdex**:
+
+- `LXNOCFG=1` disables any customization;
+- `LXALIAS=1` enableds keyword and operator aliasing.
+
 ## Config File Resolving
 
 **lambdex** will search for the config file in the directories specified below:
@@ -117,9 +122,25 @@ nonlocal_   = nonlocal_
 break_      = break_
 continue_   = continue_
 callee_     = callee_
+async_def_  = async_def_
+async_with_ = async_with_
+async_for_  = async_for_
+await_      = await_
 
 # Operators
 # From now on, the fields should start with captialized letters
 Assignment   = <
 As           = >
+```
+
+## Language Extension
+
+Extensions should be specified in the `[features]` section in `.lambdex.cfg`. To turn on a specific feature, simply set the entry to `ON`.
+
+Full list of extensions goes here:
+
+```ini
+[features]
+await_attribute = OFF
+implicit_return = OFF
 ```
