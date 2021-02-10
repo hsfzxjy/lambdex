@@ -56,8 +56,8 @@ def lambda_to_ast(lambda_object: typing.Callable, *, keyword: str, identifier: s
     Returns the AST of `lambda_object`.
     """
     tree = ast_from_source(lambda_object, keyword)
-    if isinstance(tree, ast.Expr) and isinstance(tree.value, ast.Lambda):
-        return tree.value
+    if isinstance(tree, ast.Expr):
+        assert not isinstance(tree.value, ast.Lambda)
 
     pattern = _make_pattern(keyword, identifier)
     matched = list(_shallow_match_ast(tree, pattern))
