@@ -68,14 +68,31 @@ def _wrap_code_object(code_obj, lambda_func, lambdex_ast_node):
     with code object whose `co_freevars` copied from
     `lambda_func.__code__.co_freevars`.
     """
-    code_obj = compat.code_replace(code_obj, co_freevars=lambda_func.__code__.co_freevars)
+
+    # Append code object name to its co_freevars, so that lambdex
+    # can always access itself via its name `anonymous_...`
+    name = code_obj.co_name
+    code_obj = compat.code_replace(
+        code_obj,
+        co_freevars=lambda_func.__code__.co_freevars + (name, ),
+    )
+
+    # Trick: Obtain a cell object referencing current function, by
+    # constructing a new function and extract its closure.
+    callee_ref_cells = (lambda: ret).__closure__
+
+    # We should append a cell referencing current function to the new closure.
+    if lambda_func.__closure__ is None:
+        new_closure = callee_ref_cells
+    else:
+        new_closure = lambda_func.__closure__ + callee_ref_cells
 
     ret = types.FunctionType(
         code=code_obj,
         globals=lambda_func.__globals__,
-        name=code_obj.co_name,
+        name=name,
         argdefs=lambda_func.__defaults__,
-        closure=lambda_func.__closure__,
+        closure=new_closure,
     )
 
     if __DEBUG__:
@@ -114,35 +131,34 @@ def compile_lambdex(declarer):
     )
 
     freevars = lambda_func.__code__.co_freevars  # name of nonlocal variables
+    # A name in `lambdex_node` should be compiled as nonlocal instead of
+    # global (default) if it appears in `freevars`.
+    #
+    # This is done by wrapping `lambdex_node` in another FunctionDef, and
+    # let names in `freevars` become local variables in the wrapper.
+    wrapper_name = context.select_name_and_use('wrapper')
     if freevars:
-        # A name in `lambdex_node` should be compiled as nonlocal instead of
-        # global (default) if it appears in `freevars`.
-        #
-        # This is done by wrapping `lambdex_node` in another FunctionDef, and
-        # let names in `freevars` become local variables in the wrapper.
-        wrapper_name = context.select_name_and_use('wrapper')
-        wrapper_node = ast.FunctionDef(
-            name=wrapper_name,
-            args=empty_arguments,
-            body=[
-                ast.Assign(
-                    targets=[ast.Name(id=name, ctx=ast.Store()) for name in freevars],
-                    value=None_node,
-                ),
-                lambdex_node,
-            ],
-            decorator_list=[],
-            returns=None,
-        )
-        module_node = ast.Module(
-            body=[wrapper_node],
-            type_ignores=[],
-        )
+        wrapper_body = [
+            ast.Assign(
+                targets=[ast.Name(id=name, ctx=ast.Store()) for name in freevars],
+                value=None_node,
+            ),
+            lambdex_node,
+        ]
     else:
-        module_node = ast.Module(
-            body=[lambdex_node],
-            type_ignores=[],
-        )
+        wrapper_body = [lambdex_node]
+
+    wrapper_node = ast.FunctionDef(
+        name=wrapper_name,
+        args=empty_arguments,
+        body=wrapper_body,
+        decorator_list=[],
+        returns=None,
+    )
+    module_node = ast.Module(
+        body=[wrapper_node],
+        type_ignores=[],
+    )
     module_node = ast.fix_missing_locations(module_node)
 
     if __DEBUG__:
@@ -153,14 +169,13 @@ def compile_lambdex(declarer):
     else:
         module_code = compile(module_node, lambda_func.__code__.co_filename, 'exec')
 
-    if freevars:
-        # unwrap the outer FunctionDef.
-        # since no other definition in the module, it should be co_consts[0]
-        module_code = module_code.co_consts[0]
+    # unwrap the outer FunctionDef.
+    # since no other definition in the module, it should be co_consts[0]
+    wrapper_code = module_code.co_consts[0]
 
     # the desired code object should be in `module_code.co_consts`
     # we use `.co_name` to identify
-    for obj in module_code.co_consts:
+    for obj in wrapper_code.co_consts:
         if inspect.iscode(obj) and obj.co_name == lambdex_node.name:
             lambdex_code = obj
             break

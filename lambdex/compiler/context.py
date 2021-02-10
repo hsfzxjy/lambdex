@@ -36,9 +36,10 @@ del auto
 
 
 class Frame:
-    __slots__ = ['detached_functions']
+    __slots__ = ['detached_functions', 'name']
 
     def __init__(self):
+        self.name = None
         self.detached_functions = []
 
 

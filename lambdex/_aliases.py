@@ -32,6 +32,7 @@ _Aliases = namedtuple(
         'nonlocal_',
         'break_',
         'continue_',
+        'callee_',
         # From now on, the fields should start with captialized letters
         'Assignment',
         'As'

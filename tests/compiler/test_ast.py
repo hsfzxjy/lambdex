@@ -957,3 +957,23 @@ class TestAST(unittest.TestCase):
             lambda: [return_[1]]
 
         self.assert_ast_like(f, target)
+
+    def test_callee(self):
+        f = def_(lambda: [
+            return_[callee_],
+        ])
+
+        self.assertIs(f, f())
+
+    def test_inner_callee(self):
+        f = def_(lambda: [
+            inner < def_(lambda: [
+                return_[callee_]
+            ]),
+            inner_callee < inner(),
+            return_[inner, inner_callee, callee_],
+        ])
+
+        fi, fic, c = f()
+        self.assertIs(fi, fic)
+        self.assertIs(f, c)

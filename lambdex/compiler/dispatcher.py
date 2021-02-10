@@ -42,6 +42,9 @@ def disp_Call(node: ast.Call, ctx: Context, flag: ContextFlag):
 
 @Dispatcher.register(ast.Name)
 def disp_Name(node: ast.Name, ctx: Context, flag: ContextFlag):
+    if node.id == aliases.callee_:
+        return RuleMeta('callee', ())
+
     if flag == ContextFlag.should_be_expr:
         mapping = {
             aliases.yield_: ast.Yield,

@@ -39,6 +39,11 @@ def _compile_stmts(ctx: Context, stmts):
     return compiled_statements
 
 
+@Rules.register('callee')
+def r_callee(node: ast.Name, ctx: Context):
+    return copy_lineinfo(node, ast.Name(id=ctx.frame.name, ctx=node.ctx))
+
+
 @Rules.register((ast.Lambda, ContextFlag.outermost_lambdex))
 def r_lambda(node: ast.Lambda, ctx: Context):
     ctx.assert_is_instance(node.body, ast.List, "expect '['")
@@ -46,13 +51,14 @@ def r_lambda(node: ast.Lambda, ctx: Context):
     statements = node.body  # type: ast.List
 
     ctx.push_frame()
+    ctx.frame.name = func_name = ctx.select_name_and_use('anonymous')
 
     ctx.assert_(statements.elts, 'empty body', statements)
     compiled_statements = _compile_stmts(ctx, statements.elts)
     detached_functions = ctx.frame.detached_functions
 
     new_function = ast.FunctionDef(
-        name=ctx.select_name_and_use('anonymous'),
+        name=func_name,
         args=node.args,
         body=detached_functions + compiled_statements,
         decorator_list=[],
