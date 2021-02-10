@@ -2,7 +2,7 @@ from . import ast_parser, compiler, _aliases
 
 aliases = _aliases.get_aliases()
 
-__all__ = [aliases.def_]
+__all__ = [aliases.def_, aliases.async_def_]
 
 
 class Declarer:
@@ -64,3 +64,4 @@ class Declarer:
 
 
 globals()[aliases.def_] = Declarer(aliases.def_)
+globals()[aliases.async_def_] = Declarer(aliases.async_def_)

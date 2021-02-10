@@ -2,9 +2,9 @@ import unittest
 
 from astcheck import assert_ast_like
 
-from lambdex.keywords import def_
+from lambdex.keywords import *
 from lambdex.compiler import core
-from lambdex.utils.ast import ast_from_source, pformat, pprint, recursively_set_attr
+from lambdex.utils.ast import ast_from_source, pformat, pprint, recursively_set_attr, is_coroutine_ast
 
 
 class TestAST(unittest.TestCase):
@@ -17,7 +17,11 @@ class TestAST(unittest.TestCase):
     def assert_ast_like(self, f, target):
         ast_f = f.__ast__
         recursively_set_attr(ast_f, 'type_comment', None)
-        ast_target = ast_from_source(target, 'def')
+        if is_coroutine_ast(ast_f):
+            keyword = 'async def'
+        else:
+            keyword = 'def'
+        ast_target = ast_from_source(target, keyword)
         ast_target.name = ast_f.name
 
         try:
@@ -977,3 +981,49 @@ class TestAST(unittest.TestCase):
         fi, fic, c = f()
         self.assertIs(fi, fic)
         self.assertIs(f, c)
+
+    def test_async_def(self):
+        f = async_def_(lambda: [
+            a < 1
+        ])
+
+        async def target():
+            a = 1
+
+        self.assert_ast_like(f, target)
+
+    def test_async_for(self):
+        f = async_def_(lambda: [
+            async_for_[i in range(10)] [
+                pass_
+            ]
+        ])
+
+        async def target():
+            async for i in range(10):
+                pass
+
+        self.assert_ast_like(f, target)
+
+    def test_async_with(self):
+        f = async_def_(lambda: [
+            async_with_[a > b] [
+                pass_
+            ]
+        ])
+
+        async def target():
+            async with a as b:
+                pass
+
+        self.assert_ast_like(f, target)
+
+    def test_await(self):
+        f = async_def_(lambda: [
+            await_[a]
+        ])
+
+        async def target():
+            await a
+
+        self.assert_ast_like(f, target)

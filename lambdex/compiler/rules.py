@@ -3,9 +3,17 @@ import inspect
 from functools import partial
 
 from lambdex._aliases import get_aliases, COMPARATORS
+from lambdex._features import get_features
 aliases = get_aliases()
+features = get_features()
 
-from lambdex.utils.ast import check_as, copy_lineinfo, check_compare, cast_to_lvalue
+from lambdex.utils.ast import (
+    check_as,
+    copy_lineinfo,
+    check_compare,
+    cast_to_lvalue,
+    is_coroutine_ast,
+)
 from lambdex.utils.registry import FunctionRegistry
 
 from .context import Context, ContextFlag
@@ -44,20 +52,26 @@ def r_callee(node: ast.Name, ctx: Context):
     return copy_lineinfo(node, ast.Name(id=ctx.frame.name, ctx=node.ctx))
 
 
-@Rules.register((ast.Lambda, ContextFlag.outermost_lambdex))
-def r_lambda(node: ast.Lambda, ctx: Context):
+def r_lambda(node: ast.Lambda, ctx: Context, constructor):
     ctx.assert_is_instance(node.body, ast.List, "expect '['")
 
     statements = node.body  # type: ast.List
 
     ctx.push_frame()
+    ctx.frame.is_async = is_coroutine_ast(constructor)
     ctx.frame.name = func_name = ctx.select_name_and_use('anonymous')
 
     ctx.assert_(statements.elts, 'empty body', statements)
     compiled_statements = _compile_stmts(ctx, statements.elts)
     detached_functions = ctx.frame.detached_functions
 
-    new_function = ast.FunctionDef(
+    if features.implicit_return:
+        last_stmt = compiled_statements[-1]
+        if isinstance(last_stmt, ast.Expr):
+            last_stmt = copy_lineinfo(last_stmt, ast.Return(value=last_stmt.value))
+            compiled_statements[-1] = last_stmt
+
+    new_function = constructor(
         name=func_name,
         args=node.args,
         body=detached_functions + compiled_statements,
@@ -79,16 +93,19 @@ def r_simple_lambda(node: ast.Call, ctx: Context):
 
 
 @Rules.register((ast.FunctionDef, ContextFlag.outermost_lambdex))
-def r_def(node: ast.Call, ctx: Context):
+@Rules.register((ast.AsyncFunctionDef, ContextFlag.outermost_lambdex))
+def r_def(node: ast.Call, ctx: Context, rule_id):
     ctx.assert_(node.args, "expect 'lambda' in '()'", node.func)
     ctx.assert_is_instance(node.args[0], ast.Lambda, "expect 'lambda'")
-    return r_lambda(node.args[0], ctx)
+    return r_lambda(node.args[0], ctx, rule_id[0])
 
 
 @Rules.register((ast.FunctionDef, ContextFlag.should_be_expr))
 @Rules.register((ast.FunctionDef, ContextFlag.should_be_stmt))
-def r_inner_def(node: ast.Call, ctx: Context):
-    FunctionDef_node = r_def(node, ctx)
+@Rules.register((ast.AsyncFunctionDef, ContextFlag.should_be_expr))
+@Rules.register((ast.AsyncFunctionDef, ContextFlag.should_be_stmt))
+def r_inner_def(node: ast.Call, ctx: Context, rule_id):
+    FunctionDef_node = r_def(node, ctx, rule_id)
     ctx.frame.detached_functions.append(FunctionDef_node)
 
     return ast.Name(id=FunctionDef_node.name, ctx=ast.Load())
@@ -145,7 +162,8 @@ def r_if(node: ast.Subscript, ctx: Context, clauses: list):
 
 
 @Rules.register(ast.For)
-def r_for(node: ast.Subscript, ctx: Context, clauses: list):
+@Rules.register(ast.AsyncFor)
+def r_for(node: ast.Subscript, ctx: Context, clauses: list, rule_id):
     ctx.assert_clause_num_at_most(clauses, 2)
 
     ctx.assert_head(clauses[0])
@@ -165,7 +183,7 @@ def r_for(node: ast.Subscript, ctx: Context, clauses: list):
 
     return copy_lineinfo(
         node,
-        ast.For(
+        rule_id(
             target=target,
             iter=ctx.compile(iter_item),
             body=_compile_stmts(ctx, clauses[0].body),
@@ -237,7 +255,8 @@ def r_single_keyword_stmt(node: ast.Name, ctx: Context, rule_type):
 
 
 @Rules.register(ast.With)
-def r_with(node: ast.Subscript, ctx: Context, clauses: list):
+@Rules.register(ast.AsyncWith)
+def r_with(node: ast.Subscript, ctx: Context, clauses: list, rule_id):
     ctx.assert_clause_num_at_most(clauses, 1)
 
     with_clause = clauses[0]
@@ -254,7 +273,7 @@ def r_with(node: ast.Subscript, ctx: Context, clauses: list):
 
     return copy_lineinfo(
         node,
-        ast.With(
+        rule_id(
             items=items,
             body=_compile_stmts(ctx, with_clause.body),
         ),
@@ -390,3 +409,22 @@ def r_scoping(node: ast.Subscript, ctx: Context, clauses: list, rule_id):
         node,
         rule_id(names=names),
     )
+
+
+@Rules.register(ast.Await)
+def r_await(node: ast.Subscript, ctx: Context, clauses: list):
+    ctx.assert_clause_num_at_most(clauses, 2)
+
+    await_clause = clauses[0]
+    ctx.assert_no_head(await_clause)
+    ctx.assert_single_body(await_clause)
+    value = ctx.compile(await_clause.unwrap_body())
+
+    return copy_lineinfo(node, ast.Await(value=value))
+
+
+# Rust style await
+@Rules.register((ast.Await, ast.Attribute))
+def r_await(node: ast.Attribute, ctx: Context):
+    value = ctx.compile(node.value)
+    return copy_lineinfo(node, ast.Await(value=value))

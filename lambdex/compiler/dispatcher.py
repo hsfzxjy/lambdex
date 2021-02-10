@@ -2,7 +2,9 @@ import ast
 from collections import namedtuple
 
 from lambdex._aliases import get_aliases
+from lambdex._features import get_features
 aliases = get_aliases()
+features = get_features()
 
 from lambdex.utils.registry import FunctionRegistry
 from .clauses import match_clauses
@@ -36,6 +38,7 @@ def disp_Call(node: ast.Call, ctx: Context, flag: ContextFlag):
 
     ast_type = {
         aliases.def_: ast.FunctionDef,
+        aliases.async_def_: ast.AsyncFunctionDef,
     }.get(name)
     return RuleMeta((ast_type, flag), ())
 
@@ -64,14 +67,14 @@ def disp_Name(node: ast.Name, ctx: Context, flag: ContextFlag):
     if rule_type is not None:
         return RuleMeta('single_keyword_stmt', (rule_type, ))
 
-    return RuleMeta(None, ())
+    return EMPTY_RULE
 
 
 @Dispatcher.register(ast.Subscript)
 def disp_Subscript(node: ast.Subscript, ctx: Context, flag: ContextFlag):
     clauses = match_clauses(node, ctx.raise_)
     if clauses is None:
-        return RuleMeta(None, ())
+        return EMPTY_RULE
 
     ast_type = {
         aliases.return_: ast.Return,
@@ -85,14 +88,30 @@ def disp_Subscript(node: ast.Subscript, ctx: Context, flag: ContextFlag):
         aliases.yield_from_: ast.YieldFrom,
         aliases.global_: ast.Global,
         aliases.nonlocal_: ast.Nonlocal,
+        aliases.async_for_: ast.AsyncFor,
+        aliases.async_with_: ast.AsyncWith,
+        aliases.await_: ast.Await,
     }.get(clauses[0].name)
 
+    ctx.check_coroutine(ast_type, clauses[0].node, clauses[0].name)
+
     return RuleMeta(ast_type, (clauses, ))
+
+
+if features.await_attribute:
+
+    @Dispatcher.register(ast.Attribute)
+    def disp_Attribute(node: ast.Attribute, ctx: Context, flag: ContextFlag):
+        if node.attr != aliases.await_:
+            return EMPTY_RULE
+
+        ctx.check_coroutine(ast.Await, node, aliases.await_)
+        return RuleMeta((ast.Await, ast.Attribute), ())
 
 
 @Dispatcher.register(ast.Compare)
 def disp_Compare(node: ast.Compare, ctx: Context, flag: ContextFlag):
     if flag != ContextFlag.should_be_stmt:
-        return RuleMeta(None, ())
+        return EMPTY_RULE
 
     return RuleMeta(ast.Assign, ())

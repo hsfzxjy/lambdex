@@ -26,6 +26,11 @@ def r(ctx: Context, token: TokenInfo):
 @m(exact_type=tk.NAME, string=_Aliases.def_, last_state=State.IN_LBDX_CLS_HEAD)
 @m(exact_type=tk.NAME, string=_Aliases.def_, last_state=State.IN_LBDX_CLS_BODY)
 @m(exact_type=tk.NAME, string=_Aliases.def_, last_state=State.IN_LBDX_BODY_LIST)
+@m(exact_type=tk.NAME, string=_Aliases.async_def_, last_state=State.UNKNOWN)
+@m(exact_type=tk.NAME, string=_Aliases.async_def_, last_state=State.IN_LBDX_LAMBDA)
+@m(exact_type=tk.NAME, string=_Aliases.async_def_, last_state=State.IN_LBDX_CLS_HEAD)
+@m(exact_type=tk.NAME, string=_Aliases.async_def_, last_state=State.IN_LBDX_CLS_BODY)
+@m(exact_type=tk.NAME, string=_Aliases.async_def_, last_state=State.IN_LBDX_BODY_LIST)
 def r(ctx: Context, token: TokenInfo):
     ctx.push_state(State.EXPECT_LBDX_LPAR)
 
@@ -144,11 +149,15 @@ def r(ctx: Context, token: TokenInfo):
 
 @m(exact_type=tk.NAME, string=_Aliases.if_, last_state=State.IN_LBDX_BODY_LIST)
 @m(exact_type=tk.NAME, string=_Aliases.with_, last_state=State.IN_LBDX_BODY_LIST)
+@m(exact_type=tk.NAME, string=_Aliases.async_with_, last_state=State.IN_LBDX_BODY_LIST)
 @m(exact_type=tk.NAME, string=_Aliases.for_, last_state=State.IN_LBDX_BODY_LIST)
+@m(exact_type=tk.NAME, string=_Aliases.async_for_, last_state=State.IN_LBDX_BODY_LIST)
 @m(exact_type=tk.NAME, string=_Aliases.while_, last_state=State.IN_LBDX_BODY_LIST)
 @m(exact_type=tk.NAME, string=_Aliases.if_, last_state=State.IN_LBDX_CLS_BODY)
 @m(exact_type=tk.NAME, string=_Aliases.with_, last_state=State.IN_LBDX_CLS_BODY)
+@m(exact_type=tk.NAME, string=_Aliases.async_with_, last_state=State.IN_LBDX_CLS_BODY)
 @m(exact_type=tk.NAME, string=_Aliases.for_, last_state=State.IN_LBDX_CLS_BODY)
+@m(exact_type=tk.NAME, string=_Aliases.async_for_, last_state=State.IN_LBDX_CLS_BODY)
 @m(exact_type=tk.NAME, string=_Aliases.while_, last_state=State.IN_LBDX_CLS_BODY)
 def r(ctx: Context, token: TokenInfo):
     ctx.push_state(State.EXPECT_CLS_HEAD_LSQB)

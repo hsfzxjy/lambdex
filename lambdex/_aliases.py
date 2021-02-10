@@ -33,6 +33,13 @@ _Aliases = namedtuple(
         'break_',
         'continue_',
         'callee_',
+
+        # Coroutines related
+        'async_def_',
+        'async_with_',
+        'async_for_',
+        'await_',
+
         # From now on, the fields should start with captialized letters
         'Assignment',
         'As'

@@ -21,6 +21,7 @@ __all__ = [
     'cast_to_lvalue',
     'check_compare',
     'check_as',
+    'is_coroutine_ast',
     'empty_arguments',
     'None_node',
 ]
@@ -253,6 +254,14 @@ def check_as(ctx, node: ast.expr, as_op, *, rhs_is_identifier=False):
     else:
         ctx.assert_lvalue(rhs)
         return lhs, cast_to_lvalue(rhs)
+
+
+def is_coroutine_ast(x):
+    """
+    Check if `x` is coroutine AST node or AST type. 
+    """
+    if isinstance(x, ast.AST): x = type(x)
+    return x in (ast.AsyncFunctionDef, ast.AsyncWith, ast.AsyncFor, ast.Await)
 
 
 empty_arguments = ast.arguments(

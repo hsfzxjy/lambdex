@@ -3,7 +3,7 @@ import random
 from functools import partial
 
 from lambdex.utils import compat
-from lambdex.utils.ast import is_lvalue
+from lambdex.utils.ast import is_lvalue, is_coroutine_ast
 
 from . import error
 
@@ -36,10 +36,11 @@ del auto
 
 
 class Frame:
-    __slots__ = ['detached_functions', 'name']
+    __slots__ = ['detached_functions', 'name', 'is_async']
 
     def __init__(self):
         self.name = None
+        self.is_async = False
         self.detached_functions = []
 
 
@@ -144,3 +145,11 @@ class Context:
     def assert_lvalue(self, node):
         check_result, failed_at = is_lvalue(node)
         self.assert_(check_result, EM_NOT_LVALUE, failed_at)
+
+    def check_coroutine(self, x, node, keyword):
+        if is_coroutine_ast(x):
+            self.assert_(
+                self.frame.is_async,
+                '{!r} outside async function'.format(keyword),
+                node,
+            )

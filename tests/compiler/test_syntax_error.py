@@ -1,7 +1,7 @@
 import unittest
 import contextlib
 
-from lambdex import def_
+from lambdex import def_, async_def_
 
 
 class TestSyntaxError(unittest.TestCase):
@@ -554,6 +554,22 @@ class TestSyntaxError(unittest.TestCase):
 
         self._assert_syntax_error(factory, 'expect identifier', 2, 30)
 
+    def test_return_too_many_clauses(self):
+        def factory():
+            def_(lambda: [
+                return_[a].b[c]
+            ])
+
+        self._assert_syntax_error(factory, 'unexpected clause', 2, 28)
+
+    def test_return_with_head(self):
+        def factory():
+            def_(lambda: [
+                return_[a][b]
+            ])
+
+        self._assert_syntax_error(factory, "expect only one group of '[]'", 2, 23)
+
     def test_slice_in_brackets(self):
         def factory():
             def_(lambda: [
@@ -567,4 +583,87 @@ class TestSyntaxError(unittest.TestCase):
                 return_[:, :]
             ])
 
-        self._assert_syntax_error(factory, "':' is not allowed in '[]'", 2, 23)        
+        self._assert_syntax_error(factory, "':' is not allowed in '[]'", 2, 23)
+
+    def test_async_for_in_normal_func(self):
+        def factory():
+            def_(lambda: [
+                async_for_[a in b] [
+                    pass_
+                ]
+            ])
+
+        self._assert_syntax_error(factory, "'async_for_' outside async function", 2, 26)
+
+    def test_async_for_in_nested_normal_func(self):
+        def factory():
+            async_def_(lambda: [
+                def_(lambda: [
+                    async_for_[a][b]
+                ])
+            ])
+
+        self._assert_syntax_error(factory, "'async_for_' outside async function", 3, 30)
+
+    def test_async_with_in_normal_func(self):
+        def factory():
+            def_(lambda: [
+                async_with_[a in b] [
+                    pass_
+                ]
+            ])
+
+        self._assert_syntax_error(factory, "'async_with_' outside async function", 2, 27)
+
+    def test_async_with_in_nested_normal_func(self):
+        def factory():
+            async_def_(lambda: [
+                def_(lambda: [
+                    async_with_[a][b]
+                ])
+            ])
+
+        self._assert_syntax_error(factory, "'async_with_' outside async function", 3, 31)
+
+    def test_await_in_normal_func(self):
+        def factory():
+            def_(lambda: [
+                await_[a]
+            ])
+
+        self._assert_syntax_error(factory, "'await_' outside async function", 2, 22)
+
+    def test_await_in_nested_normal_func(self):
+        def factory():
+            async_def_(lambda: [
+                def_(lambda: [
+                    await_[a]
+                ])
+            ])
+
+        self._assert_syntax_error(factory, "'await_' outside async function", 3, 26)
+
+    def test_await_too_many_clauses(self):
+        def factory():
+            async_def_(lambda: [
+                await_[a].b[c].d[e]
+            ])
+
+        self._assert_syntax_error(factory, 'unexpected clause', 2, 32)
+
+    def test_await_with_head(self):
+        def factory():
+            async_def_(lambda: [
+                await_[a][b]
+            ])
+
+        self._assert_syntax_error(factory, "expect only one group of '[]'", 2, 22)
+
+    def test_await_with_too_many_items(self):
+        def factory():
+            async_def_(lambda: [
+                await_[a, b]
+            ])
+
+        self._assert_syntax_error(factory, "expect only one item inside '[]'", 2, 27)
+
