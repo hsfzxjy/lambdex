@@ -119,7 +119,19 @@ def ast_from_source(source, keyword: str):
         source_lines = ['\n'] * lnum + inspect.getblock(lines[lnum:])
         source = ''.join(source_lines)
 
-    return ast.parse(source).body[0]
+    # Some garbage may still remain at the end, we alternatively try compiling
+    # and popping the last character until the source is valid.
+    exc = None
+    original_source = source
+    while source:
+        try:
+            return ast.parse(source).body[0]
+        except SyntaxError as e:
+            source = source[:-1]
+            exc = e
+    else:
+        # This should never happen
+        raise RuntimeError('cannot parse the snippet into AST:\n{}'.format(original_source)) from exc
 
 
 def recursively_set_attr(node: ast.AST, attrname: str, value):
