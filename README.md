@@ -5,16 +5,15 @@
 **lambdex** allows you to write multi-line anonymous function expression (called a _lambdex_) in an idiomatic manner. Below is a quick example of a recursive Fibonacci function:
 
 ```python
-fib = def_(lambda n: [
+def_(lambda n: [
     if_[n <= 0] [
         raise_[ValueError(f'{n} should be positive')]
     ],
     if_[n <= 2] [
         return_[1]
     ],
-    return_[fib(n - 1) + fib(n - 2)]
-])
-fib(10)  # 55
+    return_[callee_(n - 1) + callee_(n - 2)]
+])(10)  # 55
 ```
 
 Compared with ordinary lambda, which only allows single expression as body, lambdex may contain multiple "statements" in analogue to imperative control flows, whilst does not violate the basic syntax of Python.
@@ -35,6 +34,7 @@ Compared with ordinary lambda, which only allows single expression as body, lamb
   - [Yield statement](#yield-statement)
   - [Miscellaneous](#miscellaneous)
   - [Nested lambdexes](#nested-lambdexes)
+  - [Recursion](#recursion)
   - [Bytecode caching](#bytecode-caching)
   - [Detailed compile-time and runtime error](#detailed-compile-time-and-runtime-error)
 - [Declaration Disambiguity](#declaration-disambiguity)
@@ -656,6 +656,34 @@ for func in arr:
 ```
 
 </details>
+
+### Recursion
+
+One call always access the current lambdex itself via `callee_` within a lambdex. The feature is quite handy since you don't need to assign a lambdex to a name for doing recursion.
+
+```python
+# Summing from 1 to 10
+(def_(lambda n: [
+    if_[n == 1] [
+        return_[n]
+    ],
+    return_[callee_(n - 1) + n]
+]))(10)
+```
+
+Note that `callee_` within an inner lambdex repesents itself instead of the outer one:
+
+```python
+f = def_(lambda: [
+    inner < def_(lambda: [
+        return_[callee_]
+    ]),
+    return_[inner, inner(), callee_]
+])
+f1, f2, f3 = f()
+f1 is f2  # True
+f3 is f   # True
+```
 
 ### Bytecode caching
 

@@ -116,6 +116,7 @@ global_     = global_
 nonlocal_   = nonlocal_
 break_      = break_
 continue_   = continue_
+callee_     = callee_
 
 # Operators
 # From now on, the fields should start with captialized letters
