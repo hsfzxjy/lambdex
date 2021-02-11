@@ -356,7 +356,7 @@ def_(lambda: [
         ...
     ]
 
-    # multiple `with`, equiv to
+    # multiple `with`
     with_[open("foo"), open("bar") > fd] [
         ...
     ]
@@ -377,7 +377,7 @@ def anonymous():
     with open("foo") as fd:
         ...
 
-    # multiple `with`, equiv to
+    # multiple `with`
     with open("foo"), open("bar") as fd:
         ...
 ```
@@ -1074,7 +1074,8 @@ Brackets are easier to type than parentheses on most of the keyboards.
 
 The design is from three considerations. _1)_ Comparators such as "<", "<=", ">" or ">=" [have lower precedence](https://docs.python.org/3/reference/expressions.html#operator-precedence) than most of the other operators, thus allowing R-values without parentheses for most of the time; _2)_ in AST representation, chained comparators have a flat structure, which is easier to parse; _3)_ "<" and ">" visually illustrate the direction of data flows.
 
-The preference of "<" ">" over "<=" "=>" is that the previous ones consume only one character and are easier to type. 
+The preference of "<" ">" over "<=" "=>" is that the previous ones consume only one character and are easier to type.
+
 ---
 
 **Why use configuration file based keyword and operator aliasing instead of a programmatic approach?**
