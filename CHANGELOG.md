@@ -1,3 +1,10 @@
+# v0.7.0
+
+## What's New
+
+- **lambdex** now supports function renaming! The feature could enhance readability for error traceback.
+- **lxfmt** now supports `# lxfmt: on` and `# lxfmt: off` for temporarily turning on/off formatting.
+
 # v0.6.0
 
 ## What's New
