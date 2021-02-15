@@ -41,4 +41,4 @@ else:
 
 del os, sys, _is_run_as_script
 
-__version__ = "0.6.0"
+__version__ = "0.7.0"
