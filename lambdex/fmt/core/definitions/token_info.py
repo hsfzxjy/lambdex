@@ -1,5 +1,7 @@
 from typing import Optional, Tuple, FrozenSet
 
+import re
+
 from lambdex.fmt.utils.colored import colored, colorful
 
 from . import token as tk
@@ -104,6 +106,14 @@ class TokenInfo:
             line=token.line,
             annotation=annotation,
         )
+
+    def lxfmt_directive(self) -> Optional[str]:
+        if not self.is_CMT:
+            return None
+        matched = re.match(r'#.*\blxfmt:\s*(?P<directive>on|off)', self.string)
+        if matched is not None:
+            return matched.group('directive')
+        return None
 
     def __eq__(self, rhs):
         if isinstance(rhs, A):

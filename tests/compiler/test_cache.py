@@ -46,11 +46,9 @@ class TestEdgeCase(unittest.TestCase):
 
     def test_lambdex_on_the_same_line_should_be_different(self):
         def f():
-            return def_.a(lambda: [
-                return_[1 + 1],
-            ]), def_(lambda: [
-                return_[1 + 2],
-            ])
+            # lxfmt: off
+            return def_.a(lambda: [return_[1 + 1]]), def_(lambda: [return_[1 + 2]])
+            # lxfmt: on
 
         f1, f2 = f()
         self.assertNotEqual(f1.__code__.co_name, f2.__code__.co_name)

@@ -23,6 +23,10 @@ def _generate_queries(token, last_state, keyword_to_symbol):
     # This is for the case you want to capture a `tk.NAME`, but don't care about its content
     yield _make_key(token.exact_type, _empty, last_state, strict=False)
 
+    # Use `token` and 'ALL' as `last_state`
+    # NOTE that this is different from only `token`
+    yield _make_key(token.exact_type, _empty, 'ALL', strict=False)
+
     # Use only `last_state`
     yield _make_key(_empty, _empty, last_state, strict=False)
 
@@ -53,9 +57,9 @@ class Matcher:
         return _inner
 
     def dispatch(self, ctx, token):
-        if token.is_WS_NL_CMT:
-            # If token is whitespace, newline or comments, pass through
-            return None
+        # if token.is_WS_NL_CMT:
+        #     # If token is whitespace, newline or comments, pass through
+        #     return None
 
         for query in _generate_queries(token, ctx.last_state, self._keyword_to_symbol):
             if query in self._mapping:

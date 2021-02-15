@@ -59,6 +59,6 @@ class TestFmtResult(unittest.TestCase):
         p = _spawn_fmt([sys.executable, '-m', 'lambdex.fmt'] + [str(x.absolute()) for x in srcs])
         stdout, stderr = p.communicate()
         output = stdout.decode()
-        desired_output = _pad('\n'.join(map(pathlib.Path.read_text, dsts)))
+        desired_output = ''.join(map(_pad, map(pathlib.Path.read_text, dsts)))
         self.assertEqual(p.returncode, 0, msg='STDERR:\n' + stderr.decode())
         self.assertEqual(output, desired_output, output)

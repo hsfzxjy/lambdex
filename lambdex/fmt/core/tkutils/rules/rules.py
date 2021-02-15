@@ -5,6 +5,36 @@ from lambdex.fmt.core.definitions import State, Context, TokenInfo, tk, A, actio
 from .matcher import matcher as m
 
 
+@m(exact_type=tk.NEWLINE, last_state=State.EXPECT_LBDX_LPAR)
+@m(exact_type=tk.NEWLINE, last_state=State.MUST_LBDX_LPAR)
+@m(exact_type=tk.NEWLINE, last_state=State.EXPECT_LBDX_NAME)
+def r(ctx: Context, token: TokenInfo):
+    ctx.pop_state()
+    return actions.StopBuffer()
+
+
+@m(exact_type=tk.COMMENT, last_state=State.DISABLED)
+@m(exact_type=tk.COMMENT, last_state=State.UNKNOWN)
+def r(ctx: Context, token: TokenInfo):
+    directive = token.lxfmt_directive()
+    if directive == 'off' and ctx.last_state != State.DISABLED:
+        ctx.push_state(State.DISABLED)
+
+    elif directive == 'on' and ctx.last_state == State.DISABLED:
+        ctx.pop_state()
+
+
+
+@m(exact_type=tk.NL, last_state='ALL')
+@m(exact_type=tk.NEWLINE, last_state='ALL')
+@m(exact_type=tk.WHITESPACE, last_state='ALL')
+@m(exact_type=tk.COMMENT, last_state='ALL')
+@m(exact_type=tk.TYPE_IGNORE, last_state='ALL')
+@m(exact_type=tk.TYPE_COMMENT, last_state='ALL')
+def r(ctx: Context, token: TokenInfo):
+    return
+
+
 @m(exact_type=tk.LPAR)
 @m(exact_type=tk.LSQB)
 @m(exact_type=tk.LBRACE)

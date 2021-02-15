@@ -6,6 +6,7 @@ auto = compat.enum_auto()
 
 
 class State(enum.Enum):
+    DISABLED = auto()
     UNKNOWN = auto()
 
     EXPECT_LBDX_LPAR = auto()
