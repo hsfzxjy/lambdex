@@ -61,7 +61,7 @@ class Context:
     - `used_names`: a set containing currently occupied names
     - `frames`: current `Frame` stack
     """
-    __slots__ = ['compile', 'globals', 'used_names', 'frames', 'filename']
+    __slots__ = ['compile', 'globals', 'used_names', 'frames', 'filename', 'renames']
 
     def __init__(self, compile_fn, globals_dict, filename):
         self.compile = partial(compile_fn, ctx=self)
@@ -69,6 +69,7 @@ class Context:
         self.used_names = set(globals_dict)
         self.frames = []
         self.filename = filename
+        self.renames = {}
 
     def select_name(self, prefix):
         """

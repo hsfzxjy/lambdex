@@ -3,6 +3,7 @@ import types
 import inspect
 import functools
 
+from ..utils import compat
 from .rules import Rules
 from .context import Context, ContextFlag
 from .dispatcher import Dispatcher
@@ -101,6 +102,27 @@ def _wrap_code_object(code_obj, lambda_func, lambdex_ast_node):
     return ret
 
 
+def _rename_code_object(code, ctx: Context):
+    """
+    Recursively rename the `co_name` field in all code objects.
+    """
+
+    kwargs = {}
+
+    new_name = ctx.renames.get(code.co_name)
+    if new_name is not None:
+        kwargs['co_name'] = new_name
+
+    new_consts = []
+    for const in code.co_consts:
+        if inspect.iscode(const):
+            const = _rename_code_object(const, ctx)
+        new_consts.append(const)
+    kwargs['co_consts'] = tuple(new_consts)
+
+    return compat.code_replace(code, **kwargs)
+
+
 def compile_lambdex(declarer):
     """
     Compile a lambda object given by `declarer` into a function.
@@ -179,6 +201,7 @@ def compile_lambdex(declarer):
         if inspect.iscode(obj) and obj.co_name == lambdex_node.name:
             lambdex_code = obj
             break
+    lambdex_code = _rename_code_object(lambdex_code, context)
 
     cache.set(declarer, (lambdex_code, lambdex_node))
     return _wrap_code_object(lambdex_code, lambda_func, lambdex_node)

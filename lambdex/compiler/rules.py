@@ -94,18 +94,21 @@ def r_simple_lambda(node: ast.Call, ctx: Context):
 
 @Rules.register((ast.FunctionDef, ContextFlag.outermost_lambdex))
 @Rules.register((ast.AsyncFunctionDef, ContextFlag.outermost_lambdex))
-def r_def(node: ast.Call, ctx: Context, rule_id):
+def r_def(node: ast.Call, ctx: Context, name: str, rule_id):
     ctx.assert_(node.args, "expect 'lambda' in '()'", node.func)
     ctx.assert_is_instance(node.args[0], ast.Lambda, "expect 'lambda'")
-    return r_lambda(node.args[0], ctx, rule_id[0])
+    FunctionDef_node = r_lambda(node.args[0], ctx, rule_id[0])
+    if name is not None:
+        ctx.renames[FunctionDef_node.name] = name
+    return FunctionDef_node
 
 
 @Rules.register((ast.FunctionDef, ContextFlag.should_be_expr))
 @Rules.register((ast.FunctionDef, ContextFlag.should_be_stmt))
 @Rules.register((ast.AsyncFunctionDef, ContextFlag.should_be_expr))
 @Rules.register((ast.AsyncFunctionDef, ContextFlag.should_be_stmt))
-def r_inner_def(node: ast.Call, ctx: Context, rule_id):
-    FunctionDef_node = r_def(node, ctx, rule_id)
+def r_inner_def(node: ast.Call, ctx: Context, name: str, rule_id):
+    FunctionDef_node = r_def(node, ctx, name, rule_id)
     ctx.frame.detached_functions.append(FunctionDef_node)
 
     return ast.Name(id=FunctionDef_node.name, ctx=ast.Load())

@@ -31,16 +31,19 @@ def disp_Call(node: ast.Call, ctx: Context, flag: ContextFlag):
 
     if isinstance(func, ast.Name):
         name = func.id
+        func_name = None
     elif isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name):
         name = func.value.id
+        func_name = func.attr
     else:
         name = None
+        func_name = None
 
     ast_type = {
         aliases.def_: ast.FunctionDef,
         aliases.async_def_: ast.AsyncFunctionDef,
     }.get(name)
-    return RuleMeta((ast_type, flag), ())
+    return RuleMeta((ast_type, flag), (func_name, ))
 
 
 @Dispatcher.register(ast.Name)
