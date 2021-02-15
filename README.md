@@ -22,6 +22,7 @@ Compared with ordinary lambda, which only allows single expression as body, lamb
 <summary> <em>Table of Content</em></summary>
 
 - [More about lambdex](#more-about-lambdex)
+- [WHAT'S NEW](./CHANGELOG.md)
 - [Installation & Usage](#installation--usage)
 - [Running in an REPL](#running-in-an-repl)
 - [Language Features](#language-features)
@@ -36,6 +37,7 @@ Compared with ordinary lambda, which only allows single expression as body, lamb
   - [Miscellaneous](#miscellaneous)
   - [Nested lambdexes](#nested-lambdexes)
   - [Recursion](#recursion)
+  - [Renaming functions](#renaming-functions)
 - [Declaration Disambiguity **[NOTE]**](#declaration-disambiguity)
 - [Bytecode Caching](#bytecode-caching)
 - [Detailed Compile-time and Runtime Error](#detailed-compile-time-and-runtime-error)
@@ -47,7 +49,6 @@ Compared with ordinary lambda, which only allows single expression as body, lamb
   - [Mocking existing formatter executable](#mocking-existing-formatter-executable)
 - [Known Issues & Future](#known-issues--future)
 - [Q & A](#q--a)
-- [Change Log](./CHANGELOG.md)
 - [License](#license)
 </details>
 
@@ -92,7 +93,7 @@ If you are using an interactive environment (REPL), like IDLE or IPython, you sh
 ```python
 >>> from lambdex.repl import def_
 >>> my_sum = def_(lambda a, b: [
-... return_[a + b]
+...     return_[a + b]
 ... ])
 ...
 >>> my_sum(1, 2)
@@ -714,6 +715,46 @@ f = def_(lambda: [
 f1, f2, f3 = f()
 f1 is f2  # True
 f3 is f   # True
+```
+
+### Renaming functions
+
+A lambdex may have an optional name which uses the syntax `def_.<name>(...)`. For example:
+
+```python
+def_.one_divided_by_zero(lambda: [
+    1 / 0,
+])
+```
+
+The name is used for improving readability of a traceback when an error occurs. For example, the function above yields an exception:
+
+```
+Traceback (most recent call last):
+  File "test.py", line 6, in <module>
+    f()
+  File "test.py", line 3, in one_divided_by_zero
+    1 / 0,
+ZeroDivisionError: division by zero
+```
+
+The last frame of the traceback displays a name `one_divided_by_zero` instead of some `anonymous_xxx` by default.
+
+But be careful that **this feature does not imply any name bindings,** that is, you can not use the name as a variable to reference a function:
+
+```python
+def_.one_divided_by_zero(lambda: [
+    1 / 0,
+    one_divided_by_zero,  # NameError
+])
+one_divided_by_zero  # NameError
+
+def_(lambda: [
+    def_.inner_func(lambda: [
+        inner_func  # NameError
+    ]),
+    inner_func,  # NameError
+])
 ```
 
 ## Declaration Disambiguity
