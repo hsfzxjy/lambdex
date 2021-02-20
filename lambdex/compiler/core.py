@@ -1,5 +1,6 @@
 import ast
 import types
+import typing
 import inspect
 import functools
 
@@ -8,6 +9,7 @@ from .rules import Rules
 from .context import Context, ContextFlag
 from .dispatcher import Dispatcher
 from . import cache
+from .asm.frontend import transpile_file
 
 from lambdex.utils.ast import pformat, empty_arguments, None_node
 from lambdex.utils import compat
@@ -60,40 +62,36 @@ def compile_node(node, ctx, *, flag=ContextFlag.should_be_expr):
     return node
 
 
-def _wrap_code_object(code_obj, lambda_func, lambdex_ast_node):
+def _wrap_code_object(
+    code_obj: types.CodeType,
+    lambda_func: types.FunctionType,
+    lambdex_ast_node: ast.AST,
+    fvmapping: typing.Sequence[int],
+) -> types.FunctionType:
     """
     Construct a function using `code_obj`.
 
     To ensure the two functions have same context, the returned function
-    copies `__globals__`, `__defaults__`, `__closure__` from `lambda_func`,
-    with code object whose `co_freevars` copied from
-    `lambda_func.__code__.co_freevars`.
+    copies `__globals__`, `__defaults__`, and rebuilds `__closure__` from
+    `lambda_func`.
     """
-
-    # Append code object name to its co_freevars, so that lambdex
-    # can always access itself via its name `anonymous_...`
-    name = code_obj.co_name
-    code_obj = compat.code_replace(
-        code_obj,
-        co_freevars=lambda_func.__code__.co_freevars + (name, ),
-    )
 
     # Trick: Obtain a cell object referencing current function, by
     # constructing a new function and extract its closure.
-    callee_ref_cells = (lambda: ret).__closure__
+    callee_ref_cell = (lambda: ret).__closure__[0]
 
-    # We should append a cell referencing current function to the new closure.
-    if lambda_func.__closure__ is None:
-        new_closure = callee_ref_cells
-    else:
-        new_closure = lambda_func.__closure__ + callee_ref_cells
+    # Rebuild the closure
+    new_closure = tuple(
+        lambda_func.__closure__[i] if i >= 0 else callee_ref_cell \
+        for i in fvmapping
+    )
 
     ret = types.FunctionType(
         code=code_obj,
         globals=lambda_func.__globals__,
-        name=name,
+        name=code_obj.co_name,
         argdefs=lambda_func.__defaults__,
-        closure=new_closure,
+        closure=tuple(new_closure),
     )
 
     if __DEBUG__:
@@ -123,36 +121,41 @@ def _rename_code_object(code, ctx: Context):
     return compat.code_replace(code, **kwargs)
 
 
-def compile_lambdex(declarer):
+def _resolve_freevars_mapping(
+    old_freevars: typing.Sequence[str],
+    new_freevars: typing.Sequence[str],
+) -> typing.List[int]:
     """
-    Compile a lambda object given by `declarer` into a function.
+    Return a list `m` such that new_freevars[i] == old_freevars[m[i]].
 
-    Multiple calls with a same declarer yield functions with same code object,
-    whilst there closure and globals may be different.
+    m[i] will be -1 if new_freevars[i] not in old_freevars.
     """
-    # If cache hit, simply update metadata and return
-    cached_value = cache.get(declarer)
-    if cached_value is not None:
-        code_obj, lambdex_ast_node = cached_value
-        return _wrap_code_object(code_obj, declarer.func, lambdex_ast_node)
+    mapping = {v: k for k, v in enumerate(old_freevars)}
+    return [mapping.get(varname, -1) for varname in new_freevars]
 
-    # Otherwise, we have to compile from scratch
 
-    lambda_ast = declarer.get_ast()
-    lambda_func = declarer.func
+def _compile(
+    ast_node: ast.AST,
+    filename: str,
+    freevars: typing.Sequence[str],
+    globals: typing.Optional[dict] = None,
+) -> typing.Tuple[types.CodeType, ast.AST, typing.Sequence[int]]:
+    """
+    An internal function that do the compilation.
+    """
+    if globals is None: globals = {}
 
     context = Context(
         compile_node,
-        lambda_func.__globals__,
-        lambda_func.__code__.co_filename,
+        globals,
+        filename,
     )
     lambdex_node = compile_node(
-        lambda_ast,
+        ast_node,
         ctx=context,
         flag=ContextFlag.outermost_lambdex,
     )
 
-    freevars = lambda_func.__code__.co_freevars  # name of nonlocal variables
     # A name in `lambdex_node` should be compiled as nonlocal instead of
     # global (default) if it appears in `freevars`.
     #
@@ -185,11 +188,11 @@ def compile_lambdex(declarer):
 
     if __DEBUG__:
         try:
-            module_code = compile(module_node, lambda_func.__code__.co_filename, 'exec')
+            module_code = compile(module_node, filename, 'exec')
         except Exception as e:
             raise SyntaxError(pformat(module_node)) from e
     else:
-        module_code = compile(module_node, lambda_func.__code__.co_filename, 'exec')
+        module_code = compile(module_node, filename, 'exec')
 
     # unwrap the outer FunctionDef.
     # since no other definition in the module, it should be co_consts[0]
@@ -201,7 +204,50 @@ def compile_lambdex(declarer):
         if inspect.iscode(obj) and obj.co_name == lambdex_node.name:
             lambdex_code = obj
             break
+
+    # Append code object name to its co_freevars, so that lambdex
+    # can always access itself via its name `anonymous_...`
+    callee_name = lambdex_code.co_name
+    try:
+        callee_index = lambdex_code.co_freevars.index(callee_name)
+    except ValueError:
+        callee_index = len(lambdex_code.co_freevars)
+        lambdex_code = compat.code_replace(
+            lambdex_code,
+            co_freevars=(*lambdex_code.co_freevars, callee_name),
+        )
+    freevars_mapping = _resolve_freevars_mapping(freevars, lambdex_code.co_freevars)
+
     lambdex_code = _rename_code_object(lambdex_code, context)
 
-    cache.set(declarer, (lambdex_code, lambdex_node))
-    return _wrap_code_object(lambdex_code, lambda_func, lambdex_node)
+    return lambdex_code, lambdex_node, freevars_mapping
+
+
+def compile_lambdex(declarer) -> types.FunctionType:
+    """
+    Compile a lambda object given by `declarer` into a function.
+
+    Multiple calls with a same declarer yield functions with same code object,
+    whilst there closure and globals may be different.
+    """
+    # If cache hit, simply update metadata and return
+    cached_value = cache.get(declarer)
+    if cached_value is not None:
+        code_obj, lambdex_ast_node, fvmapping = cached_value
+        return _wrap_code_object(code_obj, declarer.func, lambdex_ast_node, fvmapping)
+
+    # Otherwise, we have to compile from scratch
+
+    lambda_ast = declarer.get_ast()
+    lambda_func = declarer.func
+
+    lambdex_code, lambdex_node, fvmapping = _compile(
+        lambda_ast,
+        lambda_func.__code__.co_filename,
+        lambda_func.__code__.co_freevars,
+        lambda_func.__globals__,
+    )
+
+    cache.set(declarer, (lambdex_code, lambdex_node, fvmapping))
+    transpile_file(lambda_func.__module__)
+    return _wrap_code_object(lambdex_code, lambda_func, lambdex_node, fvmapping)

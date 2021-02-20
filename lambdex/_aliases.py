@@ -55,6 +55,10 @@ _DEFAULT_OPS = {
 _aliases = None
 
 
+def get_declarers():
+    return {_aliases.def_, _aliases.async_def_}
+
+
 def _validate_aliases(aliases: _Aliases):
     """
     Check that given `aliases` is valid.
