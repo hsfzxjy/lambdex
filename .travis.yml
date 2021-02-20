@@ -14,6 +14,11 @@ env:
   - "TARGET=test_repl_idle"
   - "TARGET=test"
   - "TARGET=test_fmt"
+  - "TARGET=test_asm"
+jobs:
+  exclude:
+    - python: "3.5"
+      env: "TARGET=test_asm"
 install:
   - bash .travis.install
 script:
