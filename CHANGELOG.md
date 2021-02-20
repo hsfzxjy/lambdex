@@ -1,3 +1,22 @@
+# v0.8.0
+
+## What's New
+
+- The newly added function/module-level bytecode optimization can make lambdexes running faster.
+- Add support for the missing `del_` keyword.
+
+## BugFix
+
+### Compiler
+
+- `lambdex.utils.ast::ast_from_source` should not modify lines list returned from `inspect.getsourcelines()` inplacely. ([b3a1bd3](../../commit/b3a1bd3a11e7f340034930a55ea61300c9f333ae))
+- Compiler should not assume that closure variables order of code object before and after compilation are compatible. Instead, compiler should be repsonsible to re-order the closure tuple when wrapping a code object. ([61685b3](../../commit/61685b33c487570ff128351c32d2e7abd7cf7064))
+- `lambda.ast_parser::_shallow_match_ast` should further walk down to default value expressions once a Lambda node matched. ([61685b3](../../commit/61685b33c487570ff128351c32d2e7abd7cf7064))
+
+### Formatter
+
+- IN_LBDX_LAMBDA state should end at the rightmost colon, instead of intermediate one. ([a8c73a9](../../commit/a8c73a9bd3bcc10f0ab9d429abd44cbef177d3ad))
+
 # v0.7.0
 
 ## What's New
