@@ -1027,3 +1027,25 @@ class TestAST(unittest.TestCase):
             await a
 
         self.assert_ast_like(f, target)
+
+    def test_arg_default(self):
+        b = lambda: ()
+        f = def_(lambda a=b(): [
+            return_[a]
+        ])
+
+        def target(a=b()):
+            return a
+
+        self.assert_ast_like(f, target)
+
+    def test_kwarg_default(self):
+        b = lambda: ()
+        f = def_(lambda *, a=b(): [
+            return_[a]
+        ])
+
+        def target(*, a=b()):
+            return a
+
+        self.assert_ast_like(f, target)
