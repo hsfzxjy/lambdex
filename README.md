@@ -24,8 +24,7 @@ Compared with ordinary lambda, which only allows single expression as body, lamb
 - [More about lambdex](#more-about-lambdex)
 - [WHAT'S NEW](./CHANGELOG.md)
 - [Installation & Usage](#installation--usage)
-- [Running in an REPL](#running-in-an-repl)
-- [Language Features](#language-features)
+- [**Language Features**](#language-features)
   - [Parameters](#parameters)
   - [Variable assignment](#variable-assignment)
   - [Conditional statement](#conditional-statement)
@@ -38,12 +37,18 @@ Compared with ordinary lambda, which only allows single expression as body, lamb
   - [Nested lambdexes](#nested-lambdexes)
   - [Recursion](#recursion)
   - [Renaming functions](#renaming-functions)
-- [Declaration Disambiguity **[NOTE]**](#declaration-disambiguity)
-- [Bytecode Caching](#bytecode-caching)
 - [Detailed Compile-time and Runtime Error](#detailed-compile-time-and-runtime-error)
-- [Keyword and Operator Aliasing **[CUSTOM]**](#keyword-and-operator-aliasing)
-- [Language Extension **[CUSTOM]**](#language-extension)
-- [Code Formatting **[TOOL]**](#code-formatting)
+- [**EDGE CASES**](#edge-cases)
+  - [Running in an REPL](#running-in-an-repl)
+  - [Declaration Disambiguity](#declaration-disambiguity)
+- [**Runtime Efficiency**](#runtime-efficiency)
+  - [Bytecode Caching](#bytecode-caching)
+  - [Bytecode Optimization at Function Level](#bytecode-optimization-at-function-level)
+  - [Bytecode Optimization at Module Level](#bytecode-optimization-at-module-level)
+- [**Customization**](#customization)
+  - [Keyword and Operator Aliasing](#keyword-and-operator-aliasing)
+  - [Language Extension](#language-extension)
+- [**Code Formatting**](#code-formatting)
   - [Standalone lambdex formatter](#standalone-lambdex-formatter)
   - [Lambdex formatter as post-processor](#lambdex-formatter-as-post-processor)
   - [Mocking existing formatter executable](#mocking-existing-formatter-executable)
@@ -85,24 +90,6 @@ my_sum = def_(lambda a, b: [
 ```
 
 That's it! You don't even need to import other keywords such as `return_`.
-
-## Running in an REPL
-
-If you are using an interactive environment (REPL), like IDLE or IPython, you should import the keywords from `lambdex.repl`:
-
-```python
->>> from lambdex.repl import def_
->>> my_sum = def_(lambda a, b: [
-...     return_[a + b]
-... ])
-...
->>> my_sum(1, 2)
-3
-```
-
-The statement should be executed **at the beginning** to ensure that corresponding patching stuff is enabled.
-
-Currently **lambdex** has been well tested on 3 REPL environments: the built-in Python REPL, IDLE and IPython (Jupyter). Other REPL may or may not be supported.
 
 ## Language Features
 
@@ -626,6 +613,30 @@ def anonymous():
 
 </details>
 
+The `del_` is analogue to keyword `del`.
+
+<details open>
+    <summary><em>show code</em></summary>
+
+```python
+def_(lambda: [
+    a < [1, 2],
+    del_[a[0], a],
+])
+```
+
+</details>
+<details>
+    <summary><em>show equivalent function</em></summary>
+
+```python
+def anonymous():
+    a = [1, 2]
+    del a[0], a
+```
+
+</details>
+
 The `global_` and `nonlocal_` are analogue to keywords `global` and `nonlocal`.
 
 <details open>
@@ -659,7 +670,7 @@ def anonymous():
 
 ### Nested lambdexes
 
-Lambdexes can be nested to construct more complicated logics. Lambdexes regard the nested scoping rules in Python, i.e., inner lambdex captures names defined in its parent scopes. For example, we can define [IIFE](https://en.wikipedia.org/wiki/Immediately_invoked_function_expression) like in JavaScript to capture looping variables.
+Lambdexes can be nested to construct more complicated logics. Lambdexes respect the nested scoping rules in Python, i.e., inner lambdex captures names defined in its parent scopes. For example, we can define [IIFE](https://en.wikipedia.org/wiki/Immediately_invoked_function_expression) like in JavaScript to capture looping variables.
 
 <details open>
     <summary><em>show code</em></summary>
@@ -757,54 +768,6 @@ def_(lambda: [
 ])
 ```
 
-## Declaration Disambiguity
-
-We are going to discuss an edge case in this section.
-
-Suppose you are running the following code:
-
-```python
-f1, f2 = def_(lambda a, b: [return_[a + b]]), def_(lambda a, b: [return_[a * b]])
-```
-
-The code yields an exception `SyntaxError: ambiguious declaration 'def_'`.
-
-What's going on here? The problem is that **there are more than one lambdexes defined on the same line**. Since CPython provides no effective way but a line number for locating a given lambda, the lambdex compiler fails to obtain the source code of the lambda in this case. A workaround is to prepend an identifier after `def_` of lambdex:
-
-```python
-f1, f2 = def_.f1(lambda a, b: [return_[a + b]]), def_.f2(lambda a, b: [return_[a * b]])
-```
-
-With this, the compiler can now tell them from each other.
-
-In the example above, it's not necessary to add identifier for both lambdexes. The following is also acceptable, as long as their declarations are different:
-
-```python
-f1, f2 = def_.f1(lambda a, b: [return_[a + b]]), def_(lambda a, b: [return_[a * b]])
-```
-
-## Bytecode Caching
-
-Each lambdex will be compiled at the time `def_(...)` is executed, and only compiled once. The bytecode of lambdex will be cached and reused in the future execution.
-
-As an example below, each call of `foo()` returns a new lambdex object, with different closures but the same code object.
-
-```python
-def foo():
-    a = 1
-    return def_(lambda: [
-        a < a + 1,
-        return_[a],
-    ])
-
-f1 = foo()
-f2 = foo()  # will not re-compile
-f1()  # 2
-f2()  # 2
-```
-
-The feature ensures no redundant computation is done when compiling lambdexes sharing the same lexical context.
-
 ## Detailed Compile-time and Runtime Error
 
 **lambdex** preserves information of source code such as line number or token offsets. The information are used to provide detailed messages when error occurs.
@@ -862,11 +825,156 @@ Traceback (most recent call last):
 ZeroDivisionError: division by zero
 ```
 
-## Keyword and Operator Aliasing
+## EDGE CASES
+
+We are going to discuss several edge cases in this section.
+
+### Running in an REPL
+
+If you are using an interactive environment (REPL), like IDLE or IPython, you should import the keywords from `lambdex.repl`:
+
+```python
+>>> from lambdex.repl import def_
+>>> my_sum = def_(lambda a, b: [
+...     return_[a + b]
+... ])
+...
+>>> my_sum(1, 2)
+3
+```
+
+The statement should be executed **at the beginning** to ensure that corresponding patching stuff is enabled.
+
+Currently **lambdex** has been well tested on 3 REPL environments: the built-in Python REPL, IDLE and IPython (Jupyter). Other REPL may or may not be supported.
+
+### Declaration Disambiguity
+
+Suppose you are running the following code:
+
+```python
+f1, f2 = def_(lambda a, b: [return_[a + b]]), def_(lambda a, b: [return_[a * b]])
+```
+
+The code yields an exception `SyntaxError: ambiguious declaration 'def_'`.
+
+What's going on here? The problem is that **there are more than one lambdexes defined on the same line**. Since CPython provides no effective way but a line number for locating a given lambda, the lambdex compiler fails to obtain the source code of the lambda in this case. A workaround is to prepend an identifier after `def_` of lambdex:
+
+```python
+f1, f2 = def_.f1(lambda a, b: [return_[a + b]]), def_.f2(lambda a, b: [return_[a * b]])
+```
+
+With this, the compiler can now tell them from each other.
+
+In the example above, it's not necessary to add identifier for both lambdexes. The following is also acceptable, as long as their declarations are different:
+
+```python
+f1, f2 = def_.f1(lambda a, b: [return_[a + b]]), def_(lambda a, b: [return_[a * b]])
+```
+
+## Runtime Efficiency
+
+The transpilation procedure could be very time-consuming, and thus degrades the runtime efficiency. To solve the problem, **lambdex** itself provides several mechanisms on different levels for optimizing the bytecodes.
+
+### Bytecode Caching
+
+By default, **a lambdex defined at a specific location will be compiled only once**. The code object of compiled lambdex will be cached and reused in the future execution. Such mechanism applies to lambdexes defined either in a looping or as an inner function, i.e., the two lambdexes below would be compiled only once:
+
+```python
+s = 0
+for i in range(10000):
+    def_(lambda: [          # compiled at i = 0
+        global_[s],
+        s < s + i,
+    ])()
+
+def foo(i):
+    return def_(lambda: [   # compiled at the first time `foo()` executed
+        global_[s],
+        s < s + i,
+        return_[s],
+    ])
+```
+
+### Bytecode Optimization at Function Level
+
+Bytecode caching reduces most of the redundant and heavy jobs, but still has some overhead -- the core of **lambdex** needs to update some metadata (such as closure cellvars) every time `def_` was executed. For example, one may find that the snippet below costs too much time to run (like >3s):
+
+```python
+from lambdex import def_
+s = 0
+def sum():
+    n = 1000000
+    for i in range(n):
+        adder = def_(lambda: [
+            global_[s],
+            s < s + i
+        ])
+        adder()
+    assert s == n * (n - 1) / 2
+sum()
+```
+
+To optimize, one can use the `@asmopt` decorator:
+
+```python
+from lambdex import def_, asmopt
+s = 0
+@asmopt
+def sum():
+    n = 1000000
+    for i in range(n):
+        adder = def_(lambda: [
+            global_[s],
+            s < s + i
+        ])
+        adder()
+    assert s == n * (n - 1) / 2
+sum()
+```
+
+The running time will now reduce to ~0.3s, which is x10 faster and the same as using ordinary functions. The magical `@asmopt` eliminates `def_` calling and directly stores compiled lambdex on `sum`. It is worth to note that `@asmopt` should always be the innermost decorator.
+
+### Bytecode Optimization at Module Level
+
+The previous mechanism only applies to lambdexes within some functions, and still has some overhead at module initialization phase. Can we do better? Absolutely yes! One can use the `# lambdex: modopt` directive to optimize the whole module, and persist the optimized bytecode into corresponding .pyc files.
+
+```python
+# modopt_demo.py
+
+# the directive could be placed everywhere
+# lambdex: modopt
+from lambdex import def_
+s = 0
+n = 1000000
+for i in range(n):
+    adder = def_(lambda: [
+        global_[s],
+        s < s + i
+    ])
+    adder()
+assert s == n * (n - 1) / 2
+sum()
+```
+
+```bash
+$ time python3 -m modopt_demo  #  > 3s: 1st time, unoptimized
+$ time python3 -m modopt_demo  # ~0.3s: 2nd time and later, optimized
+$ time python3 -m modopt_demo  # ~0.3s
+```
+
+Optimized bytecodes will be invalidated when the source file is edited, but be available in the following executions. Thus you can see that the script costs rather long time at first, but becomes efficient afterwards.
+
+It's worth to note that such mechanism is unavailable when you run the file as a script via `python3 modopt_demo.py`, which is a limitation of CPython. In other cases, such as using `python3 -m modopt_demo` or importing as a module in other files, the mechanism works well.
+
+## Customization
+
+Users are able to customize some aspects of **lambdex**, in order to fit their preference.
+
+### Keyword and Operator Aliasing
 
 If you don't like the default keywords or operators, **lambdex** allows you to use alternative ones. See the [doc](./docs/Customization.md#keyword-and-operator-aliasing) for detailed configuration.
 
-## Language Extension
+### Language Extension
 
 **lambdex** allows you to customize some of the syntax. For how to enable specific extension, please forward to the [doc](./docs/Customization.md#language-extension).
 
