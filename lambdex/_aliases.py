@@ -30,6 +30,7 @@ _Aliases = namedtuple(
         'raise_',
         'global_',
         'nonlocal_',
+        'del_',
         'break_',
         'continue_',
         'callee_',

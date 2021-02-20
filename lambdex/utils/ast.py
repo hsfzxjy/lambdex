@@ -18,7 +18,7 @@ __all__ = [
     'recursively_set_attr',
     'copy_lineinfo',
     'is_lvalue',
-    'cast_to_lvalue',
+    'cast_to_ctx',
     'check_compare',
     'check_as',
     'is_coroutine_ast',
@@ -176,7 +176,7 @@ def is_lvalue(node: ast.AST) -> bool:
     return True, None
 
 
-def cast_to_lvalue(node: ast.AST):
+def cast_to_ctx(node: ast.AST, ctx=ast.Store()):
     """
     Recursively set `ctx` to `Store()` on `node` and its children.  This
     function assumes that `is_lvalue()` check has passed.
@@ -189,7 +189,7 @@ def cast_to_lvalue(node: ast.AST):
     todo = deque([node])
     while todo:
         n = todo.popleft()
-        n.ctx = ast.Store()
+        n.ctx = ctx
         if isinstance(n, (ast.List, ast.Tuple, ast.Starred)):
             todo.extend(ast.iter_child_nodes(n))
 
@@ -253,7 +253,7 @@ def check_as(ctx, node: ast.expr, as_op, *, rhs_is_identifier=False):
         return lhs, rhs.id
     else:
         ctx.assert_lvalue(rhs)
-        return lhs, cast_to_lvalue(rhs)
+        return lhs, cast_to_ctx(rhs)
 
 
 def is_coroutine_ast(x):

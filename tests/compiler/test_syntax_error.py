@@ -507,7 +507,7 @@ class TestSyntaxError(unittest.TestCase):
 
         self._assert_syntax_error(factory, "expect only one group of '[]'", 2, 23)
 
-    def test_global_not_name(self):
+    def test_global_not_name_1(self):
         def factory():
             def_(lambda: [
                 global_[a, 1]
@@ -515,6 +515,7 @@ class TestSyntaxError(unittest.TestCase):
 
         self._assert_syntax_error(factory, 'expect identifier', 2, 28)
 
+    def test_global_not_name_2(self):
         def factory():
             def_(lambda: [
                 global_[a, b[c]]
@@ -538,7 +539,7 @@ class TestSyntaxError(unittest.TestCase):
 
         self._assert_syntax_error(factory, "expect only one group of '[]'", 2, 25)
 
-    def test_nonlocal_not_name(self):
+    def test_nonlocal_not_name_1(self):
         def factory():
             def_(lambda: [
                 nonlocal_[a, 1]
@@ -546,13 +547,45 @@ class TestSyntaxError(unittest.TestCase):
 
         self._assert_syntax_error(factory, 'expect identifier', 2, 30)
 
-    def test_nonlocal_not_name(self):
+    def test_nonlocal_not_name_2(self):
         def factory():
             def_(lambda: [
                 nonlocal_[a, b[c]]
             ])
 
         self._assert_syntax_error(factory, 'expect identifier', 2, 30)
+
+    def test_del_too_many_clauses(self):
+        def factory():
+            def_(lambda: [
+                del_[a].wrong_[b]
+            ])
+
+        self._assert_syntax_error(factory, 'unexpected clause', 2, 30)
+
+    def test_del_with_head(self):
+        def factory():
+            def_(lambda: [
+                del_[a][b]
+            ])
+
+        self._assert_syntax_error(factory, "expect only one group of '[]'", 2, 20)
+
+    def test_del_not_lvalue_1(self):
+        def factory():
+            def_(lambda: [
+                del_[a, 1]
+            ])
+
+        self._assert_syntax_error(factory, 'cannot be deleted', 2, 25)
+
+    def test_del_not_lvalue_2(self):
+        def factory():
+            def_(lambda: [
+                del_[a, b(), []]
+            ])
+
+        self._assert_syntax_error(factory, 'cannot be deleted', 2, 25)
 
     def test_return_too_many_clauses(self):
         def factory():

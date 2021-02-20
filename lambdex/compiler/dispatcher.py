@@ -94,6 +94,7 @@ def disp_Subscript(node: ast.Subscript, ctx: Context, flag: ContextFlag):
         aliases.async_for_: ast.AsyncFor,
         aliases.async_with_: ast.AsyncWith,
         aliases.await_: ast.Await,
+        aliases.del_: ast.Delete,
     }.get(clauses[0].name)
 
     ctx.check_coroutine(ast_type, clauses[0].node, clauses[0].name)

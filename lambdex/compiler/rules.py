@@ -11,7 +11,7 @@ from lambdex.utils.ast import (
     check_as,
     copy_lineinfo,
     check_compare,
-    cast_to_lvalue,
+    cast_to_ctx,
     is_coroutine_ast,
 )
 from lambdex.utils.registry import FunctionRegistry
@@ -232,7 +232,7 @@ def r_assign(node: ast.Compare, ctx: Context):
 
     for target in targets:
         ctx.assert_lvalue(target)
-        cast_to_lvalue(target)
+        cast_to_ctx(target)
 
     return copy_lineinfo(
         node,
@@ -411,6 +411,23 @@ def r_scoping(node: ast.Subscript, ctx: Context, clauses: list, rule_id):
     return copy_lineinfo(
         node,
         rule_id(names=names),
+    )
+
+
+@Rules.register(ast.Delete)
+def r_del(node: ast.Subscript, ctx: Context, clauses: list, rule_id):
+    ctx.assert_clause_num_at_most(clauses, 1)
+    clause = clauses[0]
+    ctx.assert_no_head(clause)
+
+    targets = clause.body
+    for target in targets:
+        ctx.assert_lvalue(target, 'cannot be deleted')
+        target = cast_to_ctx(target, ast.Del())
+
+    return copy_lineinfo(
+        node,
+        rule_id(targets=targets),
     )
 
 

@@ -952,6 +952,18 @@ class TestAST(unittest.TestCase):
 
         self.assert_ast_like(f, target)
 
+    def test_del(self):
+        a = 1
+
+        f = def_(lambda: [
+            del_[a, b[c]],
+        ])
+
+        def target():
+            del a, b[c]
+
+        self.assert_ast_like(f, target)
+
     def test_simple_lambda(self):
         f = def_(lambda: [
             lambda: [return_[1]]

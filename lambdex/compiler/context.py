@@ -143,9 +143,9 @@ class Context:
     def assert_name_in(self, clause, names):
         self.assert_(clause.name in names, 'expect ' + ' or '.join(map(repr, names)), clause.node)
 
-    def assert_lvalue(self, node):
+    def assert_lvalue(self, node, msg=None):
         check_result, failed_at = is_lvalue(node)
-        self.assert_(check_result, EM_NOT_LVALUE, failed_at)
+        self.assert_(check_result, msg or EM_NOT_LVALUE, failed_at)
 
     def check_coroutine(self, x, node, keyword):
         if is_coroutine_ast(x):
