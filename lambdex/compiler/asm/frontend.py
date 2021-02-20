@@ -9,7 +9,7 @@ import traceback
 
 if sys.version_info > (3, 6, float('inf')):
     from queue import SimpleQueue
-    from py_compile import _get_default_invalidation_mode, PycInvalidationMode
+    from py_compile import PycInvalidationMode
 else:
     import enum
     from queue import Queue as SimpleQueue
@@ -19,12 +19,16 @@ else:
         CHECKED_HASH = 2
         UNCHECKED_HASH = 3
 
+
+if sys.version_info < (3, 7, 2):
+
     def _get_default_invalidation_mode():
         if os.environ.get('SOURCE_DATE_EPOCH'):
             return PycInvalidationMode.CHECKED_HASH
         else:
             return PycInvalidationMode.TIMESTAMP
-
+else:
+    from py_compile import _get_default_invalidation_mode
 
 RE_LAMBDEX_REWRITE = re.compile(rb'#\s*lambdex:\s*modopt')
 
