@@ -56,10 +56,12 @@ class TestScoping(unittest.TestCase):
         VAR = 2
         f = def_(lambda: [
             nonlocal_[VAR],
-            return_[VAR],
+            return_[VAR, callee_],
         ])
 
-        self.assertEqual(f(), 2)
+        var, fc = f()
+        self.assertEqual(var, 2)
+        self.assertIs(fc, f)
 
     def test_set_nonlocal(self):
         VAR = 2
@@ -121,7 +123,7 @@ class TestNested(unittest.TestCase):
         core.__DEBUG__ = True
         f = def_(lambda: [
             ret < [],
-            for_[i in range(10)][
+            for_[i in range(10)] [
                 def_(lambda i: [
                     ret.append(def_(lambda: [
                         return_[i],
