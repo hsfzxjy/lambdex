@@ -115,9 +115,9 @@ def ast_from_source(source, keyword: str):
             if first_keyword_loc >= 0: break
             lnum -= 1
 
-        lines[lnum] = lines[lnum][first_keyword_loc:]
+        lines = [lines[lnum][first_keyword_loc:]] + lines[lnum + 1:]
         # Prepend the lines with newlines, so that parsed AST will have correct lineno
-        source_lines = ['\n'] * lnum + inspect.getblock(lines[lnum:])
+        source_lines = ['\n'] * lnum + inspect.getblock(lines)
         source = ''.join(source_lines)
 
     # Some garbage may still remain at the end, we alternatively try compiling
