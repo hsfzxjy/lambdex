@@ -24,7 +24,6 @@ def r(ctx: Context, token: TokenInfo):
         ctx.pop_state()
 
 
-
 @m(exact_type=tk.NL, last_state='ALL')
 @m(exact_type=tk.NEWLINE, last_state='ALL')
 @m(exact_type=tk.WHITESPACE, last_state='ALL')
@@ -108,6 +107,8 @@ def r(ctx: Context, token: TokenInfo):
 
 @m(exact_type=tk.COLON, last_state=State.IN_LBDX_LAMBDA)
 def r(ctx: Context, token: TokenInfo):
+    if ctx.last_op[1] != State.IN_LBDX_CALL:
+        return
     ctx.pop_state()
     ctx.push_state(State.EXPECT_LBDX_LSQB)
 
