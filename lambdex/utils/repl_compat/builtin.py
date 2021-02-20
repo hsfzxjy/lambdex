@@ -14,7 +14,7 @@ import __main__
 
 _lines_cache = {}
 
-from ... import keywords
+from ... import _exports
 
 
 class InteractiveConsole(blcode.InteractiveConsole):
@@ -23,7 +23,7 @@ class InteractiveConsole(blcode.InteractiveConsole):
         # Add keywords to globals dict
         # This ensures def_ is available after `from lambdex.repl import *`,
         # since the statements will never return
-        locals.update({k: getattr(keywords, k) for k in keywords.__all__})
+        locals.update({k: getattr(_exports, k) for k in _exports.__all__})
 
         super(InteractiveConsole, self).__init__(locals, '<lxshell#{}>')
         self._counter = 1

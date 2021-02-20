@@ -36,8 +36,8 @@ if _is_run_as_script():
         sys.path = sys.path[1:]
 # Otherwise, we import keywords as normal
 else:
-    from .keywords import *
-    from .keywords import __all__
+    from ._exports import *
+    from ._exports import __all__
 
 del os, sys, _is_run_as_script
 
