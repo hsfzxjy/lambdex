@@ -1,3 +1,9 @@
+# v1.0.0
+
+## What's New
+
+- Support all augmented assignments using the syntax `op_<`, such as `+_<` for `+=`. Formatter is also enhanced to eliminate whitespaces among the operators.
+
 # v0.8.0
 
 ## What's New
