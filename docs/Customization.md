@@ -119,6 +119,7 @@ from_       = from_
 raise_      = raise_
 global_     = global_
 nonlocal_   = nonlocal_
+del_        = del_
 break_      = break_
 continue_   = continue_
 callee_     = callee_

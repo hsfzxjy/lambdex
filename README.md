@@ -27,6 +27,7 @@ Compared with ordinary lambda, which only allows single expression as body, lamb
 - [**Language Features**](#language-features)
   - [Parameters](#parameters)
   - [Variable assignment](#variable-assignment)
+  - [Augmented assignment](#augmented-assignment)
   - [Conditional statement](#conditional-statement)
   - [Looping](#looping)
   - [With statement](#with-statement)
@@ -210,6 +211,54 @@ def_(lambda: [
         (foo := "bar"),     # OK
     ]
 ])
+```
+
+</details>
+
+### Augmented assignment
+
+The augmented assignments are written as `[op]_<`, for example, `+_<` for `+=`. The snippet below illustrates all supported augmented assignments:
+
+<details open>
+    <summary><em>show code</em></summary>
+
+```python
+def_(lambda: [
+    a +_< 1,
+    a -_< 1,
+    a *_< 1,
+    a /_< 1,
+    a //_< 1,
+    a @_< 1,
+    a %_< 1,
+    a <<_< 1,
+    a >>_< 1,
+    a **_< 1,
+    a &_< 1,
+    a |_< 1,
+    a ^_< 1,
+])
+```
+
+</details>
+<details>
+    <summary><em>show equivalent function</em></summary>
+
+```python
+def anonymous():
+    a += 1
+    a -= 1
+    a *= 1
+    a /= 1
+    a //= 1
+    a @= 1
+    a %= 1
+    a <<= 1
+    a >>= 1
+    a **= 1
+    a &= 1
+    a |= 1
+    a ^= 1
 ```
 
 </details>
@@ -1195,13 +1244,10 @@ Mocking a formatter backend could be very useful when you want to enable lambdex
 
 Currently lambdex doesn't support:
 
-1. augmented assignments like `+=`, `-=`, etc.
-2. type annotation
-3. `import` statements
+1. type annotation
+2. `import` statements
 
-Augmented assignments [1] support is planned, but no suitable solution for the operators yet.
-
-Type annotation [2] and `import` statements [3] will not be supported.
+Type annotation [1] and `import` statements [2] will not be supported.
 
 Lambdexes also violate linters, which is inevitable.
 
