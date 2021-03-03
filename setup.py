@@ -25,7 +25,7 @@ with codecs.open("README.md", "r", "utf-8") as fd:
         url="https://github.com/hsfzxjy/lambdex",
         packages=find_packages('.'),
         classifiers=[
-            "Development Status :: 3 - Alpha",
+            "Development Status :: 4 - Beta",
             "Environment :: Console",
             "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
             "Operating System :: OS Independent",
