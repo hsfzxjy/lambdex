@@ -10,6 +10,8 @@ SUPPRESS_WHITESPACE_AFTER = frozenset([
     A.CLS_DOT,
     A.CLS_DECL,
     A.STMT_END,
+
+    A.AUGASSIGN_START,
 ])
 
 

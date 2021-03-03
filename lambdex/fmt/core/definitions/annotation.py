@@ -36,6 +36,10 @@ class Annotation(enum.Enum):
 
     LAST_NL_BEFORE_RSQB = auto()
 
+    # Aug-assign related
+    AUGASSIGN_START = auto()
+    AUGASSIGN_END = auto()
+
     def __repr__(self) -> str:
         return self.name
 

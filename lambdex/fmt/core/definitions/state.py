@@ -37,5 +37,8 @@ class State(enum.Enum):
 
     EXPECT_CLS_MAYBE_BODY_LSQB = auto()
 
+    EXPECT_AUGASSIGN_DASH = auto()
+    EXPECT_AUGASSIGN_ASSIGN = auto()
+
 
 del auto

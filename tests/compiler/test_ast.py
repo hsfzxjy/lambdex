@@ -426,6 +426,40 @@ class TestAST(unittest.TestCase):
 
         self.assert_ast_like(f, target)
 
+    def test_aug_assignment(self):
+        f = def_(lambda: [
+            a +_< 1,
+            a -_< 1,
+            a *_< 1,
+            a /_< 1,
+            a //_< 1,
+            a @_< 1,
+            a %_< 1,
+            a <<_< 1,
+            a >>_< 1,
+            a **_< 1,
+            a &_< 1,
+            a |_< 1,
+            a ^_< 1,
+        ])
+
+        def target():
+            a += 1
+            a -= 1
+            a *= 1
+            a /= 1
+            a //= 1
+            a @= 1
+            a %= 1
+            a <<= 1
+            a >>= 1
+            a **= 1
+            a &= 1
+            a |= 1
+            a ^= 1
+
+        self.assert_ast_like(f, target)
+
     def test_assignment(self):
         f = def_(lambda: [
             a < 1,

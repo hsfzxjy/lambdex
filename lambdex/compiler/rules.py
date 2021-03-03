@@ -220,6 +220,18 @@ def r_while(node: ast.Subscript, ctx: Context, clauses: list):
     )
 
 
+def r_AugAssign(node: ast.Compare, ctx: Context, targets, value):
+    if len(targets) != 1: return
+    target = targets[0]
+    if not isinstance(target, ast.BinOp) or not (isinstance(target.right, ast.Name) and target.right.id == '_'): return
+
+    target, op = target.left, target.op
+    ctx.assert_lvalue(target)
+    cast_to_ctx(target)
+
+    return copy_lineinfo(node, ast.AugAssign(target=target, op=op, value=value))
+
+
 @Rules.register(ast.Assign)
 def r_assign(node: ast.Compare, ctx: Context):
     try:
@@ -229,6 +241,10 @@ def r_assign(node: ast.Compare, ctx: Context):
             node,
             ast.Expr(ctx.compile(node, flag=ContextFlag.should_be_expr)),
         )
+
+    try_augassign = r_AugAssign(node, ctx, targets, value)
+    if try_augassign is not None:
+        return try_augassign
 
     for target in targets:
         ctx.assert_lvalue(target)

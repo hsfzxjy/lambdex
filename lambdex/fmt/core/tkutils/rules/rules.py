@@ -398,3 +398,53 @@ def r(ctx: Context, token: TokenInfo):
 @m(last_state=State.EXPECT_CLS_MAYBE_BODY_LSQB)
 def r(ctx: Context, token: TokenInfo):
     return actions.Backtrace().state(State.MUST_SUBCLS_DOT_WITH_BODY)
+
+@m(exact_type=[
+    tk.PLUS,
+    tk.MINUS,
+    tk.STAR,
+    tk.SLASH,
+    tk.DOUBLESLASH,
+    tk.DOUBLESTAR,
+    tk.AT,
+    tk.CIRCUMFLEX,
+    tk.VBAR,
+    tk.AMPER,
+    tk.LEFTSHIFT,
+    tk.RIGHTSHIFT,
+    tk.PERCENT,
+], last_state=[State.IN_LBDX_BODY_LIST, State.IN_LBDX_CLS_BODY])
+def r(ctx: Context, token: TokenInfo):
+    if not ctx.last_op[0].annotation in (A.CLS_BODY_LSQB, A.BODY_LSQB):
+        return
+
+    ctx.cache = [token]
+    ctx.push_state(State.EXPECT_AUGASSIGN_DASH)
+    return actions.StartBuffer()
+
+
+@m(exact_type=tk.NAME, string='_', last_state=State.EXPECT_AUGASSIGN_DASH)
+def r(ctx: Context, token: TokenInfo):
+    ctx.pop_state()
+    ctx.push_state(State.EXPECT_AUGASSIGN_ASSIGN)
+    return
+
+
+@m(last_state=State.EXPECT_AUGASSIGN_DASH)
+def r(ctx: Context, token: TokenInfo):
+    ctx.pop_state()
+    return actions.StopBuffer(dont_consume=True)
+
+
+@m(exact_type=_Aliases.Assignment, last_state=State.EXPECT_AUGASSIGN_ASSIGN)
+def r(ctx: Context, token: TokenInfo):
+    ctx.pop_state()
+    ctx.cache[0].annotation = A.AUGASSIGN_START
+    token.annotation = A.AUGASSIGN_END
+    return actions.StopBuffer()
+
+
+@m(last_state=State.EXPECT_AUGASSIGN_ASSIGN)
+def r(ctx: Context, token: TokenInfo):
+    ctx.pop_state()
+    return actions.StopBuffer(dont_consume=True)
