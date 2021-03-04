@@ -751,7 +751,7 @@ for func in arr:
 
 ### Recursion
 
-One call always access the current lambdex itself via `callee_` within a lambdex. The feature is quite handy since you don't need to assign a lambdex to a name for doing recursion.
+One can always access the current lambdex itself via `callee_` within a lambdex. The feature is quite handy since you don't need to assign a lambdex to a name for doing recursion.
 
 ```python
 # Summing from 1 to 10
@@ -1277,7 +1277,7 @@ The preference of "<" ">" over "<=" "=>" is that the previous ones consume only 
 
 The design is from two concerns.
 
-1. A programmatic approaches may cause inconsistency at runtime, which is difficult for troubleshooting. For example, if one declares the aliasing in `mod/__init__.py` and uses the new keywords in `mod/A.py`, the aliasing works fine if `mod/A.py` imported as `mod.A`, but fails if run as a standalone script.
+1. A programmatic approach may cause inconsistency at runtime, which is difficult for troubleshooting. For example, if one declares the aliasing in `mod/__init__.py` and uses the new keywords in `mod/A.py`, the aliasing works fine if `mod/A.py` imported as `mod.A`, but fails if run as a standalone script.
 2. The compiler and formatter should behave consistently when processing the same file. If a programmatic approach used, the formatter must apply semantic analysis to figure out the aliasing rules, which is far more complicated.
 
 ---
