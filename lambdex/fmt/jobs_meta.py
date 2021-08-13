@@ -7,7 +7,7 @@ logger = getLogger(__name__)
 
 class JobsMeta:
 
-    __slots__ = ['adapter', 'quiet', 'in_place', 'print_diff', 'parallel', 'files']
+    __slots__ = ["adapter", "quiet", "in_place", "print_diff", "parallel", "files"]
 
     def __init__(self, adapter: str):
         self.adapter = adapter

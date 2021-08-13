@@ -1,7 +1,7 @@
 import os
 import sys
 
-colorful = os.getenv('NOCOLOR') is None
+colorful = os.getenv("NOCOLOR") is None
 if colorful:
     try:
         from termcolor import colored

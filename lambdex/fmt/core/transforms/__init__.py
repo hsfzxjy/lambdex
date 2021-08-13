@@ -25,11 +25,11 @@ def transform(tokenseq: Sequence[TokenInfo]) -> Sequence[TokenInfo]:
     return seq
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
     from .tkutils.tokenize import tokenize
 
-    with open(sys.argv[1], 'rb') as fd:
+    with open(sys.argv[1], "rb") as fd:
         tokenseq = tokenize(fd.__next__)
 
         seq = transform(tokenseq)

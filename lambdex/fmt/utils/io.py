@@ -14,14 +14,15 @@ def get_stdin() -> bytes:
             break
         try:
             content = sys.stdin.buffer.read()
-            if not content: break
+            if not content:
+                break
             contents.append(content)
         except EOFError:
             break
         except KeyboardInterrupt:
             sys.exit(1)
 
-    return b''.join(contents)
+    return b"".join(contents)
 
 
 class _ResourceBase(abc.ABC):
@@ -51,26 +52,29 @@ class _ResourceBase(abc.ABC):
         return self._backend_output_stream
 
     def is_changed(self, formatted_code: str) -> bool:
-        return self._source.decode('utf-8') != formatted_code
+        return self._source.decode("utf-8") != formatted_code
 
     def write_formatted_code(self, formatted_code: str):
         content = formatted_code
         if self._meta.print_diff:
-            before = self._source.decode('utf-8').splitlines()
+            before = self._source.decode("utf-8").splitlines()
             after = formatted_code.splitlines()
-            content = '\n'.join(
-                difflib.unified_diff(
-                    before,
-                    after,
-                    self._display_filename(),
-                    self._display_filename(),
-                    '(original)',
-                    '(reformatted)',
-                    lineterm='',
+            content = (
+                "\n".join(
+                    difflib.unified_diff(
+                        before,
+                        after,
+                        self._display_filename(),
+                        self._display_filename(),
+                        "(original)",
+                        "(reformatted)",
+                        lineterm="",
+                    )
                 )
-            ) + '\n'
-        elif not self._meta.in_place and not content.endswith('\n'):
-            content += '\n'
+                + "\n"
+            )
+        elif not self._meta.in_place and not content.endswith("\n"):
+            content += "\n"
 
         self._write_content(content)
 
@@ -80,7 +84,7 @@ class StdinResource(_ResourceBase):
         return get_stdin()
 
     def _display_filename(self) -> str:
-        return '<stdin>'
+        return "<stdin>"
 
     def _write_content(self, content: str):
         assert not self._meta.in_place

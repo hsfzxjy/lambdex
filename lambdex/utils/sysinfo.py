@@ -15,7 +15,7 @@ def get_importer_path():
         filename = abspath(f.f_code.co_filename)
 
         # If it's in importlib or in lambdex, continue
-        if 'importlib' in filename or filename.startswith(ROOT_DIR):
+        if "importlib" in filename or filename.startswith(ROOT_DIR):
             f = f.f_back
         else:
             break
@@ -26,8 +26,8 @@ def get_importer_path():
 def get_site_paths():
     import site
 
-    if hasattr(site, 'getsitepackages'):
+    if hasattr(site, "getsitepackages"):
         yield from site.getsitepackages()
 
-    if hasattr(site, 'getusersitepackages'):
+    if hasattr(site, "getusersitepackages"):
         yield site.getusersitepackages()

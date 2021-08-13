@@ -6,9 +6,9 @@ from lambdex.fmt.core.definitions import tk, A, TokenInfo, actions
 logger = getLogger(__name__)
 
 NORMALIZE_WHITESPACE_BEFORE = {
-    A.BODY_LSQB: ' ',
-    A.CLS_HEAD_LSQB: '',
-    A.CLS_BODY_LSQB: ' ',
+    A.BODY_LSQB: " ",
+    A.CLS_HEAD_LSQB: "",
+    A.CLS_BODY_LSQB: " ",
 }
 
 

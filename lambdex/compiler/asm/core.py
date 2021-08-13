@@ -17,33 +17,39 @@ from lambdex.ast_parser import (
 
 from lambdex.compiler.core import _compile
 
-__all__ = ['transpile']
+__all__ = ["transpile"]
 
-LOAD_GLOBAL = opmap['LOAD_GLOBAL']
-LOAD_NAME = opmap['LOAD_NAME']
-LOAD_METHOD = opmap['LOAD_METHOD'] if sys.version_info > (3, 6, float('inf')) else opmap['LOAD_ATTR']
-LOAD_CLOSURE = opmap['LOAD_CLOSURE']
-LOAD_CONST = opmap['LOAD_CONST']
+LOAD_GLOBAL = opmap["LOAD_GLOBAL"]
+LOAD_NAME = opmap["LOAD_NAME"]
+LOAD_METHOD = (
+    opmap["LOAD_METHOD"]
+    if sys.version_info > (3, 6, float("inf"))
+    else opmap["LOAD_ATTR"]
+)
+LOAD_CLOSURE = opmap["LOAD_CLOSURE"]
+LOAD_CONST = opmap["LOAD_CONST"]
 
-CALL_FUNCTION = opmap['CALL_FUNCTION']
-CALL_METHOD = opmap['CALL_METHOD'] if sys.version_info > (3, 6, float('inf')) else CALL_FUNCTION
+CALL_FUNCTION = opmap["CALL_FUNCTION"]
+CALL_METHOD = (
+    opmap["CALL_METHOD"] if sys.version_info > (3, 6, float("inf")) else CALL_FUNCTION
+)
 
-MAKE_FUNCTION = opmap['MAKE_FUNCTION']
-BUILD_TUPLE = opmap['BUILD_TUPLE']
+MAKE_FUNCTION = opmap["MAKE_FUNCTION"]
+BUILD_TUPLE = opmap["BUILD_TUPLE"]
 
-DUP_TOP = opmap['DUP_TOP']
-STORE_DEREF = opmap['STORE_DEREF']
+DUP_TOP = opmap["DUP_TOP"]
+STORE_DEREF = opmap["STORE_DEREF"]
 
-EXTENDED_ARG = opmap['EXTENDED_ARG']
+EXTENDED_ARG = opmap["EXTENDED_ARG"]
 
-JUMP_FORWARD = opmap['JUMP_FORWARD']
-JUMP_ABSOLUTE = opmap['JUMP_ABSOLUTE']
+JUMP_FORWARD = opmap["JUMP_FORWARD"]
+JUMP_ABSOLUTE = opmap["JUMP_ABSOLUTE"]
 
-JUMP_IF_TRUE_OR_POP = opmap['JUMP_IF_TRUE_OR_POP']
-JUMP_IF_FALSE_OR_POP = opmap['JUMP_IF_FALSE_OR_POP']
+JUMP_IF_TRUE_OR_POP = opmap["JUMP_IF_TRUE_OR_POP"]
+JUMP_IF_FALSE_OR_POP = opmap["JUMP_IF_FALSE_OR_POP"]
 
-POP_JUMP_IF_FALSE = opmap['POP_JUMP_IF_FALSE']
-POP_JUMP_IF_TRUE = opmap['POP_JUMP_IF_TRUE']
+POP_JUMP_IF_FALSE = opmap["POP_JUMP_IF_FALSE"]
+POP_JUMP_IF_TRUE = opmap["POP_JUMP_IF_TRUE"]
 
 JABS_STACK_EFFECT_AFTER_JUMP = {
     JUMP_ABSOLUTE: 0,
@@ -76,54 +82,52 @@ class _LambdexBlock:
      MAKE_FUNCTION
      CALL_FUNCTION / CALL_METHOD
     """
+
     __slots__ = (
         # ====> These fields record some key offsets of the block
         # The start offset of the block (inclusive)
         # Usually a LOAD_GLOBAL / LOAD_NAME (def_)
-        'offset_start',
+        "offset_start",
         # The end offset of the block (inclusive)
         # Usually a CALL_FUNCTION / CALL_METHOD
-        'offset_end',
+        "offset_end",
         # The offset of an op from which should preserve
         # Should be the next op of `offset_start`, if using def_(...)
         # or the second next op of `offset_start`, if using def_.<ident>(...)
-        'offset_start_make_lambda',
+        "offset_start_make_lambda",
         # The offset of an op at which building closure tuple ends
         # Should be the offset of the BUILD_TUPLE, or None if no closure built
-        'offset_end_make_closure_tuple',
-
+        "offset_end_make_closure_tuple",
         # ====> These fields are temporary variables during block recognizing phase,
         # ====> and has no meaning outside `_find_lambdex_blocks`
         # The stach depth BEFORE `offset_start`
-        'stack_depth',
+        "stack_depth",
         # If a jump op met during recognizing, store the target offset in `offset_jump`,
         # and the stack depth after jumping in `stack_depth_after_jump`
-        'offset_jump',
-        'stack_depth_after_jump',
-
+        "offset_jump",
+        "stack_depth_after_jump",
         # ====> These fields characterize a definition, for AST rewriting
         # The lineno of the last CALL_FUNCTION / CALL_METHOD op
-        'lineno',
+        "lineno",
         # Names of freevars that the lambdex owns
-        'freevars',
+        "freevars",
         # Oparg of LOAD_CLOSURE for each freevar
-        'freevar_opargs',
+        "freevar_opargs",
         # The keyword of lambdex
-        'keyword',
+        "keyword",
         # The identifier of lambdex
-        'identifier',
+        "identifier",
         # The code object of the lambda expression
-        'lambda_code',
-
+        "lambda_code",
         # ====> These fields are for bytecode rewriting
         # The index of `lambda_code` in co_consts
-        'code_const_idx',
+        "code_const_idx",
         # The arg of MAKE_FUNCTION
-        'make_function_mode',
+        "make_function_mode",
         # Storing compiled lambdex code object
-        'compiled_code',
+        "compiled_code",
         # Freevars mapping before and after transpilation
-        'fvmapping',
+        "fvmapping",
     )
 
     def __init__(self):
@@ -136,8 +140,10 @@ class _LambdexBlock:
         self.offset_end_make_closure_tuple = None
 
     def __repr__(self) -> str:
-        fields = ', '.join('{}={}'.format(name, getattr(self, name, None)) for name in self.__slots__)
-        return 'Def({})'.format(fields)
+        fields = ", ".join(
+            "{}={}".format(name, getattr(self, name, None)) for name in self.__slots__
+        )
+        return "Def({})".format(fields)
 
     @property
     def key(self) -> LambdexASTLookupKey:
@@ -177,7 +183,10 @@ def _find_lambdex_blocks(code: types.CodeType) -> Sequence[_LambdexBlock]:
 
     for offset, op, arg in dis._unpack_opargs(code.co_code):
         # Update lineno if necessary
-        if n_linestarts - 1 > i_linestarts and linestarts[i_linestarts + 1][0] <= offset:
+        if (
+            n_linestarts - 1 > i_linestarts
+            and linestarts[i_linestarts + 1][0] <= offset
+        ):
             i_linestarts += 1
             lineno = linestarts[i_linestarts][1]
 
@@ -217,7 +226,9 @@ def _find_lambdex_blocks(code: types.CodeType) -> Sequence[_LambdexBlock]:
             stack_depth = curr_block.stack_depth_after_jump
 
         # Update the stack depth as if (op, arg) is performed
-        if op != EXTENDED_ARG:  # In Python <= 3.7, EXTENDED_ARG as argument will cause ValueError
+        if (
+            op != EXTENDED_ARG
+        ):  # In Python <= 3.7, EXTENDED_ARG as argument will cause ValueError
             stack_depth += stack_effect(op, arg)
 
         # In the following branches, we update the current block and decide whether
@@ -228,7 +239,8 @@ def _find_lambdex_blocks(code: types.CodeType) -> Sequence[_LambdexBlock]:
             # If the function `def_` or `def_.<ident>` popped unexpectedly,
             # we consider the current block as broken
             blocks.pop()
-            if blocks: curr_block = blocks[-1]
+            if blocks:
+                curr_block = blocks[-1]
         elif op == LOAD_METHOD and offset == curr_block.offset_start + 2:
             # If LOAD_METHOD met just after offset_start, record the name as identifier
             curr_block.identifier = names[arg]
@@ -247,11 +259,15 @@ def _find_lambdex_blocks(code: types.CodeType) -> Sequence[_LambdexBlock]:
         elif op == MAKE_FUNCTION:
             # If MAKE_FUNCTION met, record the offset (so that the last one preserved)
             curr_block.make_function_mode = arg
-        elif op in {CALL_FUNCTION, CALL_METHOD} and stack_depth == curr_block.stack_depth + 1:
+        elif (
+            op in {CALL_FUNCTION, CALL_METHOD}
+            and stack_depth == curr_block.stack_depth + 1
+        ):
             # If CALL_FUNCTION / CALL_METHOD met and the stack is balanced, finish the current block
             curr_block.offset_end = offset
             yield blocks.pop()
-            if blocks: curr_block = blocks[-1]
+            if blocks:
+                curr_block = blocks[-1]
 
         prev_op = op
 
@@ -278,16 +294,17 @@ class _Instruction:
         arg=0x102,
     )
     """
+
     __slots__ = (
-        'op',
-        'arg',
-        'offset',
-        'lineno',
-        'is_jabs',
-        'is_jrel',
-        'is_jump',
-        'jump_offset',
-        'length',  # #bytes the instruction takes
+        "op",
+        "arg",
+        "offset",
+        "lineno",
+        "is_jabs",
+        "is_jrel",
+        "is_jump",
+        "jump_offset",
+        "length",  # #bytes the instruction takes
     )
 
     def __init__(self, op: int, arg: int, offset: int = -1):
@@ -339,11 +356,11 @@ class _Instruction:
         """
         arg = self.arg or 0
         length = self.length // 2
-        for i, byte in enumerate(arg.to_bytes(length, 'little')):
+        for i, byte in enumerate(arg.to_bytes(length, "little")):
             yield EXTENDED_ARG if i < length - 1 else self.op
             yield byte
 
-    def update(self, jtable: '_JumpTable', offset: int) -> bool:
+    def update(self, jtable: "_JumpTable", offset: int) -> bool:
         """
         Update self.offset and self.arg given a new offset and jump table.
 
@@ -365,14 +382,18 @@ class _Instruction:
         self._calc_jump_offset()
         return changed
 
-    def jump_offset_is_wrong(self, jtable: '_JumpTable') -> bool:
+    def jump_offset_is_wrong(self, jtable: "_JumpTable") -> bool:
         """
         Given a jump table, check whether self.jump_offset is correct or not.
         """
         return self.is_jump and self.jump_offset != jtable[self].offset
 
     def __repr__(self):
-        return '{}{}{}'.format(str(self.offset).rjust(20), opname[self.op].rjust(20), str(self.arg).rjust(20))
+        return "{}{}{}".format(
+            str(self.offset).rjust(20),
+            opname[self.op].rjust(20),
+            str(self.arg).rjust(20),
+        )
 
 
 class _JumpTable:
@@ -382,9 +403,10 @@ class _JumpTable:
     A _JumpTable preserves the mapping in both directions, so that updating
     jump targets could have constant time complexity.
     """
+
     def __init__(self, instrs: Sequence[_Instruction]):
         """
-        `instrs` should be well-behaved, i.e., the `.jump_offset` of each 
+        `instrs` should be well-behaved, i.e., the `.jump_offset` of each
         instruction correctly equals the offset of its target.
 
         Usually, `instrs` should be the instruction sequence just disassembled
@@ -412,7 +434,8 @@ class _JumpTable:
         not violating the mapping.
         """
         # Do nothing if old and new are same objects
-        if old is new: return
+        if old is new:
+            return
 
         m, rm = self._mapping, self._reversed_mapping
 
@@ -435,8 +458,8 @@ class _JumpTable:
         return self._mapping[instr]
 
     def __repr__(self) -> str:
-        lines = ('{} -> {}'.format(k, v) for k, v in self._mapping.items())
-        return '\n'.join(lines)
+        lines = ("{} -> {}".format(k, v) for k, v in self._mapping.items())
+        return "\n".join(lines)
 
 
 def _disassemble(code: types.CodeType) -> Tuple[List[_Instruction], _JumpTable]:
@@ -460,6 +483,7 @@ def _assemble(instrs: Sequence[_Instruction]) -> bytes:
     """
     Produce bytecodes from a sequence of _Instruction.
     """
+
     def _iter():
         for item in instrs:
             yield from item.assemble()
@@ -494,7 +518,7 @@ def _rewrite_code(
 ) -> Tuple[bytes, List, List, bytes, List[int]]:
     """
     Rewrite `code` to eliminate lambdex runtime transpiling.
-    
+
     Firstly, the function find all blocks in `code.co_code`. For each block, the following
     steps are taken:
 
@@ -519,6 +543,7 @@ def _rewrite_code(
      - new_lnotab (bytes)
      - skipped_consts_idxs (list): indices of the code objects that need not to be rewritten.
     """
+
     def _calibrate_freevar_index(instr: _Instruction) -> _Instruction:
         # calibrate freevar index, since we will change the length of co_cellvars
         if instr.op in HASFREE:
@@ -562,7 +587,7 @@ def _rewrite_code(
         except StopIteration:
             # Usually the end of a block will not be at the last
             # If this happens, complain it
-            raise EOFError('Unexpected end of bytecodes encounted')
+            raise EOFError("Unexpected end of bytecodes encounted")
 
         offset = curr_instr.offset
 
@@ -575,7 +600,9 @@ def _rewrite_code(
             # Use the block key to find corresponding AST, and obtained
             # the compiled code object
             astdef = asttab[curr_block.key]
-            lambdex_code, _, fvmapping = _compile(astdef, code.co_filename, curr_block.freevars)
+            lambdex_code, _, fvmapping = _compile(
+                astdef, code.co_filename, curr_block.freevars
+            )
 
             curr_block.compiled_code = lambdex_code
             curr_block.fvmapping = fvmapping
@@ -628,7 +655,10 @@ def _rewrite_code(
             new_instrs.append(curr_instr)
 
             discarded_instrs.append(curr_instr)
-        elif offset == curr_block.offset_end - 6 and curr_block.offset_end_make_closure_tuple is None:
+        elif (
+            offset == curr_block.offset_end - 6
+            and curr_block.offset_end_make_closure_tuple is None
+        ):
             # If no closure was made in the code bytecodes, make one
             new_instrs.append(_Instruction(LOAD_CLOSURE, extra_closure_idx))
             first_added_instr = new_instrs[-1]
@@ -657,7 +687,9 @@ def _rewrite_code(
 
             new_instrs.append(_Instruction(STORE_DEREF, extra_closure_idx))
 
-            cellvars.append('?')  # the name need not to be valid, since its just a placeholder
+            cellvars.append(
+                "?"
+            )  # the name need not to be valid, since its just a placeholder
             extra_closure_idx += 1
 
             discarded_instrs.append(curr_instr)
@@ -687,12 +719,13 @@ def _rewrite_code(
 
 # From Python 3.10+, there would be a new linetable specification
 # See https://github.com/python/cpython/blob/v3.10.0a5/Objects/lnotab_notes.txt
-if sys.version_info > (3, 9, float('inf')):
+if sys.version_info > (3, 9, float("inf")):
 
     def _make_lnotab(instrs: List[_Instruction], firstlineno: int) -> Dict[str, bytes]:
         """
         Generate co_lnotab byte sequence from `instrs`.
         """
+
         def _iter() -> Sequence[int]:
             ldelta = None
             prev_lineno = firstlineno or 0
@@ -714,10 +747,10 @@ if sys.version_info > (3, 9, float('inf')):
                     end = offset
 
                 sdelta = end - start
-                while sdelta > 0xfe:
-                    yield 0xfe
+                while sdelta > 0xFE:
+                    yield 0xFE
                     yield 0x00
-                    sdelta -= 0xfe
+                    sdelta -= 0xFE
                 yield sdelta
                 if ldelta is None:
                     yield 0x80
@@ -735,11 +768,11 @@ if sys.version_info > (3, 9, float('inf')):
                     yield 0x00
                     yield ldelta + 0x100
                 else:
-                    yield 0x7f
+                    yield 0x7F
                     ldelta -= 127
                     while ldelta > 127:
                         yield 0x00
-                        yield 0x7f
+                        yield 0x7F
                         ldelta -= 127
                     yield 0x00
                     yield ldelta
@@ -748,30 +781,36 @@ if sys.version_info > (3, 9, float('inf')):
                 end = None
                 ldelta = lineno - prev_lineno if lineno else None
                 prev_lineno = lineno
-            yield 0xff
+            yield 0xFF
             yield 0x00
 
         return dict(co_linetable=bytes(_iter()))
+
+
 else:
 
-    def _make_lnotab(instrs: Sequence[_Instruction], firstlineno: int) -> Dict[str, bytes]:
+    def _make_lnotab(
+        instrs: Sequence[_Instruction], firstlineno: int
+    ) -> Dict[str, bytes]:
         """
         Generate co_lnotab byte sequence from `instrs`.
         """
+
         def _iter() -> Sequence[int]:
             prev_offset = 0
             prev_lineno = firstlineno or 0
             for instr in instrs:
-                if instr.lineno is None: continue
+                if instr.lineno is None:
+                    continue
                 offset = instr.offset
                 lineno = instr.lineno
 
                 sdelta = offset - prev_offset
                 ldelta = lineno - prev_lineno
-                while sdelta > 0xff:
-                    yield 0xff
+                while sdelta > 0xFF:
+                    yield 0xFF
                     yield 0x00
-                    sdelta -= 0xff
+                    sdelta -= 0xFF
                 yield sdelta
                 if -128 <= ldelta <= -1:
                     yield ldelta + 0x100
@@ -787,11 +826,11 @@ else:
                     yield 0x00
                     yield ldelta + 0x100
                 else:
-                    yield 0x7f
+                    yield 0x7F
                     ldelta -= 127
                     while ldelta > 127:
                         yield 0x00
-                        yield 0x7f
+                        yield 0x7F
                         ldelta -= 127
                     yield 0x00
                     yield ldelta
@@ -802,17 +841,22 @@ else:
         return dict(co_lnotab=bytes(_iter()))
 
 
-def transpile(code: types.CodeType, ismod: bool, asttab: Optional[LambdexASTLookupTable] = None) -> types.CodeType:
+def transpile(
+    code: types.CodeType, ismod: bool, asttab: Optional[LambdexASTLookupTable] = None
+) -> types.CodeType:
     """
     Recursively rewrite `code` to eliminate lambdex runtime compiling.
     """
     if asttab is None:
         asttab = find_lambdex_ast_in_code(code, ismod)
 
-    new_bc, new_consts, new_cellvars, new_lnotab, skipped_const_idxs = _rewrite_code(code, asttab)
+    new_bc, new_consts, new_cellvars, new_lnotab, skipped_const_idxs = _rewrite_code(
+        code, asttab
+    )
 
     for idx, const in enumerate(new_consts):
-        if idx in skipped_const_idxs: continue
+        if idx in skipped_const_idxs:
+            continue
         if iscode(const):
             new_consts[idx] = transpile(const, asttab)
 

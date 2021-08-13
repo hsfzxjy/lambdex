@@ -26,7 +26,7 @@ class AddWhitespace(_StreamWithLog):
         if ws_start is not None:
             whitespace_token = TokenInfo(
                 tk.WHITESPACE,
-                token.line[ws_start[1]:ws_end[1]],
+                token.line[ws_start[1] : ws_end[1]],
                 ws_start,
                 ws_end,
                 token.line,
@@ -44,7 +44,7 @@ class RearrangeSentinel(_StreamWithLog):
         self.stmt_start_in_buffer = None
 
     def _handle_token(self, token: TokenInfo):
-        if (token.is_WS_NL_CMT or token == A.STMT_START):
+        if token.is_WS_NL_CMT or token == A.STMT_START:
             if not self.buffering:
                 self.action = actions.StartBuffer()
         elif self.buffering:
@@ -84,9 +84,9 @@ class HandleLastSTMT(_StreamWithLog):
         if token.annotation == A.STMT_END and not self.buffering:
             self.action = actions.StartBuffer()
         elif self.buffering and token.annotation in (
-                A.BODY_RSQB,
-                A.CLS_BODY_RSQB,
-                A.STMT_START,
+            A.BODY_RSQB,
+            A.CLS_BODY_RSQB,
+            A.STMT_START,
         ):
 
             if token.annotation != A.STMT_START:
@@ -172,7 +172,8 @@ def tokenize(readline):
     return seq
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
-    with open(sys.argv[1], 'rb') as fd:
+
+    with open(sys.argv[1], "rb") as fd:
         tokenize(fd.__next__)

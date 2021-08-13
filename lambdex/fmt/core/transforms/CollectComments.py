@@ -12,14 +12,16 @@ AFTER = 2
 def _match_rule(pattern, rules):
     pattern = tuple(pattern)
     for rule in rules:
-        if len(pattern) > len(rule.pattern): continue
-        if pattern == rule.pattern[:len(pattern)]: return True, rule, len(pattern) == len(rule.pattern)
+        if len(pattern) > len(rule.pattern):
+            continue
+        if pattern == rule.pattern[: len(pattern)]:
+            return True, rule, len(pattern) == len(rule.pattern)
 
     return False, None, False
 
 
 class _CollectRule:
-    __slots__ = ['pattern', 'insert_at']
+    __slots__ = ["pattern", "insert_at"]
 
     def __init__(self, *, insert_at: int, pattern: tuple):
         self.pattern = pattern
@@ -90,7 +92,8 @@ class CollectComments(_StreamWithLog):
         return comments, others
 
     def _handle_token(self, token):
-        if token.annotation is None: return
+        if token.annotation is None:
+            return
 
         if not self.buffering:
             if token.annotation in START_TOKENS:

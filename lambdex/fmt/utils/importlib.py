@@ -13,7 +13,7 @@ def silent_import(
     try:
         mod = importlib.import_module(dotted_name)
     except ModuleNotFoundError:
-        logger.warning('module {} not found'.format(dotted_name))
+        logger.warning("module {} not found".format(dotted_name))
         return None
 
     if names is None:
@@ -23,5 +23,7 @@ def silent_import(
         if hasattr(mod, name):
             return getattr(mod, name)
 
-    logger.warning('attribute {} not found on module {}'.format(', '.join(names), dotted_name))
+    logger.warning(
+        "attribute {} not found on module {}".format(", ".join(names), dotted_name)
+    )
     return None

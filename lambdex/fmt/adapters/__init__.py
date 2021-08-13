@@ -5,8 +5,8 @@ from .yapf import YapfAdapter
 from .dummy import DummyAdapter
 
 mapping = {
-    'yapf': YapfAdapter,
-    'dummy': DummyAdapter,
+    "yapf": YapfAdapter,
+    "dummy": DummyAdapter,
 }
 
 

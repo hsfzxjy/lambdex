@@ -10,7 +10,15 @@ from .annotation import Annotation as A
 
 class TokenInfo:
 
-    __slots__ = ['type', 'string', 'start', 'end', 'line', 'annotation', 'leading_whitespace']
+    __slots__ = [
+        "type",
+        "string",
+        "start",
+        "end",
+        "line",
+        "annotation",
+        "leading_whitespace",
+    ]
 
     def __init__(
         self,
@@ -43,39 +51,41 @@ class TokenInfo:
 
         start, end = self.start[1], self.end[1]
 
-        before = colored(_(string[:start]), 'yellow', attrs=['underline', 'dark'])
-        after = colored(_(string[end:]), 'yellow', attrs=['underline', 'dark'])
+        before = colored(_(string[:start]), "yellow", attrs=["underline", "dark"])
+        after = colored(_(string[end:]), "yellow", attrs=["underline", "dark"])
 
         middle = self.string
         if not middle:
-            middle = '\u2591'
-            suffix = ''
+            middle = "\u2591"
+            suffix = ""
         else:
             middle = _(middle)
-            suffix = ' '
+            suffix = " "
 
-        middle = colored(middle, 'yellow', attrs=['underline', 'bold'])
+        middle = colored(middle, "yellow", attrs=["underline", "bold"])
         return before + middle + after + suffix
 
     def __repr__(self) -> str:
-        annotated_type = '%d (%s)' % (self.type, tk.tok_name[self.type])
+        annotated_type = "%d (%s)" % (self.type, tk.tok_name[self.type])
         visualized = self.visualize(repr=True)
 
         if visualized is None:
-            return 'TokenInfo({}, type={:>17s}, A={:>20s}, LWS={})'.format(
+            return "TokenInfo({}, type={:>17s}, A={:>20s}, LWS={})".format(
                 repr(self.string),
                 annotated_type,
                 repr(self.annotation),
                 repr(self.leading_whitespace),
             )
         else:
-            return 'TokenInfo({}, type={:>17s}, A={:>20s}, LWS={}, lineno={}:{})'.format(
-                visualized,
-                annotated_type,
-                repr(self.annotation),
-                repr(self.leading_whitespace),
-                self.start[0],
-                self.end[0],
+            return (
+                "TokenInfo({}, type={:>17s}, A={:>20s}, LWS={}, lineno={}:{})".format(
+                    visualized,
+                    annotated_type,
+                    repr(self.annotation),
+                    repr(self.leading_whitespace),
+                    self.start[0],
+                    self.end[0],
+                )
             )
 
     @property
@@ -91,7 +101,7 @@ class TokenInfo:
             type=tk.SENTINEL,
             start=token.end,
             end=token.end,
-            string='',
+            string="",
             line=token.line,
             annotation=annotation,
         )
@@ -102,7 +112,7 @@ class TokenInfo:
             type=tk.SENTINEL,
             start=token.start,
             end=token.start,
-            string='',
+            string="",
             line=token.line,
             annotation=annotation,
         )
@@ -110,9 +120,9 @@ class TokenInfo:
     def lxfmt_directive(self) -> Optional[str]:
         if not self.is_CMT:
             return None
-        matched = re.match(r'#.*\blxfmt:\s*(?P<directive>on|off)', self.string)
+        matched = re.match(r"#.*\blxfmt:\s*(?P<directive>on|off)", self.string)
         if matched is not None:
-            return matched.group('directive')
+            return matched.group("directive")
         return None
 
     def __eq__(self, rhs):
@@ -134,7 +144,7 @@ class TokenInfo:
     for name, value in list(locals().items()):
         if not isinstance(value, frozenset):
             continue
-        locals()['is_{}'.format(name)] = _build_property(value)
+        locals()["is_{}".format(name)] = _build_property(value)
         del locals()[name]
 
     del name, value

@@ -15,35 +15,37 @@ logger = getLogger(__name__)
 
 
 def _build_argument_parser():
-    parser = argparse.ArgumentParser(description='Default formatter for lambdex')
+    parser = argparse.ArgumentParser(description="Default formatter for lambdex")
     diff_inplace_quiet_group = parser.add_mutually_exclusive_group()
     diff_inplace_quiet_group.add_argument(
-        '-d',
-        '--diff',
-        action='store_true',
-        help='print the diff for the fixed source',
+        "-d",
+        "--diff",
+        action="store_true",
+        help="print the diff for the fixed source",
     )
     diff_inplace_quiet_group.add_argument(
-        '-i',
-        '--in-place',
-        action='store_true',
-        help='make changes to files in place',
+        "-i",
+        "--in-place",
+        action="store_true",
+        help="make changes to files in place",
     )
     diff_inplace_quiet_group.add_argument(
-        '-q',
-        '--quiet',
-        action='store_true',
-        help='output nothing and set return value',
+        "-q",
+        "--quiet",
+        action="store_true",
+        help="output nothing and set return value",
     )
 
     parser.add_argument(
-        '-p',
-        '--parallel',
-        action='store_true',
-        help='run in parallel when formatting multiple files.',
+        "-p",
+        "--parallel",
+        action="store_true",
+        help="run in parallel when formatting multiple files.",
     )
 
-    parser.add_argument('files', nargs='*', help='reads from stdin when no files are specified.')
+    parser.add_argument(
+        "files", nargs="*", help="reads from stdin when no files are specified."
+    )
     return parser
 
 
@@ -54,9 +56,11 @@ class DummyAdapter(BaseAdapter):
         bopts = parser.parse_args(self.backend_argv)
 
         if (bopts.in_place or bopts.diff) and not bopts.files:
-            logger.error('cannot use --in-place or --diff flags when reading from stdin')
+            logger.error(
+                "cannot use --in-place or --diff flags when reading from stdin"
+            )
 
-        meta = JobsMeta(adapter='yapf')
+        meta = JobsMeta(adapter="yapf")
         meta.in_place = bopts.in_place
         meta.parallel = bopts.parallel
         meta.print_diff = bopts.diff

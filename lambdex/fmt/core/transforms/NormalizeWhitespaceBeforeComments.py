@@ -43,18 +43,20 @@ class NormalizeWhitespaceBeforeComments(_StreamWithLog):
             return
 
         if not self.buffering and not self.newlined:
-            yield TokenInfo(tk.WHITESPACE, '  ')
+            yield TokenInfo(tk.WHITESPACE, "  ")
             yield token
             self.action = actions.Default(dont_store=True)
             return
 
         if self.buffering:
-            if any('\\' in x.string for x in self.buffer) or self.leading:
+            if any("\\" in x.string for x in self.buffer) or self.leading:
                 self.action = actions.StopBuffer()
             else:
-                yield TokenInfo(tk.WHITESPACE, '  ')
+                yield TokenInfo(tk.WHITESPACE, "  ")
                 yield token
-                self.action = actions.StopBuffer(dont_store=True, dont_yield_buffer=True)
+                self.action = actions.StopBuffer(
+                    dont_store=True, dont_yield_buffer=True
+                )
 
             self.leading = False
             self.newlined = False

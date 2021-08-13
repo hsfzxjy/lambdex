@@ -1,8 +1,8 @@
 __all__ = [
-    'get',
-    'set',
-    'set_enabled',
-    'is_enabled',
+    "get",
+    "set",
+    "set_enabled",
+    "is_enabled",
 ]
 
 _cache = {}

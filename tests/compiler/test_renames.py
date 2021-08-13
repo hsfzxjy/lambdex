@@ -9,7 +9,7 @@ class TestRename(unittest.TestCase):
             pass_
         ])
 
-        self.assertEqual(f.__code__.co_name, 'myfunc')
+        self.assertEqual(f.__code__.co_name, "myfunc")
 
     def test_inner_rename(self):
         f = def_.myfunc(lambda: [
@@ -18,7 +18,7 @@ class TestRename(unittest.TestCase):
             ])]
         ])
 
-        self.assertEqual(f().__code__.co_name, 'myfunc_inner')
+        self.assertEqual(f().__code__.co_name, "myfunc_inner")
 
     def test_inner_rename_not_expose(self):
         f = def_.myfunc(lambda: [

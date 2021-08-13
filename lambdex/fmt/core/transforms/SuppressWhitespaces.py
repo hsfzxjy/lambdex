@@ -1,18 +1,18 @@
 from lambdex.fmt.core.definitions import tk, A, TokenInfo, actions
 from lambdex.fmt.core._stream_base import _StreamWithLog
 
-SUPPRESS_WHITESPACE_AFTER = frozenset([
-    A.DECL,
-    A.DECL_LPAR,
-
-    A.BODY_RSQB,
-    A.CLS_BODY_RSQB,
-    A.CLS_DOT,
-    A.CLS_DECL,
-    A.STMT_END,
-
-    A.AUGASSIGN_START,
-])
+SUPPRESS_WHITESPACE_AFTER = frozenset(
+    [
+        A.DECL,
+        A.DECL_LPAR,
+        A.BODY_RSQB,
+        A.CLS_BODY_RSQB,
+        A.CLS_DOT,
+        A.CLS_DECL,
+        A.STMT_END,
+        A.AUGASSIGN_START,
+    ]
+)
 
 
 class SuppressWhitespaces(_StreamWithLog):

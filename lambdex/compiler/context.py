@@ -7,7 +7,7 @@ from lambdex.utils.ast import is_lvalue, is_coroutine_ast
 
 from . import error
 
-__all__ = ['Context', 'ContextFlag']
+__all__ = ["Context", "ContextFlag"]
 
 
 def random_hex(nbits=32) -> str:
@@ -36,7 +36,7 @@ del auto
 
 
 class Frame:
-    __slots__ = ['detached_functions', 'name', 'is_async']
+    __slots__ = ["detached_functions", "name", "is_async"]
 
     def __init__(self):
         self.name = None
@@ -47,8 +47,8 @@ class Frame:
 EM_HEAD_FOUND = "expect only one group of '[]'"
 EM_HEAD_MISSING = "expect another group of '[]'"
 EM_TOO_MANY_ITEMS = "expect only one item inside '[]'"
-EM_UNEXPECTED_CLAUSE = 'unexpected clause'
-EM_NOT_LVALUE = 'cannot be assigned'
+EM_UNEXPECTED_CLAUSE = "unexpected clause"
+EM_NOT_LVALUE = "cannot be assigned"
 
 
 class Context:
@@ -61,7 +61,8 @@ class Context:
     - `used_names`: a set containing currently occupied names
     - `frames`: current `Frame` stack
     """
-    __slots__ = ['compile', 'globals', 'used_names', 'frames', 'filename', 'renames']
+
+    __slots__ = ["compile", "globals", "used_names", "frames", "filename", "renames"]
 
     def __init__(self, compile_fn, globals_dict, filename):
         self.compile = partial(compile_fn, ctx=self)
@@ -77,7 +78,7 @@ class Context:
         `self.used_names`.
         """
         while True:
-            name = '{}_{}'.format(prefix, random_hex())
+            name = "{}_{}".format(prefix, random_hex())
             if name not in self.used_names:
                 return name
 
@@ -129,7 +130,9 @@ class Context:
         self.assert_(clause.single_body(), EM_TOO_MANY_ITEMS, lambda: clause.body[1])
 
     def assert_clause_num_at_most(self, clauses, num: int):
-        self.assert_(len(clauses) <= num, EM_UNEXPECTED_CLAUSE, lambda: clauses[num].node)
+        self.assert_(
+            len(clauses) <= num, EM_UNEXPECTED_CLAUSE, lambda: clauses[num].node
+        )
 
     def assert_no_head(self, clause):
         self.assert_(clause.no_head(), EM_HEAD_FOUND, lambda: clause.node)
@@ -138,10 +141,12 @@ class Context:
         self.assert_(clause.head, EM_HEAD_MISSING, lambda: clause.node)
 
     def assert_name_equals(self, clause, name: str):
-        self.assert_(clause.name == name, 'expect {!r}'.format(name), clause.node)
+        self.assert_(clause.name == name, "expect {!r}".format(name), clause.node)
 
     def assert_name_in(self, clause, names):
-        self.assert_(clause.name in names, 'expect ' + ' or '.join(map(repr, names)), clause.node)
+        self.assert_(
+            clause.name in names, "expect " + " or ".join(map(repr, names)), clause.node
+        )
 
     def assert_lvalue(self, node, msg=None):
         check_result, failed_at = is_lvalue(node)
@@ -151,6 +156,6 @@ class Context:
         if is_coroutine_ast(x):
             self.assert_(
                 self.frame.is_async,
-                '{!r} outside async function'.format(keyword),
+                "{!r} outside async function".format(keyword),
                 node,
             )

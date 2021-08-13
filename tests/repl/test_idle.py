@@ -8,6 +8,7 @@ import multiprocessing
 
 try:
     import idlelib
+
     del idlelib
 except ImportError:
     IDLE_AVAILABLE = False
@@ -42,6 +43,7 @@ def _subprocess(Q_in: multiprocessing.Queue, Q_out: multiprocessing.Queue):
          - Record output string from the execution backend;
          - Remove the prompt at exiting.
         """
+
         def write(self, s, tags=()):
             outputs.append(s)
             return super(_PyShell, self).write(s, tags)
@@ -58,7 +60,7 @@ def _subprocess(Q_in: multiprocessing.Queue, Q_out: multiprocessing.Queue):
     th = threading.Thread(target=pyshell.main)
     th.start()
     # Wait until `pyshell.flish.pyshell` is ready
-    while not hasattr(pyshell, 'flist') or pyshell.flist.pyshell is None:
+    while not hasattr(pyshell, "flist") or pyshell.flist.pyshell is None:
         time.sleep(0.1)
 
     pyshell_object = pyshell.flist.pyshell
@@ -68,9 +70,9 @@ def _subprocess(Q_in: multiprocessing.Queue, Q_out: multiprocessing.Queue):
             break
 
         # Set the string onto the editor
-        pyshell_object.text.insert('insert', string)
+        pyshell_object.text.insert("insert", string)
         # Trigger logic in ENTER event
-        pyshell_object.enter_callback('')
+        pyshell_object.enter_callback("")
 
         # Wait until the editor is ready to get more inputs
         while pyshell_object.executing and not pyshell_object.reading:
@@ -86,7 +88,7 @@ def get_output_from_idle(inputs) -> str:
     Feed the inputs into an IDLE process, and returns the output as
     string.
     """
-    input_lines = inputs = textwrap.dedent(inputs).strip().split('\n')
+    input_lines = inputs = textwrap.dedent(inputs).strip().split("\n")
 
     Q_in = multiprocessing.Queue()
     Q_out = multiprocessing.Queue()
@@ -103,18 +105,18 @@ def get_output_from_idle(inputs) -> str:
             outputs = Q_out.get(block=False, timeout=1)
         except multiprocessing.queues.Empty:
             if not p.is_alive():
-                raise RuntimeError('IDLE process gone')
+                raise RuntimeError("IDLE process gone")
             time.sleep(0.5)
         else:
             break
     p.join()
-    return ''.join(outputs).replace('    \t', '')
+    return "".join(outputs).replace("    \t", "")
 
 
-@unittest.skipIf(not IDLE_AVAILABLE, 'IDLE not available')
+@unittest.skipIf(not IDLE_AVAILABLE, "IDLE not available")
 class TestIDLE(unittest.TestCase, _Cases):
     def _test(self, inputs, outputs):
         self.maxDiff = None
         stdout = get_output_from_idle(inputs)
-        outputs = textwrap.dedent(outputs).lstrip('\r\n')
-        self.assertEqual(stdout[-len(outputs):], outputs, stdout)
+        outputs = textwrap.dedent(outputs).lstrip("\r\n")
+        self.assertEqual(stdout[-len(outputs) :], outputs, stdout)

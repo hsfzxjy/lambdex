@@ -15,7 +15,9 @@ def main() -> int:
         import multiprocessing
         import concurrent.futures
 
-        with concurrent.futures.ProcessPoolExecutor(multiprocessing.cpu_count()) as executor:
+        with concurrent.futures.ProcessPoolExecutor(
+            multiprocessing.cpu_count()
+        ) as executor:
             future_formats = [executor.submit(job) for job in adapter.get_jobs()]
             for future in concurrent.futures.as_completed(future_formats):
                 changed |= future.result()
@@ -23,4 +25,8 @@ def main() -> int:
         for job in adapter.get_jobs():
             changed |= job()
 
-    return 1 if changed and (adapter.jobs_meta.print_diff or adapter.jobs_meta.quiet) else 0
+    return (
+        1
+        if changed and (adapter.jobs_meta.print_diff or adapter.jobs_meta.quiet)
+        else 0
+    )

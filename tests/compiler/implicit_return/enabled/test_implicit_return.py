@@ -6,7 +6,7 @@ from astcheck import assert_ast_like
 
 
 def _reload_lambdex():
-    for modname in sorted(filter(lambda x: 'lambdex' in x, sys.modules)):
+    for modname in sorted(filter(lambda x: "lambdex" in x, sys.modules)):
         del sys.modules[modname]
 
 
@@ -27,21 +27,36 @@ class TestImplicitReturn(unittest.TestCase):
 
     def tearDown(self):
         from lambdex.compiler import core
+
         core.__DEBUG__ = False
 
         _reload_lambdex()
 
     def assert_ast_like(self, f, target):
-        from lambdex.utils.ast import ast_from_source, pformat, pprint, recursively_set_attr
+        from lambdex.utils.ast import (
+            ast_from_source,
+            pformat,
+            pprint,
+            recursively_set_attr,
+        )
+
         ast_f = f.__ast__
-        recursively_set_attr(ast_f, 'type_comment', None)
-        ast_target = ast_from_source(target, 'async def')
+        recursively_set_attr(ast_f, "type_comment", None)
+        ast_target = ast_from_source(target, "async def")
         ast_target.name = ast_f.name
 
         try:
             assert_ast_like(ast_f, ast_target)
         except AssertionError as cause:
-            msg = '\n'.join(['', '===> Compiled:', pformat(ast_f), '===> Target:', pformat(ast_target)])
+            msg = "\n".join(
+                [
+                    "",
+                    "===> Compiled:",
+                    pformat(ast_f),
+                    "===> Target:",
+                    pformat(ast_target),
+                ]
+            )
             raise AssertionError(msg) from cause
 
     def test_implicit_return_last_expr(self):

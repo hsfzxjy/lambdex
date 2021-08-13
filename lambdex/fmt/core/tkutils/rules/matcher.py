@@ -9,7 +9,8 @@ def _make_key(exact_type, string, last_state, *, strict=True):
     if exact_type == tk.NAME:
         return (exact_type, string, last_state)
     else:
-        if strict: assert string is _empty
+        if strict:
+            assert string is _empty
         return (exact_type, last_state)
 
 
@@ -24,7 +25,7 @@ def _generate_queries(token, last_state, keyword_to_symbol):
 
         # Use `token` and 'ALL' as `last_state`
         # NOTE that this is different from only `token`
-        yield _make_key(exact_type, _empty, 'ALL', strict=False)
+        yield _make_key(exact_type, _empty, "ALL", strict=False)
 
         # Use only `last_state`
         yield _make_key(_empty, _empty, last_state, strict=False)
@@ -48,6 +49,7 @@ class Matcher:
 
     def reset_aliases(self, *userpaths):
         from lambdex._aliases import _Aliases, get_aliases
+
         aliases = get_aliases(userpaths, reinit=True)
 
         self._keyword_to_symbol = {}
@@ -58,7 +60,9 @@ class Matcher:
         def _key_combinations():
             iters = []
             for condition in (exact_type, string, last_state):
-                iters.append(condition if isinstance(condition, (tuple, list)) else [condition])
+                iters.append(
+                    condition if isinstance(condition, (tuple, list)) else [condition]
+                )
             return (_make_key(*args) for args in product(*iters))
 
         def _inner(f):

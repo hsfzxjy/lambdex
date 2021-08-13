@@ -109,9 +109,11 @@ class TestScoping(unittest.TestCase):
 class TestNested(unittest.TestCase):
     def test_load_nonlocal(self):
         f = def_(lambda VAR: [
-            return_[def_(lambda: [
-                return_[VAR],
-            ])],
+            return_[
+                def_(lambda: [
+                    return_[VAR],
+                ])
+            ],
         ])
 
         self.assertEqual(f(4)(), 4)
@@ -120,15 +122,18 @@ class TestNested(unittest.TestCase):
     def test_IIFE(self):
         import lambdex.compiler.core as core
         from lambdex.utils.ast import pprint
+
         core.__DEBUG__ = True
         f = def_(lambda: [
             ret < [],
             for_[i in range(10)] [
                 def_(lambda i: [
-                    ret.append(def_(lambda: [
-                        return_[i],
-                    ])),
-                ])(i), 
+                    ret.append(
+                        def_(lambda: [
+                            return_[i],
+                        ])
+                    ),
+                ])(i),
             ],
             return_[ret],
         ])

@@ -14,7 +14,7 @@ from .asm.frontend import transpile_file
 from lambdex.utils.ast import pformat, empty_arguments, None_node
 from lambdex.utils import compat
 
-__all__ = ['compile_lambdex']
+__all__ = ["compile_lambdex"]
 
 # This flag is used internally. when turned on:
 #  - compiled lambdex will have attribute `__ast__`
@@ -82,8 +82,7 @@ def _wrap_code_object(
 
     # Rebuild the closure
     new_closure = tuple(
-        lambda_func.__closure__[i] if i >= 0 else callee_ref_cell \
-        for i in fvmapping
+        lambda_func.__closure__[i] if i >= 0 else callee_ref_cell for i in fvmapping
     )
 
     ret = types.FunctionType(
@@ -109,14 +108,14 @@ def _rename_code_object(code, ctx: Context):
 
     new_name = ctx.renames.get(code.co_name)
     if new_name is not None:
-        kwargs['co_name'] = new_name
+        kwargs["co_name"] = new_name
 
     new_consts = []
     for const in code.co_consts:
         if inspect.iscode(const):
             const = _rename_code_object(const, ctx)
         new_consts.append(const)
-    kwargs['co_consts'] = tuple(new_consts)
+    kwargs["co_consts"] = tuple(new_consts)
 
     return compat.code_replace(code, **kwargs)
 
@@ -143,7 +142,8 @@ def _compile(
     """
     An internal function that do the compilation.
     """
-    if globals is None: globals = {}
+    if globals is None:
+        globals = {}
 
     context = Context(
         compile_node,
@@ -161,7 +161,7 @@ def _compile(
     #
     # This is done by wrapping `lambdex_node` in another FunctionDef, and
     # let names in `freevars` become local variables in the wrapper.
-    wrapper_name = context.select_name_and_use('wrapper')
+    wrapper_name = context.select_name_and_use("wrapper")
     if freevars:
         wrapper_body = [
             ast.Assign(
@@ -188,11 +188,11 @@ def _compile(
 
     if __DEBUG__:
         try:
-            module_code = compile(module_node, filename, 'exec')
+            module_code = compile(module_node, filename, "exec")
         except Exception as e:
             raise SyntaxError(pformat(module_node)) from e
     else:
-        module_code = compile(module_node, filename, 'exec')
+        module_code = compile(module_node, filename, "exec")
 
     # unwrap the outer FunctionDef.
     # since no other definition in the module, it should be co_consts[0]

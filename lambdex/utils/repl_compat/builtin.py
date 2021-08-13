@@ -25,7 +25,7 @@ class InteractiveConsole(blcode.InteractiveConsole):
         # since the statements will never return
         locals.update({k: getattr(_exports, k) for k in _exports.__all__})
 
-        super(InteractiveConsole, self).__init__(locals, '<lxshell#{}>')
+        super(InteractiveConsole, self).__init__(locals, "<lxshell#{}>")
         self._counter = 1
 
     def runsource(self, source, _):
@@ -46,9 +46,9 @@ class InteractiveConsole(blcode.InteractiveConsole):
         """
         Overwrite to directly exit the process after interact() ends.
         """
-        kwargs = dict(banner='')
-        if sys.version_info > (3, 5, float('inf')):
-            kwargs['exitmsg'] = ''
+        kwargs = dict(banner="")
+        if sys.version_info > (3, 5, float("inf")):
+            kwargs["exitmsg"] = ""
         super(InteractiveConsole, self).interact(**kwargs)
         sys.exit(0)
 
@@ -61,7 +61,7 @@ def _extended_linecache_getlines(
     """
     Patch `linecache.getlines` to obtain lines from `_lines_cache`.
     """
-    if filename.startswith('<lxshell'):
+    if filename.startswith("<lxshell"):
         if filename in _lines_cache:
             return _lines_cache[filename]
 
@@ -78,6 +78,7 @@ def _patch_sys_excepthook():
     we reset `sys.excepthook`.
     """
     import sys
+
     try:
         import apport_python_hook
     except ImportError:
@@ -94,8 +95,9 @@ def _start_console():
 
     # Check stack frames to ensure that custom console not started
     for frameinfo in inspect.stack():
-        if frameinfo.function != 'runsource': continue
-        self = frameinfo.frame.f_locals.get('self', None)
+        if frameinfo.function != "runsource":
+            continue
+        self = frameinfo.frame.f_locals.get("self", None)
         if isinstance(self, InteractiveConsole):
             return
 

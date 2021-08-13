@@ -7,7 +7,7 @@ INSERT = 2
 
 class Scope:
 
-    __slots__ = ['leading_whitespace', 'indent_level']
+    __slots__ = ["leading_whitespace", "indent_level"]
 
     def __init__(self, leading_whitespace, *, indent_level=0):
         self.leading_whitespace = leading_whitespace
@@ -20,17 +20,17 @@ class Reindent(_StreamWithLog):
 
     def _init(self):
         self.indent_initialized = False
-        self.orig_indent_str = '    '
-        self.spaced_indent_str = '    '
+        self.orig_indent_str = "    "
+        self.spaced_indent_str = "    "
 
         self.str_newline = None
 
         self.newlined = False
-        self.last_leading_whitespace = ''
+        self.last_leading_whitespace = ""
         self.scopes = []
 
     def _to_spaced(self, string: str) -> str:
-        return string.replace('\t', ' ' * self.SPACES_PER_TAB)
+        return string.replace("\t", " " * self.SPACES_PER_TAB)
 
     def _restore_tabbed(self, string: str) -> str:
         return string.replace(self.spaced_indent_str, self.orig_indent_str)
@@ -48,33 +48,37 @@ class Reindent(_StreamWithLog):
             if token.is_WS_NL or token.type == tk.INDENT:
                 return token, REPLACE
             else:
-                return TokenInfo(type=tk.WHITESPACE, string=''), INSERT
+                return TokenInfo(type=tk.WHITESPACE, string=""), INSERT
 
         if token.is_WS:
             orig_lws = token.string
             action = REPLACE
         elif not token.is_NL:
-            orig_lws = ''
+            orig_lws = ""
             action = INSERT
         else:
             return token, REPLACE
 
-        indentation = self.spaced_indent_str * self.scopes[-1].indent_level + self.scopes[-1].leading_whitespace
+        indentation = (
+            self.spaced_indent_str * self.scopes[-1].indent_level
+            + self.scopes[-1].leading_whitespace
+        )
         orig_lws = self._to_spaced(orig_lws)
 
         if token.leading_whitespace is not None:
             orig_parent_lws = self._to_spaced(token.leading_whitespace)
             if orig_lws.startswith(orig_parent_lws):
-                indentation += orig_lws[len(orig_parent_lws):]
+                indentation += orig_lws[len(orig_parent_lws) :]
             else:
-                indentation = indentation[:len(orig_lws) - len(orig_parent_lws)]
+                indentation = indentation[: len(orig_lws) - len(orig_parent_lws)]
 
         indentation = self._restore_tabbed(indentation)
 
         return TokenInfo(type=tk.WHITESPACE, string=indentation), action
 
     def _handle_token(self, token):
-        if token.type == tk.ENCODING: return
+        if token.type == tk.ENCODING:
+            return
         self._store_constant(token)
 
         if self.newlined:
@@ -95,7 +99,7 @@ class Reindent(_StreamWithLog):
         if token.annotation in (A.BODY_LSQB, A.CLS_BODY_LSQB):
             self.scopes[-1].indent_level += 1
 
-        if token.annotation in (A.LAST_NL_BEFORE_RSQB, ):
+        if token.annotation in (A.LAST_NL_BEFORE_RSQB,):
             self.scopes[-1].indent_level -= 1
 
         if token.is_NL:

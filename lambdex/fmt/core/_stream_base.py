@@ -46,7 +46,9 @@ class _StreamBase(abc.ABC):
         if token.annotation is not None:
             self.last_token = token
 
-    def _handle_action(self, token: TokenInfo, action: actions.BaseAction) -> Sequence[TokenInfo]:
+    def _handle_action(
+        self, token: TokenInfo, action: actions.BaseAction
+    ) -> Sequence[TokenInfo]:
 
         if actions.Default.is_class_of(action):
             yield from self._handle_default(token)

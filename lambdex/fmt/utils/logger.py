@@ -4,14 +4,14 @@ import logging
 
 from .colored import colored
 
-IS_DEBUG = os.getenv('DEBUG') is not None
+IS_DEBUG = os.getenv("DEBUG") is not None
 
 
 class _Formatter(logging.Formatter):
     def __init__(self, *args, **kwargs):
-        kwargs['style'] = '{'
+        kwargs["style"] = "{"
         kwargs.setdefault(
-            'fmt',
+            "fmt",
             colored("[{funcName}] ", "green") + "{message}",
         )
         super(_Formatter, self).__init__(*args, **kwargs)
@@ -34,8 +34,8 @@ class _Logger(logging.Logger):
         file name, line number and function name.
         """
         f = logging.currentframe()
-        #On some versions of IronPython, currentframe() returns None if
-        #IronPython isn't run with -X:Frames.
+        # On some versions of IronPython, currentframe() returns None if
+        # IronPython isn't run with -X:Frames.
         if f is not None:
             f = f.f_back
         orig_f = f
@@ -54,17 +54,17 @@ class _Logger(logging.Logger):
             sinfo = None
             if stack_info:
                 sio = io.StringIO()
-                sio.write('Stack (most recent call last):\n')
+                sio.write("Stack (most recent call last):\n")
                 traceback.print_stack(f, file=sio)
                 sinfo = sio.getvalue()
-                if sinfo[-1] == '\n':
+                if sinfo[-1] == "\n":
                     sinfo = sinfo[:-1]
                 sio.close()
 
             localvars = f.f_locals
-            classname_prefix = ''
-            if 'self' in localvars:
-                classname_prefix = localvars['self'].__class__.__name__ + '::'
+            classname_prefix = ""
+            if "self" in localvars:
+                classname_prefix = localvars["self"].__class__.__name__ + "::"
 
             rv = (co.co_filename, f.f_lineno, classname_prefix + co.co_name, sinfo)
             break

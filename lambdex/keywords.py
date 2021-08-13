@@ -12,7 +12,7 @@ class Declarer:
     or `<keyword>.<ident>(<lambda>)`.
     """
 
-    __slots__ = ['__keyword', '__identifier', 'func']
+    __slots__ = ["__keyword", "__identifier", "func"]
 
     def __init__(self, keyword):
         self.__identifier = None
@@ -21,14 +21,16 @@ class Declarer:
 
     def __getattr__(self, identifier: str):
         """
-        Create a new `Declarer` instance with `self.__keyword` as keyword and `identifier`  
+        Create a new `Declarer` instance with `self.__keyword` as keyword and `identifier`
         as identifier.
         """
         if self.__identifier is not None:
-            raise SyntaxError('Duplicated name {!r} and {!r}'.format(identifier, self.__identifier))
+            raise SyntaxError(
+                "Duplicated name {!r} and {!r}".format(identifier, self.__identifier)
+            )
 
         if not identifier.isidentifier():
-            raise SyntaxError('{!r} is not valid identifier'.format(identifier))
+            raise SyntaxError("{!r} is not valid identifier".format(identifier))
 
         ret = Declarer(self.__keyword)
         ret.__identifier = identifier
@@ -42,7 +44,9 @@ class Declarer:
         This process requires `self.__keyword` and `self.__identifier` and thus can not be
         performed outside.
         """
-        return ast_parser.lambda_to_ast(self.func, keyword=self.__keyword, identifier=self.__identifier)
+        return ast_parser.lambda_to_ast(
+            self.func, keyword=self.__keyword, identifier=self.__identifier
+        )
 
     def __call__(self, f):
         """

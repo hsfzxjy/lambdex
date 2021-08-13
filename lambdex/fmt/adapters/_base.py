@@ -14,7 +14,7 @@ logger = getLogger(__name__)
 
 class Result:
 
-    __slots__ = ['success', 'output']
+    __slots__ = ["success", "output"]
 
     def __init__(self, success: bool, output: bytes):
         self.success = success
@@ -54,7 +54,7 @@ class BaseAdapter(abc.ABC):
         cmd = self._get_backend_cmd_for_resource(resource)
         backend_result = self.call_backend(cmd, resource.source)
         if not backend_result.success:
-            logger.error('backend exits unexpectedly')
+            logger.error("backend exits unexpectedly")
         resource.set_backend_output(backend_result.output)
 
         formatted_code = FormatCode(resource.backend_output_stream.readline)
@@ -66,7 +66,9 @@ class BaseAdapter(abc.ABC):
         if not self.jobs_meta.files:
             yield self._job
         else:
-            yield from (partial(self._job, filename) for filename in self.jobs_meta.files)
+            yield from (
+                partial(self._job, filename) for filename in self.jobs_meta.files
+            )
 
     def call_backend(self, cmd: Sequence[str], stdin: bytes) -> Result:
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.PIPE)

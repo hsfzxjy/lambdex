@@ -3,6 +3,7 @@ from collections import namedtuple
 
 from lambdex._aliases import get_aliases
 from lambdex._features import get_features
+
 aliases = get_aliases()
 features = get_features()
 
@@ -10,11 +11,11 @@ from lambdex.utils.registry import FunctionRegistry
 from .clauses import match_clauses
 from .context import ContextFlag, Context
 
-__all__ = ['Dispatcher']
+__all__ = ["Dispatcher"]
 
-RuleMeta = namedtuple('RuleMeta', ['id', 'args'])
+RuleMeta = namedtuple("RuleMeta", ["id", "args"])
 EMPTY_RULE = RuleMeta(None, ())
-Dispatcher = FunctionRegistry('Dispatcher').set_default(lambda *_: EMPTY_RULE)
+Dispatcher = FunctionRegistry("Dispatcher").set_default(lambda *_: EMPTY_RULE)
 
 
 @Dispatcher.register(ast.Lambda)
@@ -43,13 +44,13 @@ def disp_Call(node: ast.Call, ctx: Context, flag: ContextFlag):
         aliases.def_: ast.FunctionDef,
         aliases.async_def_: ast.AsyncFunctionDef,
     }.get(name)
-    return RuleMeta((ast_type, flag), (func_name, ))
+    return RuleMeta((ast_type, flag), (func_name,))
 
 
 @Dispatcher.register(ast.Name)
 def disp_Name(node: ast.Name, ctx: Context, flag: ContextFlag):
     if node.id == aliases.callee_:
-        return RuleMeta('callee', ())
+        return RuleMeta("callee", ())
 
     if flag == ContextFlag.should_be_expr:
         mapping = {
@@ -68,7 +69,7 @@ def disp_Name(node: ast.Name, ctx: Context, flag: ContextFlag):
     rule_type = mapping.get(node.id)
 
     if rule_type is not None:
-        return RuleMeta('single_keyword_stmt', (rule_type, ))
+        return RuleMeta("single_keyword_stmt", (rule_type,))
 
     return EMPTY_RULE
 
@@ -99,7 +100,7 @@ def disp_Subscript(node: ast.Subscript, ctx: Context, flag: ContextFlag):
 
     ctx.check_coroutine(ast_type, clauses[0].node, clauses[0].name)
 
-    return RuleMeta(ast_type, (clauses, ))
+    return RuleMeta(ast_type, (clauses,))
 
 
 if features.await_attribute:

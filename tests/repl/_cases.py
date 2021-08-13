@@ -7,14 +7,14 @@ import pexpect
 
 def _remove_ANSI_escape(
     string: str,
-    regexp=re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])'),
+    regexp=re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])"),
 ) -> str:
     """
     Remove ANSI escape sequence in a string.
 
     See https://stackoverflow.com/questions/14693701/
     """
-    return regexp.sub('', string)
+    return regexp.sub("", string)
 
 
 def get_output(inputs, *cmds, timeout=1):
@@ -31,13 +31,13 @@ def get_output(inputs, *cmds, timeout=1):
     log = io.BytesIO()
     p.logfile_read = log
 
-    for line in inputs.split('\n'):
+    for line in inputs.split("\n"):
         p.sendline(line.encode())
 
     try:
         p.expect(pexpect.EOF, timeout=timeout)
     except pexpect.TIMEOUT as exc:
-        raise RuntimeError('OUTPUT:\n' + log.getvalue().decode()) from exc
+        raise RuntimeError("OUTPUT:\n" + log.getvalue().decode()) from exc
     else:
         p.wait()
 
@@ -46,35 +46,35 @@ def get_output(inputs, *cmds, timeout=1):
 
 class _Cases:
     def test_runtime_error(self):
-        inputs = '''
+        inputs = """
         from lambdex.repl import *
         f = def_(lambda: [
             1 / 0, ])
 
         f()
         exit()
-        '''
+        """
 
-        outputs = '''
+        outputs = """
             1 / 0, ])
         ZeroDivisionError: division by zero
-        >>> '''
+        >>> """
 
         self._test(inputs, outputs)
 
     def test_compiletime_error(self):
-        inputs = '''
+        inputs = """
         from lambdex.repl import *
         f = def_(lambda: [
             if_[a], ])
 
         exit()
-        '''
+        """
 
-        outputs = '''
+        outputs = """
            if_[a], ])
               ^
         SyntaxError: expect another group of '[]'
-        >>> >>> '''
+        >>> >>> """
 
         self._test(inputs, outputs)

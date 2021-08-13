@@ -4,7 +4,7 @@ from collections import namedtuple
 from lambdex.utils.ast import value_from_subscript
 
 
-class Clause(namedtuple('_Clause', 'node name head body')):
+class Clause(namedtuple("_Clause", "node name head body")):
     def no_head(self) -> bool:
         """
         Check that whether the head is None.

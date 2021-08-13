@@ -4,6 +4,7 @@ from functools import partial
 
 from lambdex._aliases import get_aliases, COMPARATORS
 from lambdex._features import get_features
+
 aliases = get_aliases()
 features = get_features()
 
@@ -18,20 +19,20 @@ from lambdex.utils.registry import FunctionRegistry
 
 from .context import Context, ContextFlag
 
-__all__ = ['Rules']
+__all__ = ["Rules"]
 
 
 class RulesRegistry(FunctionRegistry):
     def get(self, key, default=FunctionRegistry._empty):
         f = super().get(key, default)
 
-        if f is not None and 'rule_id' in inspect.signature(f).parameters:
+        if f is not None and "rule_id" in inspect.signature(f).parameters:
             return partial(f, rule_id=key)
 
         return f
 
 
-Rules = RulesRegistry('Rules')
+Rules = RulesRegistry("Rules")
 
 
 def _compile_stmts(ctx: Context, stmts):
@@ -47,7 +48,7 @@ def _compile_stmts(ctx: Context, stmts):
     return compiled_statements
 
 
-@Rules.register('callee')
+@Rules.register("callee")
 def r_callee(node: ast.Name, ctx: Context):
     return copy_lineinfo(node, ast.Name(id=ctx.frame.name, ctx=node.ctx))
 
@@ -59,9 +60,9 @@ def r_lambda(node: ast.Lambda, ctx: Context, constructor):
 
     ctx.push_frame()
     ctx.frame.is_async = is_coroutine_ast(constructor)
-    ctx.frame.name = func_name = ctx.select_name_and_use('anonymous')
+    ctx.frame.name = func_name = ctx.select_name_and_use("anonymous")
 
-    ctx.assert_(statements.elts, 'empty body', statements)
+    ctx.assert_(statements.elts, "empty body", statements)
     compiled_statements = _compile_stmts(ctx, statements.elts)
     detached_functions = ctx.frame.detached_functions
 
@@ -221,9 +222,13 @@ def r_while(node: ast.Subscript, ctx: Context, clauses: list):
 
 
 def r_AugAssign(node: ast.Compare, ctx: Context, targets, value):
-    if len(targets) != 1: return
+    if len(targets) != 1:
+        return
     target = targets[0]
-    if not isinstance(target, ast.BinOp) or not (isinstance(target.right, ast.Name) and target.right.id == '_'): return
+    if not isinstance(target, ast.BinOp) or not (
+        isinstance(target.right, ast.Name) and target.right.id == "_"
+    ):
+        return
 
     target, op = target.left, target.op
     ctx.assert_lvalue(target)
@@ -259,7 +264,7 @@ def r_assign(node: ast.Compare, ctx: Context):
     )
 
 
-@Rules.register('single_keyword_stmt')
+@Rules.register("single_keyword_stmt")
 def r_single_keyword_stmt(node: ast.Name, ctx: Context, rule_type):
     if rule_type == ast.Yield:
         new_node = ast.Yield(value=None)
@@ -355,7 +360,12 @@ def r_try(node: ast.Subscript, ctx: Context, clauses: list):
                     lambda: default_except_clause.node,
                 )
                 ctx.assert_single_head(clause)
-                type_, name = check_as(ctx, clause.unwrap_head(), COMPARATORS[aliases.As], rhs_is_identifier=True)
+                type_, name = check_as(
+                    ctx,
+                    clause.unwrap_head(),
+                    COMPARATORS[aliases.As],
+                    rhs_is_identifier=True,
+                )
 
             handler = ast.ExceptHandler(
                 type=ctx.compile(type_),
@@ -380,11 +390,13 @@ def r_try(node: ast.Subscript, ctx: Context, clauses: list):
             ctx.assert_no_head(clause)
             final_body.extend(_compile_stmts(ctx, clause.body))
         else:
-            ctx.raise_('unexpected {!r}'.format(clause.name), clause.node)
+            ctx.raise_("unexpected {!r}".format(clause.name), clause.node)
 
     ctx.assert_(
         handlers or final_body,
-        "{!r} has neither {!r} clause(s) nor {!r} clause".format(aliases.try_, aliases.except_, aliases.finally_),
+        "{!r} has neither {!r} clause(s) nor {!r} clause".format(
+            aliases.try_, aliases.except_, aliases.finally_
+        ),
         try_clause.node,
     )
 
@@ -438,7 +450,7 @@ def r_del(node: ast.Subscript, ctx: Context, clauses: list, rule_id):
 
     targets = clause.body
     for target in targets:
-        ctx.assert_lvalue(target, 'cannot be deleted')
+        ctx.assert_lvalue(target, "cannot be deleted")
         target = cast_to_ctx(target, ast.Del())
 
     return copy_lineinfo(

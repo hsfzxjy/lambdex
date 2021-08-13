@@ -1,10 +1,11 @@
-__all__ = ['FunctionRegistry']
+__all__ = ["FunctionRegistry"]
 
 
 class FunctionRegistry:
     """
     A registry with values being functions.
     """
+
     _empty = object()
 
     def __init__(self, name: str):

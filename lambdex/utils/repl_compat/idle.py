@@ -32,8 +32,8 @@ def get_rpchandler():
     frame = sys._getframe(1)
     while frame is not None and frame.f_code is not None:
         f_code = frame.f_code
-        is_runcode = frame.f_code.co_name == 'runcode'
-        self = frame.f_locals.get('self')
+        is_runcode = frame.f_code.co_name == "runcode"
+        self = frame.f_locals.get("self")
         is_Executive = isinstance(self, idlelib.run.Executive)
 
         if is_runcode and is_Executive:
@@ -41,7 +41,7 @@ def get_rpchandler():
 
         frame = frame.f_back
     else:
-        raise RuntimeError('cannot find TCP handler of IDLE')
+        raise RuntimeError("cannot find TCP handler of IDLE")
 
     _rpchandler = self.rpchandler
     return _rpchandler
@@ -61,9 +61,11 @@ def _extended_linecache_getlines(
         return _local_lines_cache[filename]
 
     # If is source lines entered in IDLE, invoke a remote call
-    if filename.startswith('<pyshell'):
+    if filename.startswith("<pyshell"):
         handler = get_rpchandler()
-        lines = handler.remotecall('linecache', 'getlines', (filename, globals_dict), {})
+        lines = handler.remotecall(
+            "linecache", "getlines", (filename, globals_dict), {}
+        )
         _local_lines_cache[filename] = lines
         return lines
 

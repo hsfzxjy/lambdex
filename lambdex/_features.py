@@ -8,10 +8,10 @@ from collections import namedtuple
 from ._config import get_parser, ParsingError
 
 _Features = namedtuple(
-    '_Features',
+    "_Features",
     [
-        'await_attribute',
-        'implicit_return',
+        "await_attribute",
+        "implicit_return",
     ],
 )
 
@@ -30,8 +30,10 @@ def _parse_flag(flag: str):
     If invalid value encountered, return None.
     """
     flag = flag.lower()
-    if flag in {'y', 'on'}: return True
-    if flag in {'n', 'off'}: return False
+    if flag in {"y", "on"}:
+        return True
+    if flag in {"n", "off"}:
+        return False
     return None
 
 
@@ -42,15 +44,16 @@ def get_features(userpaths=(), reinit=False) -> _Features:
     `userpaths` and `reinit` are for building the config parser.
     """
     global _features
-    if _features is not None and not reinit: return _features
+    if _features is not None and not reinit:
+        return _features
 
     _features = _DEFAULT
     build_kwargs = {}
     parser = get_parser(userpaths, reinit=reinit)
-    if parser.has_section('features'):
+    if parser.has_section("features"):
         for name in _Features._fields:
-            if name in parser['features']:
-                flag = parser['features'][name]
+            if name in parser["features"]:
+                flag = parser["features"][name]
                 flag = _parse_flag(flag)
                 if flag is None:
                     raise ParsingError("unknown option '{} = {}'".format(name, flag))

@@ -12,7 +12,12 @@ from lambdex.compiler import error
 
 from lambdex._aliases import get_aliases, get_declarers
 
-__all__ = ['lambda_to_ast', 'find_lambdex_ast_in_code', 'LambdexASTLookupKey', 'LambdexASTLookupTable']
+__all__ = [
+    "lambda_to_ast",
+    "find_lambdex_ast_in_code",
+    "LambdexASTLookupKey",
+    "LambdexASTLookupTable",
+]
 
 
 def _shallow_match_ast(node, match, *, yield_node_only=True):
@@ -33,7 +38,9 @@ def _shallow_match_ast(node, match, *, yield_node_only=True):
         if isinstance(value, list):
             for item in value:
                 if isinstance(item, ast.AST):
-                    yield from _shallow_match_ast(item, match, yield_node_only=yield_node_only)
+                    yield from _shallow_match_ast(
+                        item, match, yield_node_only=yield_node_only
+                    )
         elif isinstance(value, ast.AST):
             yield from _shallow_match_ast(value, match, yield_node_only=yield_node_only)
 
@@ -52,27 +59,41 @@ def _make_pattern(keyword: str, identifier: str):
         def _match(node):
             if node.__class__ is ast.Name and node.id in declarers:
                 return (node.id, None)
-            elif node.__class__ is ast.Attribute and node.value.__class__ is ast.Name and node.value.id in declarers:
+            elif (
+                node.__class__ is ast.Attribute
+                and node.value.__class__ is ast.Name
+                and node.value.id in declarers
+            ):
                 return (node.value.id, node.attr)
             else:
                 return None
+
     elif not identifier:
 
         def _match(node):
             if node.__class__ is ast.Name and keyword == node.id:
                 return (keyword, None)
             return None
+
     else:
 
         def _match(node):
-            if (node.__class__ is ast.Attribute and node.value.__class__ is ast.Name and keyword == node.value.id
-                    and identifier == node.attr):
+            if (
+                node.__class__ is ast.Attribute
+                and node.value.__class__ is ast.Name
+                and keyword == node.value.id
+                and identifier == node.attr
+            ):
                 return (keyword, identifier)
 
             return None
 
     def _pattern(node: ast.AST) -> bool:
-        if node.__class__ is not ast.Call or len(node.args) != 1 or node.args[0].__class__ != ast.Lambda:
+        if (
+            node.__class__ is not ast.Call
+            or len(node.args) != 1
+            or node.args[0].__class__ != ast.Lambda
+        ):
             return None
 
         return _match(node.func)
@@ -84,11 +105,13 @@ def _raise_ambiguity(node, filename, keyword, identifier):
     """
     Raise SyntaxError reporting an ambiguious declaration.
     """
-    decl = keyword if not identifier else keyword + '.' + identifier
-    error.assert_(False, 'ambiguious declaration {!r}'.format(decl), node, filename)
+    decl = keyword if not identifier else keyword + "." + identifier
+    error.assert_(False, "ambiguious declaration {!r}".format(decl), node, filename)
 
 
-def lambda_to_ast(lambda_object: types.FunctionType, *, keyword: str, identifier: str = ''):
+def lambda_to_ast(
+    lambda_object: types.FunctionType, *, keyword: str, identifier: str = ""
+):
     """
     Returns the AST of `lambda_object`.
     """
@@ -100,10 +123,12 @@ def lambda_to_ast(lambda_object: types.FunctionType, *, keyword: str, identifier
     matched = list(_shallow_match_ast(tree, pattern))
 
     if not len(matched):
-        raise SyntaxError('cannot parse lambda for unknown reason')
+        raise SyntaxError("cannot parse lambda for unknown reason")
 
     if len(matched) > 1:
-        _raise_ambiguity(matched[0], lambda_object.__code__.co_filename, keyword, identifier)
+        _raise_ambiguity(
+            matched[0], lambda_object.__code__.co_filename, keyword, identifier
+        )
 
     assert isinstance(matched[0], ast.Call)
 
@@ -114,7 +139,9 @@ LambdexASTLookupKey = Tuple[int, str, Optional[str]]
 LambdexASTLookupTable = Dict[LambdexASTLookupKey, ast.AST]
 
 
-def find_lambdex_ast_in_code(code: types.CodeType, ismod: bool) -> LambdexASTLookupTable:
+def find_lambdex_ast_in_code(
+    code: types.CodeType, ismod: bool
+) -> LambdexASTLookupTable:
     """
     Find out all possible lambdex declaration AST nodes within the source of `code`.
     """
@@ -122,11 +149,13 @@ def find_lambdex_ast_in_code(code: types.CodeType, ismod: bool) -> LambdexASTLoo
         lines = linecache.getlines(code.co_filename)
     else:
         lines, lnum = inspect.getsourcelines(code)
-        lines = ['\n'] * (lnum - 1) + lines
-    lines = textwrap.dedent(''.join(lines))
+        lines = ["\n"] * (lnum - 1) + lines
+    lines = textwrap.dedent("".join(lines))
     ast_node = ast.parse(lines)
     table = {}
-    iterator = _shallow_match_ast(ast_node, _make_pattern(None, None), yield_node_only=False)
+    iterator = _shallow_match_ast(
+        ast_node, _make_pattern(None, None), yield_node_only=False
+    )
     for lambdex_node, (keyword, identifier) in iterator:
         key = (lambdex_node.lineno, keyword, identifier)
         if key in table:

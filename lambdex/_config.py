@@ -36,18 +36,22 @@ def _walk_parents(paths: List[pathlib.Path]):
         # Walk upwards until reach the root
         while True:
             # If a path is visited, all of its parents should also be
-            if path in visited: break
+            if path in visited:
+                break
 
             visited.add(path)
             yield path
 
             # If reach the root, try another path
-            if path.parent == path: break
+            if path.parent == path:
+                break
 
             path = path.parent
 
 
-def _find_config_file(userpaths: List[str], filename='.lambdex.cfg') -> Optional[pathlib.Path]:
+def _find_config_file(
+    userpaths: List[str], filename=".lambdex.cfg"
+) -> Optional[pathlib.Path]:
     """
     Search for the first file with filename `filename` in the order below:
 
@@ -59,7 +63,7 @@ def _find_config_file(userpaths: List[str], filename='.lambdex.cfg') -> Optional
 
     If envvar LXNOCFG set, simply return None (don't use any config files).
     """
-    if os.getenv('LXNOCFG') is not None:
+    if os.getenv("LXNOCFG") is not None:
         return None
 
     paths = []
@@ -103,7 +107,7 @@ def get_parser(userpaths: List[str], reinit=False) -> configparser.ConfigParser:
         _config_path = _find_config_file(userpaths)
         _parser = configparser.ConfigParser()
         if _config_path is not None:
-            with _config_path.open('r', encoding='utf-8') as fd:
+            with _config_path.open("r", encoding="utf-8") as fd:
                 _parser.read_file(fd)
 
     return _parser

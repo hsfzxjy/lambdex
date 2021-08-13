@@ -6,7 +6,7 @@ from lambdex.fmt.utils.logger import getLogger
 
 logger = getLogger(__name__)
 
-DELIMITTER = '--'
+DELIMITTER = "--"
 
 
 def split_argv():
@@ -20,26 +20,29 @@ def split_argv():
         return argv, ()
     elif num_delimitters == 1:
         idx = idx_delimitters[0]
-        return argv[:idx], argv[idx + 1:]
+        return argv[:idx], argv[idx + 1 :]
     else:
         start, end = idx_delimitters
-        return argv[:start] + argv[end + 1:], argv[start + 1:end]
+        return argv[:start] + argv[end + 1 :], argv[start + 1 : end]
 
 
 def build_parser():
-    parser = argparse.ArgumentParser('lxfmt [ARGS OF BACKEND] --', description='Lambdex formatter as a post-processor for specific backend')
-    parser.add_argument(
-        '-b',
-        '--backend',
-        metavar='BACKEND',
-        dest='adapter',
-        default='dummy',
-        choices=list(adapters.mapping),
-        help='name of formatter backend (default: dummy)',
+    parser = argparse.ArgumentParser(
+        "lxfmt [ARGS OF BACKEND] --",
+        description="Lambdex formatter as a post-processor for specific backend",
     )
     parser.add_argument(
-        '-e',
-        '--executable',
-        help='executable of backend',
+        "-b",
+        "--backend",
+        metavar="BACKEND",
+        dest="adapter",
+        default="dummy",
+        choices=list(adapters.mapping),
+        help="name of formatter backend (default: dummy)",
+    )
+    parser.add_argument(
+        "-e",
+        "--executable",
+        help="executable of backend",
     )
     return parser

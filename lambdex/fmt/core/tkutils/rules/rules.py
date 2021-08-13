@@ -17,19 +17,19 @@ def r(ctx: Context, token: TokenInfo):
 @m(exact_type=tk.COMMENT, last_state=State.UNKNOWN)
 def r(ctx: Context, token: TokenInfo):
     directive = token.lxfmt_directive()
-    if directive == 'off' and ctx.last_state != State.DISABLED:
+    if directive == "off" and ctx.last_state != State.DISABLED:
         ctx.push_state(State.DISABLED)
 
-    elif directive == 'on' and ctx.last_state == State.DISABLED:
+    elif directive == "on" and ctx.last_state == State.DISABLED:
         ctx.pop_state()
 
 
-@m(exact_type=tk.NL, last_state='ALL')
-@m(exact_type=tk.NEWLINE, last_state='ALL')
-@m(exact_type=tk.WHITESPACE, last_state='ALL')
-@m(exact_type=tk.COMMENT, last_state='ALL')
-@m(exact_type=tk.TYPE_IGNORE, last_state='ALL')
-@m(exact_type=tk.TYPE_COMMENT, last_state='ALL')
+@m(exact_type=tk.NL, last_state="ALL")
+@m(exact_type=tk.NEWLINE, last_state="ALL")
+@m(exact_type=tk.WHITESPACE, last_state="ALL")
+@m(exact_type=tk.COMMENT, last_state="ALL")
+@m(exact_type=tk.TYPE_IGNORE, last_state="ALL")
+@m(exact_type=tk.TYPE_COMMENT, last_state="ALL")
 def r(ctx: Context, token: TokenInfo):
     return
 
@@ -99,7 +99,7 @@ def r(ctx: Context, token: TokenInfo):
     return actions.StopBuffer(dont_consume=True)
 
 
-@m(exact_type=tk.NAME, string='lambda', last_state=State.IN_LBDX_CALL)
+@m(exact_type=tk.NAME, string="lambda", last_state=State.IN_LBDX_CALL)
 def r(ctx: Context, token: TokenInfo):
     ctx.push_state(State.IN_LBDX_LAMBDA)
     token.annotation = A.DECL_LAMBDA
@@ -161,7 +161,9 @@ def r(ctx: Context, token: TokenInfo):
 @m(exact_type=tk.RPAR, last_state=State.EXPECT_LBDX_RPAR)
 def r(ctx: Context, token: TokenInfo):
     t, state = ctx.pop_op()
-    if state not in (State.EXPECT_LBDX_LSQB, State.IN_LBDX_CALL) or not tk.ISMATCHED(t, token):
+    if state not in (State.EXPECT_LBDX_LSQB, State.IN_LBDX_CALL) or not tk.ISMATCHED(
+        t, token
+    ):
         ctx.error()
 
     if t.annotation == A.DECL_LPAR:
@@ -355,8 +357,16 @@ def r(ctx: Context, token: TokenInfo):
 
 
 @m(exact_type=tk.NAME, string=_Aliases.except_, last_state=State.EXPECT_SUBCLS_NAME)
-@m(exact_type=tk.NAME, string=_Aliases.except_, last_state=State.MUST_SUBCLS_NAME_WITH_HEAD)
-@m(exact_type=tk.NAME, string=_Aliases.except_, last_state=State.MUST_SUBCLS_NAME_WITH_BODY)
+@m(
+    exact_type=tk.NAME,
+    string=_Aliases.except_,
+    last_state=State.MUST_SUBCLS_NAME_WITH_HEAD,
+)
+@m(
+    exact_type=tk.NAME,
+    string=_Aliases.except_,
+    last_state=State.MUST_SUBCLS_NAME_WITH_BODY,
+)
 def r(ctx: Context, token: TokenInfo):
     last_state = ctx.pop_state()
     ctx.cache.append(token)
@@ -399,21 +409,25 @@ def r(ctx: Context, token: TokenInfo):
 def r(ctx: Context, token: TokenInfo):
     return actions.Backtrace().state(State.MUST_SUBCLS_DOT_WITH_BODY)
 
-@m(exact_type=[
-    tk.PLUS,
-    tk.MINUS,
-    tk.STAR,
-    tk.SLASH,
-    tk.DOUBLESLASH,
-    tk.DOUBLESTAR,
-    tk.AT,
-    tk.CIRCUMFLEX,
-    tk.VBAR,
-    tk.AMPER,
-    tk.LEFTSHIFT,
-    tk.RIGHTSHIFT,
-    tk.PERCENT,
-], last_state=[State.IN_LBDX_BODY_LIST, State.IN_LBDX_CLS_BODY])
+
+@m(
+    exact_type=[
+        tk.PLUS,
+        tk.MINUS,
+        tk.STAR,
+        tk.SLASH,
+        tk.DOUBLESLASH,
+        tk.DOUBLESTAR,
+        tk.AT,
+        tk.CIRCUMFLEX,
+        tk.VBAR,
+        tk.AMPER,
+        tk.LEFTSHIFT,
+        tk.RIGHTSHIFT,
+        tk.PERCENT,
+    ],
+    last_state=[State.IN_LBDX_BODY_LIST, State.IN_LBDX_CLS_BODY],
+)
 def r(ctx: Context, token: TokenInfo):
     if not ctx.last_op[0].annotation in (A.CLS_BODY_LSQB, A.BODY_LSQB):
         return
@@ -423,7 +437,7 @@ def r(ctx: Context, token: TokenInfo):
     return actions.StartBuffer()
 
 
-@m(exact_type=tk.NAME, string='_', last_state=State.EXPECT_AUGASSIGN_DASH)
+@m(exact_type=tk.NAME, string="_", last_state=State.EXPECT_AUGASSIGN_DASH)
 def r(ctx: Context, token: TokenInfo):
     ctx.pop_state()
     ctx.push_state(State.EXPECT_AUGASSIGN_ASSIGN)
