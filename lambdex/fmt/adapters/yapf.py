@@ -15,6 +15,10 @@ logger = getLogger(__name__)
 class YapfAdapter(BaseAdapter):
     def _make_jobs_meta(self) -> JobsMeta:
         _ParseArguments = silent_import("yapf", ["_ParseArguments", "_BuildParser"])
+        if _ParseArguments.__name__ == "_BuildParser":
+            _ParseArguments = (lambda f: lambda args: f().parse_args(args[1:]))(
+                _ParseArguments
+            )
         file_resources = silent_import("yapf.yapflib.file_resources")
 
         bopts = self._backend_opts = _ParseArguments([" "] + self.backend_argv)
