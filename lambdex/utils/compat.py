@@ -2,6 +2,11 @@ import sys
 import enum
 import types
 
+if sys.version_info < (3, 6):
+    ModuleNotFoundError = ImportError
+else:
+    ModuleNotFoundError = ModuleNotFoundError
+
 if sys.version_info < (3, 8):
     _code_fields = [
         "argcount",

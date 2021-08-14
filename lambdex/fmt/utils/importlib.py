@@ -1,6 +1,7 @@
 import typing
 import importlib
 
+from lambdex.utils.compat import ModuleNotFoundError
 from .logger import getLogger
 
 logger = getLogger(__name__)
