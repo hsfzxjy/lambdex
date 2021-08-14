@@ -6,7 +6,7 @@ def f():
   if_[condition] [
       f2 < def_(lambda:[a+b]),
       return_[f2],
-            ],try_[# comment3
+            ].else_[c],try_[# comment3
       body,
   ].except_[Exception > e] [
       except_handler

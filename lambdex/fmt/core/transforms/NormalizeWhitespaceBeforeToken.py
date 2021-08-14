@@ -15,6 +15,7 @@ NORMALIZE_WHITESPACE_BEFORE = {
 class NormalizeWhitespaceBeforeToken(_StreamWithLog):
     def _init(self):
         self.scope_stack = []
+        self.prev_non_ws_token = None
 
     def _handle_token(self, token: TokenInfo):
         if token.annotation == A.DECL_LPAR:
@@ -30,9 +31,15 @@ class NormalizeWhitespaceBeforeToken(_StreamWithLog):
             return
 
         if token.annotation in NORMALIZE_WHITESPACE_BEFORE:
+            replacement = NORMALIZE_WHITESPACE_BEFORE[token.annotation]
+            if (
+                self.prev_non_ws_token.annotation != A.CLS_HEAD_RSQB
+                and token.annotation == A.CLS_BODY_LSQB
+            ):
+                replacement = ""
             whitespace = TokenInfo(
                 type=tk.WHITESPACE,
-                string=NORMALIZE_WHITESPACE_BEFORE[token.annotation],
+                string=replacement,
             )
             yield whitespace
 
@@ -40,3 +47,5 @@ class NormalizeWhitespaceBeforeToken(_StreamWithLog):
                 self.action = actions.StopBuffer(dont_yield_buffer=True)
         elif self.buffering:
             self.action = actions.StopBuffer()
+
+        self.prev_non_ws_token = token

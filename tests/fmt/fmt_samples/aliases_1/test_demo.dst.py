@@ -9,7 +9,7 @@ def f():
             ]),
             Return[f2],
         ],
-        Try [  # comment3
+        Try[  # comment3
             body,
         ].Except[Exception > e] [
             Excepthandler

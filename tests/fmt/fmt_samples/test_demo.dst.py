@@ -8,8 +8,10 @@ def f():
                 a+b
             ]),
             return_[f2],
+        ].else_[
+            c
         ],
-        try_ [  # comment3
+        try_[  # comment3
             body,
         ].except_[Exception > e] [
             except_handler
