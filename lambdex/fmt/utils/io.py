@@ -92,6 +92,21 @@ class StdinResource(_ResourceBase):
             sys.stdout.write(content)
 
 
+class StringResource(_ResourceBase):
+    def __init__(self, jobs_meta: JobsMeta, content: str):
+        self._source = content
+        super().__init__(jobs_meta)
+
+    def _get_source(self) -> bytes:
+        return self._source.encode()
+
+    def _display_filename(self) -> str:
+        return "<-c>"
+
+    def _write_content(self, content: str):
+        StdinResource._write_content(self, content)
+
+
 class FileResource(_ResourceBase):
     def __init__(self, jobs_meta: JobsMeta, filename: str):
         self._filename = filename

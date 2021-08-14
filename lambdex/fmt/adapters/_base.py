@@ -44,12 +44,17 @@ class BaseAdapter(abc.ABC):
         else:
             matcher.reset_aliases(filename)
 
-    def _job(self, filename=None) -> bool:
-        self._reset_aliases(filename)
-        if filename is None:
+    def _create_resource(self, filename) -> _ResourceBase:
+        if filename in {None, "-"}:
             resource = StdinResource(self.jobs_meta)
         else:
             resource = FileResource(self.jobs_meta, filename)
+
+        return resource
+
+    def _job(self, filename=None) -> bool:
+        self._reset_aliases(filename)
+        resource = self._create_resource(filename)
 
         cmd = self._get_backend_cmd_for_resource(resource)
         backend_result = self.call_backend(cmd, resource.source)
